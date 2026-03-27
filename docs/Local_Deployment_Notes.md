@@ -22,6 +22,21 @@ Repositories covered here:
 
 The `project-docs` repository is documentation-only and is not part of the runtime stack.
 
+## Repository License Snapshot
+
+The implementation repositories in this baseline do not share a single license. The current repository-level license files are:
+
+| Repository | Repository License | Notes |
+| --- | --- | --- |
+| `eudi-app-android-wallet-ui` | `EUPL-1.2` | Android wallet fork retains the upstream EUPL license |
+| `eudi-srv-issuer-oidc-py` | `Apache-2.0` | Auth server fork |
+| `eudi-srv-web-issuing-eudiw-py` | `Apache-2.0` | Issuer backend fork |
+| `eudi-srv-web-issuing-frontend-eudiw-py` | `Apache-2.0` | Issuer frontend fork |
+| `av-srv-web-verifier-endpoint-23220-4-kt` | `Apache-2.0` | Verifier backend fork |
+| `eudi-web-verifier` | `Apache-2.0` | Verifier UI fork |
+
+This document is descriptive only. It records the working six-repository baseline, but it does not alter the license terms of any implementation repository.
+
 ## Analysis Method
 
 For each implementation repository, the current fork head was compared with `upstream/main` using the merge base as the effective baseline for the current fork state.
