@@ -48,4 +48,6 @@ This repository documents the cross-repository reference implementation and loca
 
 See [LICENSE.md](LICENSE.md) for the license text that applies to this documentation repository.
 
+The license file in each implementation repository is the authoritative license source for that repository.
+
 Its license applies only to the content of this documentation repository. The six implementation repositories remain governed by their own repository-specific licenses.
