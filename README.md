@@ -1,1 +1,30 @@
-# project-docs
+# Project Docs
+
+This repository holds documentation that applies across the six implementation repositories in the `InstechSandbox` EUDI insurance readiness proof of concept.
+
+## Core Documents
+
+- [Local Deployment Notes](docs/Local_Deployment_Notes.md) - explains the fork-to-baseline commit set, the rationale behind the local deployment changes, and the coordinated baseline tags
+
+## Repositories In Scope
+
+- [eudi-app-android-wallet-ui](https://github.com/InstechSandbox/eudi-app-android-wallet-ui)
+- [eudi-srv-issuer-oidc-py](https://github.com/InstechSandbox/eudi-srv-issuer-oidc-py)
+- [eudi-srv-web-issuing-eudiw-py](https://github.com/InstechSandbox/eudi-srv-web-issuing-eudiw-py)
+- [eudi-srv-web-issuing-frontend-eudiw-py](https://github.com/InstechSandbox/eudi-srv-web-issuing-frontend-eudiw-py)
+- [av-srv-web-verifier-endpoint-23220-4-kt](https://github.com/InstechSandbox/av-srv-web-verifier-endpoint-23220-4-kt)
+- [eudi-web-verifier](https://github.com/InstechSandbox/eudi-web-verifier)
+
+## Baseline Reference
+
+The current stable local working baseline is tagged in each implementation repository as:
+
+- `local-e2e-baseline-2026-03-27`
+
+The detailed tag-to-commit mapping is maintained in [Local Deployment Notes](docs/Local_Deployment_Notes.md).
+
+## Why This Repo Exists
+
+The organization profile README should stay short and act as an entry point.
+
+This repository exists so the deeper technical narrative can live in one place without duplicating the same operational detail across six separate READMEs.
