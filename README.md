@@ -5,6 +5,7 @@ This repository holds documentation that applies across the six implementation r
 ## Core Documents
 
 - [Local Deployment Notes](docs/Local_Deployment_Notes.md) - explains the fork-to-baseline commit set, the rationale behind the local deployment changes, and the coordinated baseline tags
+- [Licensing Notes](docs/Licensing_Notes.md) - practical engineering guidance on the mixed-license repo set, notice preservation, and distribution cautions
 
 ## Repositories In Scope
 
@@ -34,7 +35,7 @@ The six implementation repositories do not use a single shared license.
 - `av-srv-web-verifier-endpoint-23220-4-kt` uses `Apache-2.0`
 - `eudi-web-verifier` uses `Apache-2.0`
 
-The full context and repository-by-repository notes are maintained in [Local Deployment Notes](docs/Local_Deployment_Notes.md).
+The full context and repository-by-repository notes are maintained in [Local Deployment Notes](docs/Local_Deployment_Notes.md) and [Licensing Notes](docs/Licensing_Notes.md).
 
 ## Why This Repo Exists
 
