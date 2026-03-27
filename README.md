@@ -28,3 +28,9 @@ The detailed tag-to-commit mapping is maintained in [Local Deployment Notes](doc
 The organization profile README should stay short and act as an entry point.
 
 This repository exists so the deeper technical narrative can live in one place without duplicating the same operational detail across six separate READMEs.
+
+## Licensing Note
+
+This repository documents the cross-repository reference implementation and local deployment rationale.
+
+Its license applies only to the content of this documentation repository. The six implementation repositories remain governed by their own repository-specific licenses.
