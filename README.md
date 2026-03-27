@@ -23,6 +23,19 @@ The current stable local working baseline is tagged in each implementation repos
 
 The detailed tag-to-commit mapping is maintained in [Local Deployment Notes](docs/Local_Deployment_Notes.md).
 
+## License Summary
+
+The six implementation repositories do not use a single shared license.
+
+- `eudi-app-android-wallet-ui` uses `EUPL-1.2`
+- `eudi-srv-issuer-oidc-py` uses `Apache-2.0`
+- `eudi-srv-web-issuing-eudiw-py` uses `Apache-2.0`
+- `eudi-srv-web-issuing-frontend-eudiw-py` uses `Apache-2.0`
+- `av-srv-web-verifier-endpoint-23220-4-kt` uses `Apache-2.0`
+- `eudi-web-verifier` uses `Apache-2.0`
+
+The full context and repository-by-repository notes are maintained in [Local Deployment Notes](docs/Local_Deployment_Notes.md).
+
 ## Why This Repo Exists
 
 The organization profile README should stay short and act as an entry point.
