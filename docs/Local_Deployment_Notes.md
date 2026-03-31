@@ -70,7 +70,7 @@ The stable local working build has been tagged and pushed in all six implementat
 
 ### 1. A Stable LAN Identity Was Needed Across The Stack
 
-The local working build converged on a stable LAN host, `192.168.0.110`, so the phone, wallet, issuer services, and verifier could all resolve the same endpoints from the same network.
+The local working build converged on a stable LAN host so the phone, wallet, issuer services, and verifier could all resolve the same endpoints from the same network.
 
 Why this mattered:
 
