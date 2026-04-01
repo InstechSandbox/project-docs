@@ -66,6 +66,25 @@ The stable local working build has been tagged and pushed in all six implementat
 | `av-srv-web-verifier-endpoint-23220-4-kt` | `local-e2e-baseline-2026-03-27` | `02c5035a9e23378a8039102887a27ba0addf55cd` | verifier backend |
 | `eudi-web-verifier` | `local-e2e-baseline-2026-03-27` | `c170d0e464e54b6a9ccf74c16707ef504c680926` | verifier UI |
 
+## Stable Repeatable Local Build Baseline
+
+The stable repeatable local build has now been tagged and pushed in all six implementation repositories as:
+
+- `local-repeatable-build-2026-04-01`
+
+This second coordinated tag records the post-baseline state where local build and setup behaviour were generalized and made more repeatable without redefining the March 27 end-to-end milestone.
+
+### Repeatable Build Tags And SHAs
+
+| Repository | Tag | Commit SHA | Role In Local Stack |
+| --- | --- | --- | --- |
+| `eudi-app-android-wallet-ui` | `local-repeatable-build-2026-04-01` | `e94d7acd46423d1ab23058c13a6a32174e6e11b9` | Android wallet used for issuance and verifier presentation |
+| `eudi-srv-issuer-oidc-py` | `local-repeatable-build-2026-04-01` | `d10ef895ee1544eae81d69cbb5bc6dec37cce6c4` | local OAuth and authorization server |
+| `eudi-srv-web-issuing-eudiw-py` | `local-repeatable-build-2026-04-01` | `ce21d63fa2b0d4cdb5dd198585ebc42cd2671fca` | issuer backend |
+| `eudi-srv-web-issuing-frontend-eudiw-py` | `local-repeatable-build-2026-04-01` | `fa298aa434fda1b0ab711e0be90c6269271c42ad` | issuer frontend and metadata endpoint |
+| `av-srv-web-verifier-endpoint-23220-4-kt` | `local-repeatable-build-2026-04-01` | `3d1ae5fcb4aa942d3990950f5396e12d4c7a29c4` | verifier backend |
+| `eudi-web-verifier` | `local-repeatable-build-2026-04-01` | `9803b56a5ba6d51c78a815616de1c1b1481baa71` | verifier UI |
+
 ## What Had To Change And Why
 
 ### 1. A Stable LAN Identity Was Needed Across The Stack
