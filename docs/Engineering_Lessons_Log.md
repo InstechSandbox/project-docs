@@ -34,4 +34,4 @@ Record recurring lessons that are worth turning into shared engineering guidance
 - Context: Shared pre-push hooks were introduced across the multi-repo workspace to enforce repo-native deterministic checks.
 - What happened: Foundation-only commits that changed only `.github/copilot-instructions.md` were blocked in several repos by pre-existing Gradle, pytest, and ESLint failures unrelated to the changed files.
 - Reusable lesson: When a change only introduces governance or documentation files outside the product runtime path, failing quality gates should be treated first as potentially pre-existing repository debt rather than as regressions caused by that change.
-- Follow-up doc or rule update: Allow a documented one-off `git push --no-verify` only for clearly isolated foundation commits, then return immediately to the normal failing gate state and schedule proper fixes in the affected repos.
+- Follow-up doc or rule update: If delivery needs require a temporary bypass, record a dedicated shared-hook bypass commit, track the affected repos in the gate debt backlog, and revert that specific commit once the repo-native gates are fixed.
