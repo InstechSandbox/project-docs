@@ -28,3 +28,10 @@ Record recurring lessons that are worth turning into shared engineering guidance
 - What happened: `DEFAULT_FRONTEND=${FRONTEND_ID}` resolved incorrectly and broke the credential offer flow.
 - Reusable lesson: Do not rely on forward references in local environment files when runtime behaviour depends on the resolved value.
 - Follow-up doc or rule update: Prefer explicit values or validated generation scripts for critical local env fields.
+
+### 2026-04-01 - New shared gates can expose pre-existing repo health debt
+
+- Context: Shared pre-push hooks were introduced across the multi-repo workspace to enforce repo-native deterministic checks.
+- What happened: Foundation-only commits that changed only `.github/copilot-instructions.md` were blocked in several repos by pre-existing Gradle, pytest, and ESLint failures unrelated to the changed files.
+- Reusable lesson: When a change only introduces governance or documentation files outside the product runtime path, failing quality gates should be treated first as potentially pre-existing repository debt rather than as regressions caused by that change.
+- Follow-up doc or rule update: Allow a documented one-off `git push --no-verify` only for clearly isolated foundation commits, then return immediately to the normal failing gate state and schedule proper fixes in the affected repos.
