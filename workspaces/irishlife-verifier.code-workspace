@@ -1,0 +1,38 @@
+{
+  "folders": [
+    {
+      "path": "../../workstreams/irishlife-verifier/eudi-web-verifier"
+    },
+    {
+      "path": "../../workstreams/irishlife-verifier/av-srv-web-verifier-endpoint-23220-4-kt"
+    },
+    {
+      "path": "../../workstreams/irishlife-verifier/project-docs"
+    }
+  ],
+  "settings": {
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/.angular": true,
+      "**/build": true,
+      "**/dist": true,
+      "**/.gradle": true,
+      "**/.venv": true,
+      "**/local": true,
+      "**/.local": true,
+      "**/certs/*.crt": true,
+      "**/certs/*.key": true,
+      "**/certs/*.pem": true,
+      "**/private/*.json": true,
+      "**/backend_cert.pem": true,
+      "**/custom_ca_bundle.pem": true,
+      "**/server.crt": true,
+      "**/server.key": true,
+      "**/docker/haproxy.pem": true
+    },
+    "files.exclude": {
+      "**/.git": true,
+      "**/.DS_Store": true
+    }
+  }
+}

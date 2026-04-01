@@ -1,0 +1,54 @@
+{
+  "folders": [
+    {
+      "path": "../../.github"
+    },
+    {
+      "path": ".."
+    },
+    {
+      "path": "../../eudi-app-android-wallet-ui"
+    },
+    {
+      "path": "../../eudi-srv-issuer-oidc-py"
+    },
+    {
+      "path": "../../eudi-srv-web-issuing-eudiw-py"
+    },
+    {
+      "path": "../../eudi-srv-web-issuing-frontend-eudiw-py"
+    },
+    {
+      "path": "../../av-srv-web-verifier-endpoint-23220-4-kt"
+    },
+    {
+      "path": "../../eudi-web-verifier"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/.git": true,
+      "**/.DS_Store": true
+    },
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/.angular": true,
+      "**/.gradle": true,
+      "**/.venv": true,
+      "**/build": true,
+      "**/dist": true,
+      "**/.local": true,
+      "**/local": true,
+      "**/docker/local": true,
+      "**/certs/*.crt": true,
+      "**/certs/*.key": true,
+      "**/certs/*.pem": true,
+      "**/private/*.json": true,
+      "**/backend_cert.pem": true,
+      "**/custom_ca_bundle.pem": true,
+      "**/server.crt": true,
+      "**/server.key": true,
+      "**/docker/haproxy.pem": true
+    }
+  }
+}
