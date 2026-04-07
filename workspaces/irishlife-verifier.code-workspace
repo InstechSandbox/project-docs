@@ -1,6 +1,18 @@
 {
   "folders": [
     {
+      "path": "../../workstreams/irishlife-verifier/eudi-app-android-wallet-ui"
+    },
+    {
+      "path": "../../workstreams/irishlife-verifier/eudi-srv-issuer-oidc-py"
+    },
+    {
+      "path": "../../workstreams/irishlife-verifier/eudi-srv-web-issuing-eudiw-py"
+    },
+    {
+      "path": "../../workstreams/irishlife-verifier/eudi-srv-web-issuing-frontend-eudiw-py"
+    },
+    {
       "path": "../../workstreams/irishlife-verifier/eudi-web-verifier"
     },
     {

@@ -5,6 +5,7 @@ This repository holds documentation that applies across the six implementation r
 ## Core Documents
 
 - [Local Build Runbook](docs/Local_Build_Runbook.md) - step-by-step local build, startup, smoke, wallet install, issuance, and verification flow across the six repositories
+- [Cloud Build And Deployment Runbook](docs/Cloud_Build_Deployment_Runbook.md) - agreed first-phase GitHub Actions, AWS `test` environment, artifact publication, and `cloud-build` workstream design
 - [EIDAS ARF Implementation Brief](docs/EIDAS_ARF_Implementation_Brief.md) - local implementation guardrails for ARF alignment, protocol assumptions, trust boundaries, and verifier-first delivery
 - [AI Working Agreement](docs/AI_Working_Agreement.md) - canonical AI-assisted engineering rules, repo map, testing expectations, and docs-update policy
 - [Engineering Lessons Log](docs/Engineering_Lessons_Log.md) - reusable lessons captured as the project evolves
@@ -47,7 +48,9 @@ The full context and repository-by-repository notes are maintained in [Local Dep
 
 The organization profile README should stay short and act as an entry point.
 
-This repository exists so the deeper technical narrative can live in one place without duplicating the same operational detail across six separate READMEs.
+This repository exists so the deeper technical narrative can live in one place without duplicating the same operational detail across the implementation READMEs.
+
+The current documentation scope explicitly includes both the stable local baseline and the first-phase cloud build and deployment design.
 
 ## Licensing Note
 

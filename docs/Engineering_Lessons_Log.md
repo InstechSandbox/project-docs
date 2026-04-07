@@ -15,6 +15,13 @@ Record recurring lessons that are worth turning into shared engineering guidance
 
 ## Seed Entries
 
+### 2026-04-07 - Cloud deployment should extend the local packaging model, not fork it
+
+- Context: The proof of concept is moving from a repeatable local build into GitHub Actions driven AWS deployment.
+- What happened: The design review showed that the local wrappers were already thin enough to serve as a stable foundation, but tracked runtime JSON and SAN files were still being mutated in place for local host-specific setup.
+- Reusable lesson: Preserve the local build as the engineering baseline, but converge local and cloud onto the same packaging contracts, generated runtime config, and reviewable deployment model instead of maintaining two separate systems.
+- Follow-up doc or rule update: Record the single-environment `test` model, push-to-main trigger, Docker-first issuer direction, and generated-config requirement in the cloud deployment runbook and AI working agreement.
+
 ### 2026-03-31 - Local runtime artifacts must remain untracked
 
 - Context: Local EUDI orchestration relies on certificates, JWKS files, and generated runtime assets that differ per machine.

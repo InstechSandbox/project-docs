@@ -13,8 +13,8 @@ Define the initial repo scope, build path, smoke-test target, and distribution p
 ## Repository Strategy
 
 - Desired long-term source of truth: `InstechSandbox/eudi-app-ios-wallet-ui`.
-- Current local stopgap: the `ios-wallet` workstream contains a temporary local clone of `eu-digital-identity-wallet/eudi-app-ios-wallet-ui` because the InstechSandbox fork has not yet been created from this environment.
-- Once the fork exists, switch the local clone's `origin` to the InstechSandbox fork and keep `upstream` pointing at `eu-digital-identity-wallet/eudi-app-ios-wallet-ui`.
+- Current local state: the `ios-wallet` workstream uses the `InstechSandbox/eudi-app-ios-wallet-ui` fork as `origin` and retains `eu-digital-identity-wallet/eudi-app-ios-wallet-ui` as `upstream`.
+- Keep `origin` pointed at the InstechSandbox fork for isolated workstream changes and keep `upstream` pointed at `eu-digital-identity-wallet/eudi-app-ios-wallet-ui` for reference and sync.
 
 ## Initial Build Path
 
