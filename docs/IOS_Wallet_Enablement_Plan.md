@@ -52,8 +52,10 @@ The first iOS smoke target should prove the following in order:
 - Use TestFlight as the intended tester distribution path.
 - Set up Apple Developer Program membership, App Store Connect access, bundle identifiers, signing certificates, and provisioning profiles early.
 - Treat external TestFlight beta review as a lead-time dependency rather than a final packaging step.
+- Treat every tester build as a redistributed modified `EUPL-1.2` work: preserve upstream `LICENSE.txt`, `NOTICE.txt`, and header material, keep the corresponding fork source available, and publish a third-party notice record with the build.
 
 ## Documentation Rule For This Workstream
 
 - Record build prerequisites, signing assumptions, local service configuration, trust handling, and smoke steps in `project-docs` as they are validated.
+- Record the source commit, modification date, retained notices, and third-party dependency inventory used for each tester distribution.
 - Tag a coordinated iOS-capable local baseline only after the build and smoke path are repeatable.

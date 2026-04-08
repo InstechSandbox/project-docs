@@ -14,6 +14,7 @@ It is intended to explain both:
 Repositories covered here:
 
 - `eudi-app-android-wallet-ui`
+- `eudi-app-ios-wallet-ui`
 - `eudi-srv-issuer-oidc-py`
 - `eudi-srv-web-issuing-eudiw-py`
 - `eudi-srv-web-issuing-frontend-eudiw-py`
@@ -22,6 +23,8 @@ Repositories covered here:
 
 The `project-docs` repository is documentation-only and is not part of the runtime stack.
 
+The stable baseline sections below still describe the currently validated six-repository runtime baseline. The iOS wallet fork is now in scope for enablement and licensing tracking, but it is not yet part of a coordinated baseline tag.
+
 ## Repository License Snapshot
 
 The implementation repositories in this baseline do not share a single license. The current repository-level license files are:
@@ -29,6 +32,7 @@ The implementation repositories in this baseline do not share a single license. 
 | Repository | Repository License | Notes |
 | --- | --- | --- |
 | `eudi-app-android-wallet-ui` | `EUPL-1.2` | Android wallet fork retains the upstream EUPL license |
+| `eudi-app-ios-wallet-ui` | `EUPL-1.2` | iOS wallet fork retains the upstream EUPL license; enablement repo in scope but not yet baseline tagged |
 | `eudi-srv-issuer-oidc-py` | `Apache-2.0` | Auth server fork |
 | `eudi-srv-web-issuing-eudiw-py` | `Apache-2.0` | Issuer backend fork |
 | `eudi-srv-web-issuing-frontend-eudiw-py` | `Apache-2.0` | Issuer frontend fork |

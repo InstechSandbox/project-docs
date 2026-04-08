@@ -1,6 +1,6 @@
 # Project Docs
 
-This repository holds documentation that applies across the six implementation repositories in the `InstechSandbox` EUDI insurance readiness proof of concept.
+This repository holds documentation that applies across the current implementation repositories in the `InstechSandbox` EUDI insurance readiness proof of concept.
 
 ## Core Documents
 
@@ -13,10 +13,13 @@ This repository holds documentation that applies across the six implementation r
 - [Local Deployment Notes](docs/Local_Deployment_Notes.md) - explains the fork-to-baseline commit set, the rationale behind the local deployment changes, and the coordinated baseline tags
 - [iOS Wallet Enablement Plan](docs/IOS_Wallet_Enablement_Plan.md) - initial repo scope, build path, smoke targets, and distribution preparation for the iOS workstream
 - [Licensing Notes](docs/Licensing_Notes.md) - practical engineering guidance on the mixed-license repo set, notice preservation, and distribution cautions
+- [Mobile App Distribution Compliance](docs/Mobile_App_Distribution_Compliance.md) - PoC tester-distribution rules for the Android and iOS wallet forks, including notice retention, source availability, and third-party notice handling
+- [Mobile App Release Record Template](docs/Mobile_App_Release_Record_Template.md) - reusable template for Android APK and iOS TestFlight tester release records
 
 ## Repositories In Scope
 
 - [eudi-app-android-wallet-ui](https://github.com/InstechSandbox/eudi-app-android-wallet-ui)
+- [eudi-app-ios-wallet-ui](https://github.com/InstechSandbox/eudi-app-ios-wallet-ui)
 - [eudi-srv-issuer-oidc-py](https://github.com/InstechSandbox/eudi-srv-issuer-oidc-py)
 - [eudi-srv-web-issuing-eudiw-py](https://github.com/InstechSandbox/eudi-srv-web-issuing-eudiw-py)
 - [eudi-srv-web-issuing-frontend-eudiw-py](https://github.com/InstechSandbox/eudi-srv-web-issuing-frontend-eudiw-py)
@@ -25,24 +28,27 @@ This repository holds documentation that applies across the six implementation r
 
 ## Baseline Reference
 
-The current stable local working baseline is tagged in each implementation repository as:
+The current stable local working baseline is tagged in each of the six currently validated runtime repositories as:
 
 - `local-e2e-baseline-2026-03-27`
+
+The iOS wallet fork is now in scope for enablement and licensing tracking, but it is not yet part of a coordinated stable runtime baseline tag.
 
 The detailed tag-to-commit mapping is maintained in [Local Deployment Notes](docs/Local_Deployment_Notes.md).
 
 ## License Summary
 
-The six implementation repositories do not use a single shared license.
+The seven implementation repositories currently in scope do not use a single shared license.
 
 - `eudi-app-android-wallet-ui` uses `EUPL-1.2`
+- `eudi-app-ios-wallet-ui` uses `EUPL-1.2`
 - `eudi-srv-issuer-oidc-py` uses `Apache-2.0`
 - `eudi-srv-web-issuing-eudiw-py` uses `Apache-2.0`
 - `eudi-srv-web-issuing-frontend-eudiw-py` uses `Apache-2.0`
 - `av-srv-web-verifier-endpoint-23220-4-kt` uses `Apache-2.0`
 - `eudi-web-verifier` uses `Apache-2.0`
 
-The full context and repository-by-repository notes are maintained in [Local Deployment Notes](docs/Local_Deployment_Notes.md) and [Licensing Notes](docs/Licensing_Notes.md).
+The full context and repository-by-repository notes are maintained in [Local Deployment Notes](docs/Local_Deployment_Notes.md), [Licensing Notes](docs/Licensing_Notes.md), and [Mobile App Distribution Compliance](docs/Mobile_App_Distribution_Compliance.md).
 
 ## Why This Repo Exists
 
@@ -60,4 +66,4 @@ See [LICENSE.md](LICENSE.md) for the license text that applies to this documenta
 
 The license file in each implementation repository is the authoritative license source for that repository.
 
-Its license applies only to the content of this documentation repository. The six implementation repositories remain governed by their own repository-specific licenses.
+Its license applies only to the content of this documentation repository. The implementation repositories remain governed by their own repository-specific licenses.
