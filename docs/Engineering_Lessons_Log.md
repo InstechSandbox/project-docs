@@ -59,6 +59,20 @@ Record recurring lessons that are worth turning into shared engineering guidance
 
 ## Seed Entries
 
+### 2026-04-08 - Local Python bootstrap should prefer the cloud runtime minor version
+
+- Context: Local issuer validation failed because one repo-local `.venv` had been created under Python 3.14 while the current container packaging path used Python 3.11.
+- What happened: The backend dependency install broke locally even though the service still had a viable Docker packaging path and a working Python 3.11 runtime.
+- Reusable lesson: Keep local bootstrap and cloud packaging close by preferring the current container Python minor version for local `.venv` creation, and fail fast on unsupported newer minors instead of silently accepting environment drift.
+- Follow-up doc or rule update: Add a shared local Python bootstrap wrapper and require supported Python minors in the local orchestration preflight.
+
+### 2026-04-08 - Local wrappers should absorb machine-specific SDK and trust-directory prerequisites
+
+- Context: The post-bootstrap local build and start path still failed on one machine-specific Android SDK setting and one missing local trusted-CA directory for the issuer backend.
+- What happened: The wallet Gradle build needed `sdk.dir`, and the issuer backend crashed at import time because `TRUSTED_CAS_PATH` pointed at a directory that did not exist yet.
+- Reusable lesson: Put local machine prerequisites behind shared wrappers where practical so operators do not have to rediscover the same environment fixes by hand.
+- Follow-up doc or rule update: Mirror Android SDK detection into wallet `local.properties` and ensure the issuer backend local trust directory exists during the local patch/start path.
+
 ### 2026-04-07 - Cloud deployment should extend the local packaging model, not fork it
 
 - Context: The proof of concept is moving from a repeatable local build into GitHub Actions driven AWS deployment.

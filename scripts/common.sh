@@ -52,6 +52,26 @@ detect_adb_bin() {
   printf '%s\n' "$HOME/Library/Android/sdk/platform-tools/adb"
 }
 
+detect_android_sdk_dir() {
+  local candidate="${ANDROID_SDK_DIR:-}"
+
+  if [[ -n "$candidate" ]] && [[ -d "$candidate" ]]; then
+    printf '%s\n' "$candidate"
+    return
+  fi
+
+  for candidate in \
+    "${ANDROID_SDK_ROOT:-}" \
+    "${ANDROID_HOME:-}" \
+    "$HOME/Library/Android/sdk"
+  do
+    if [[ -n "$candidate" ]] && [[ -d "$candidate" ]]; then
+      printf '%s\n' "$candidate"
+      return
+    fi
+  done
+}
+
 DETECTED_LAN_IP="$(detect_lan_ip)"
 AUTO_DETECT_HOST_IP="${AUTO_DETECT_HOST_IP:-true}"
 CONFIGURED_PUBLIC_HOST="${PUBLIC_HOST:-}"
@@ -83,6 +103,7 @@ SHARED_CERT_FILE="${SHARED_CERT_FILE:-$ISSUER_REPO/local/runtime/runtime-ec.crt}
 SHARED_KEY_FILE="${SHARED_KEY_FILE:-$ISSUER_REPO/local/runtime/runtime-ec.key}"
 
 ADB_BIN="${ADB_BIN:-$(detect_adb_bin)}"
+ANDROID_SDK_DIR="${ANDROID_SDK_DIR:-$(detect_android_sdk_dir)}"
 APK_PATH="${APK_PATH:-$WALLET_REPO/app/build/outputs/apk/demo/debug/app-demo-debug.apk}"
 ANDROID_SERIAL="${ANDROID_SERIAL:-}"
 
@@ -121,15 +142,67 @@ require_command() {
   command -v "$1" >/dev/null 2>&1 || fail "Required command not found: $1"
 }
 
-sync_wallet_local_demo_host() {
+python_minor_version() {
+  "$1" -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")'
+}
+
+is_supported_python_minor() {
+  case "$1" in
+    3.9|3.10|3.11) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+select_supported_python() {
+  local requested="${1:-${PYTHON_BIN:-}}"
+  local candidate=""
+  local minor=""
+
+  if [[ -n "$requested" ]]; then
+    command -v "$requested" >/dev/null 2>&1 || fail "Requested Python interpreter not found: $requested"
+    minor="$(python_minor_version "$requested")"
+    is_supported_python_minor "$minor" || fail "Requested Python interpreter must be 3.9, 3.10, or 3.11: $requested ($minor)"
+    printf '%s\n' "$requested"
+    return
+  fi
+
+  for candidate in python3.11 python3.10 python3.9; do
+    if command -v "$candidate" >/dev/null 2>&1; then
+      printf '%s\n' "$candidate"
+      return
+    fi
+  done
+
+  fail "No supported Python interpreter found. Install python3.11, python3.10, or python3.9."
+}
+
+require_supported_venv_python() {
+  local label=$1
+  local python_path=$2
+  local minor=""
+
+  require_file "$python_path"
+  minor="$(python_minor_version "$python_path")"
+  is_supported_python_minor "$minor" || fail "$label must use Python 3.9, 3.10, or 3.11: $python_path ($minor)"
+  printf '[ok]   %-12s %s (%s)\n' "$label" "$python_path" "$minor"
+}
+
+sync_wallet_local_properties() {
   local properties_file="$WALLET_REPO/local.properties"
   local temp_file
 
   temp_file=$(mktemp)
 
   if [[ -f "$properties_file" ]]; then
-    awk -v host="$PUBLIC_HOST" '
-      BEGIN { updated = 0 }
+    awk -v host="$PUBLIC_HOST" -v sdk_dir="$ANDROID_SDK_DIR" '
+      BEGIN { updated = 0; sdk_updated = 0 }
+      /^sdk\.dir=/ {
+        if (sdk_dir != "") {
+          print "sdk.dir=" sdk_dir
+          sdk_updated = 1
+        }
+        next
+      }
       /^localDemoHost=/ {
         print "localDemoHost=" host
         updated = 1
@@ -137,17 +210,30 @@ sync_wallet_local_demo_host() {
       }
       { print }
       END {
+        if (sdk_dir != "" && !sdk_updated) {
+          print "sdk.dir=" sdk_dir
+        }
         if (!updated) {
           print "localDemoHost=" host
         }
       }
     ' "$properties_file" > "$temp_file"
   else
-    printf 'localDemoHost=%s\n' "$PUBLIC_HOST" > "$temp_file"
+    {
+      if [[ -n "$ANDROID_SDK_DIR" ]]; then
+        printf 'sdk.dir=%s\n' "$ANDROID_SDK_DIR"
+      fi
+      printf 'localDemoHost=%s\n' "$PUBLIC_HOST"
+    } > "$temp_file"
   fi
 
   mv "$temp_file" "$properties_file"
   printf '[ok]   wallet localDemoHost %s\n' "$PUBLIC_HOST"
+  if [[ -n "$ANDROID_SDK_DIR" ]]; then
+    printf '[ok]   wallet sdk.dir  %s\n' "$ANDROID_SDK_DIR"
+  else
+    printf '[warn] wallet sdk.dir not set automatically; define ANDROID_SDK_DIR, ANDROID_SDK_ROOT, or ANDROID_HOME if Gradle cannot find the Android SDK\n'
+  fi
 }
 
 print_runtime_summary() {
@@ -162,6 +248,7 @@ print_runtime_summary() {
   printf 'Shared cert:        %s\n' "$SHARED_CERT_FILE"
   printf 'APK path:           %s\n' "$APK_PATH"
   printf 'ADB bin:            %s\n' "$ADB_BIN"
+  printf 'Android SDK dir:    %s\n' "${ANDROID_SDK_DIR:-unavailable}"
   printf 'ADB target:         %s\n' "$ADB_TARGET_LABEL"
   printf 'Log dir:            %s\n' "$LOG_DIR"
 }

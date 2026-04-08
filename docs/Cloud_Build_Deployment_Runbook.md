@@ -89,6 +89,7 @@ The agreed direction is to move the issuer stack toward Docker-first packaging w
 This means:
 
 - local developer flows may still use the current run scripts and wrappers
+- local Python venv bootstrap should prefer Python 3.11 to stay close to the current Docker packaging baseline, with 3.10 or 3.9 only as explicit local fallback choices
 - packaging contracts should converge on container images and generated runtime config
 - local and cloud should use the same packaging model wherever practical to avoid maintaining two diverging systems
 

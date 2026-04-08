@@ -44,6 +44,9 @@ This document defines the shared working agreement for AI-assisted development a
 ## Branch And Workstream Conventions
 
 - `main` is the canonical long-lived integration branch.
+- For each repository in a multi-repo workstream, keep one canonical local checkout on `main` outside the workstream directory and create the workstream copy as a linked `git worktree`, not as a separate clone.
+- In `/Users/bg/Dropbox/svn/code/workstreams/<stream>/...`, the expected git layout is a `.git` file that points back to the canonical checkout; a `.git` directory usually means the repo was added incorrectly.
+- When introducing a new repository into an existing workstream, first clone or confirm the canonical `main` checkout, then add `wip/<stream>` with `git worktree add` so VS Code workspace and Source Control views stay consistent across repos.
 - Local worktrees may use short-lived or medium-lived `wip/<stream>` branches to isolate active work.
 - Prefer short-lived workstreams that are rebased or selectively promoted into `main` frequently, ideally daily and no less often than weekly.
 - The default flow is local-first: commit on `wip/<stream>`, selectively promote ready increments into `main`, then rebase `wip/<stream>` onto the updated `main` so the workstream stays current.
@@ -92,6 +95,8 @@ This document defines the shared working agreement for AI-assisted development a
 - Use repo-native deterministic checks as mandatory local gates.
 - Keep pre-commit hooks fast and deterministic.
 - Keep pre-push hooks repo-aware and meaningful.
+- For the local issuer Python services, prefer Python 3.11 for `.venv` bootstrap so local runtime stays close to the current Docker packaging baseline; use 3.10 or 3.9 only as explicit fallback choices.
+- If local Python runtime drift is detected, rebuild the affected `.venv` with `project-docs/scripts/bootstrap-local-python-venvs.sh` rather than patching around the drift inside repo code or cloud deployment scripts.
 - While pull requests are not yet the primary delivery mechanism, `push` to `main` must still be treated as a controlled integration event with deterministic remote validation.
 - Do not replace the direct-to-`main` promotion model with remote workstream branches unless the user explicitly asks for that exception.
 - Strengthen verifier-focused smoke and acceptance coverage as the Irish Life workstream evolves.

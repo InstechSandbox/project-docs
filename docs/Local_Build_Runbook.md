@@ -16,6 +16,7 @@ Build and runtime path:
 
 ```bash
 cd "$CODE_ROOT/project-docs/scripts"
+./bootstrap-local-python-venvs.sh
 ./build-local-all.sh
 ./start-local-all.sh
 ./smoke-local-all.sh
@@ -106,23 +107,48 @@ These should stay as wrappers around repo-level build and launch entry points.
 
 ## One-Time Setup
 
-1. Copy `scripts/local-demo.env.example` to `scripts/local-demo.env` if you need local overrides.
-2. If you are using this workstream layout, leave `CODE_ROOT` unset in `scripts/local-demo.env` so the wrappers use the sibling repos under `workstreams/irishlife-verifier`.
-3. Create the repo-local config files before using the wrappers:
-   - copy `eudi-srv-issuer-oidc-py/private/token_jwks.json` into the worktree if your parent checkout already has a generated local token JWKS
-   - copy `eudi-srv-issuer-oidc-py/certs/` into the worktree if your parent checkout already has local auth cert material
-   - copy `eudi-srv-web-issuing-eudiw-py/app/.env.example` to `eudi-srv-web-issuing-eudiw-py/app/.env`
-   - copy `eudi-srv-web-issuing-eudiw-py/local/cert/` into the worktree if your parent checkout already has local trusted CA material
-   - copy `eudi-srv-web-issuing-eudiw-py/local/privKey/` into the worktree if your parent checkout already has local issuer signing keys
-   - copy `eudi-srv-web-issuing-frontend-eudiw-py/.env.example` to `eudi-srv-web-issuing-frontend-eudiw-py/.env`
-   - copy `eudi-app-android-wallet-ui/local.properties.example` to `eudi-app-android-wallet-ui/local.properties`, or copy `local.properties` from a known-good local setup
-4. If you are working from worktrees, copy those local-only files from your parent checkout or recreate them locally before the first build.
-5. Confirm the shared local certificate and key paths are correct.
-   - normal start runs refresh the shared runtime certificate for the local services when needed, but it does not update the wallet PEM
-   - `./build-local-all.sh` and `./build-local-all-clean.sh` now sync the shared cert into the wallet source before compiling the APK
+1. Copy `scripts/local-demo.env.example` to `scripts/local-demo.env` if you need to override local paths or other local settings.
+2. Install one of the supported local Python versions: `python3.11` is preferred because it matches the current Python Dockerfiles; `python3.10` and `python3.9` remain acceptable fallbacks.
+3. Build or refresh the local Python service virtual environments with:
+
+```bash
+cd "$CODE_ROOT/project-docs/scripts"
+./bootstrap-local-python-venvs.sh
+```
+
+This wrapper rebuilds `.venv` for the auth server, issuer backend, and issuer frontend using a supported interpreter. It prefers `python3.11`, then `python3.10`, then `python3.9`, and refuses unsupported minors such as `python3.14`.
+
+If you are working from linked worktrees and a repo-local `.env`, JWKS file, cert bundle, or signing key is missing, copy or recreate that local-only material before the first build. The wrappers do not invent all repo-local secrets or signing assets automatically.
+
+If the issuer backend local checkout does not already contain the local Utopia PID signer assets needed for mdoc issuance, set `LOCAL_UTOPIA_SIGNER_SOURCE_DIR` in `scripts/local-demo.env` to a local seed directory that contains:
+
+```bash
+privKey/PID-DS-0001_UT.pem
+cert/PID-DS-0001_UT_cert.der
+cert/PID-DS-0001_UT_cert.pem
+```
+
+The issuer backend bootstrap uses that seed directory to populate the local signer files before startup. Without those assets, the issuance flow will fail after form submission when the backend tries to build the PID mdoc.
+
+If Gradle cannot find the Android SDK automatically, set `ANDROID_SDK_DIR` in `scripts/local-demo.env`. The shared wrappers will mirror that into the wallet `local.properties` file as `sdk.dir` during the local build flow.
+
+## To Avoid Drift In Practice
+
+Use these rules as the default operator path:
+
+1. Run `./bootstrap-local-python-venvs.sh` before the first local build on a machine, and again whenever your local Python installation changes.
+2. Treat `python3.11` as the default local target because it is the closest current match to the Python container packaging used by the issuer services.
+3. Use `python3.10` or `python3.9` only when `python3.11` is unavailable or when you are deliberately checking fallback behaviour.
+4. Do not work around a broken local `.venv` by changing repo code, changing cloud deployment scripts, or pinning ad hoc package versions first; rebuild the `.venv` from the shared bootstrap wrapper and re-run the local build path.
+5. If the shared wrappers report an unsupported Python minor inside `.venv`, treat that as environment drift, not as a product bug.
+6. If the wallet build fails because Gradle cannot find the Android SDK, treat that as local machine setup drift and fix it through `ANDROID_SDK_DIR`, `ANDROID_SDK_ROOT`, or `ANDROID_HOME` rather than by editing Gradle build logic.
+
+7. Confirm the shared local certificate and key paths are correct.
+   - normal start runs refresh the shared runtime certificate for the local services when needed, but they do not update the wallet PEM by default
+   - `./build-local-all.sh` and `./build-local-all-clean.sh` sync the shared cert into the wallet source before compiling the APK
    - if you rotate the shared cert outside those build wrappers, run `./refresh-local-certs.sh --sync-wallet-cert`, then rebuild and install the wallet APK
-6. Confirm Docker Desktop is running if that is your local Docker engine.
-7. Check the current LAN IP with:
+8. Confirm Docker Desktop is running if that is your local Docker engine.
+9. Check the current LAN IP with:
 
 ```bash
 ipconfig getifaddr en0 || ipconfig getifaddr en1
@@ -320,6 +346,8 @@ What this does not do by default:
 
 - it does not rotate the wallet app's embedded `backend_cert.pem`
 - if you intentionally change wallet trust material, run `./refresh-local-certs.sh --sync-wallet-cert` before rebuilding and reinstalling the APK
+
+If `build-local-all.sh` or `start-local-all.sh` fails in preflight with an unsupported Python minor version inside `.venv`, rerun `./bootstrap-local-python-venvs.sh` before retrying.
 
 `build-local-all.sh` is the faster incremental path. `build-local-all-clean.sh` forces a heavier wallet rebuild and a no-cache Docker rebuild.
 

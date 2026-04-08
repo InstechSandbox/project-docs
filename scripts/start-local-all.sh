@@ -8,9 +8,10 @@ source "$SCRIPT_DIR/common.sh"
 
 section "Preflight"
 require_file "$SCRIPT_DIR/refresh-local-certs.sh"
-require_file "$AUTH_REPO/.venv/bin/python"
 require_file "$AUTH_REPO/patch_auth_server_local.sh"
-require_file "$ISSUER_REPO/.venv/bin/flask"
+require_supported_venv_python "auth venv" "$AUTH_REPO/.venv/bin/python"
+require_supported_venv_python "issuer venv" "$ISSUER_REPO/.venv/bin/python"
+require_supported_venv_python "frontend venv" "$FRONTEND_REPO/.venv/bin/python"
 require_file "$FRONTEND_REPO/.venv/bin/flask"
 require_file "$VERIFIER_REPO/scripts/start-local-verifier.sh"
 
@@ -19,6 +20,10 @@ require_file "$VERIFIER_REPO/scripts/start-local-verifier.sh"
 require_file "$SHARED_CERT_FILE"
 require_file "$SHARED_KEY_FILE"
 
+AUTH_RUNTIME_DIR="$LOCAL_STATE_DIR/auth-server"
+ISSUER_RUNTIME_DIR="$LOCAL_STATE_DIR/issuer-backend"
+mkdir -p "$AUTH_RUNTIME_DIR" "$ISSUER_RUNTIME_DIR"
+
 section "Stopping Any Existing Local Stack"
 "$SCRIPT_DIR/stop-local-all.sh" --quiet
 
@@ -26,12 +31,12 @@ section "Starting Python Services"
 start_background_command \
   auth-server \
   "$AUTH_REPO" \
-  "source .venv/bin/activate && MYIP='$PUBLIC_HOST' AUTH_PORT='$AUTH_PORT' ISSUER_PORT='$ISSUER_PORT' ./patch_auth_server_local.sh && exec .venv/bin/python server.py config.json --cert '$SHARED_CERT_FILE' --key '$SHARED_KEY_FILE'"
+  "source .venv/bin/activate && MYIP='$PUBLIC_HOST' AUTH_PORT='$AUTH_PORT' ISSUER_PORT='$ISSUER_PORT' LOCAL_RUNTIME_DIR='$AUTH_RUNTIME_DIR' AUTH_CONFIG_FILE='$AUTH_RUNTIME_DIR/config.json' AUTH_OPENID_CONFIGURATION_FILE='$AUTH_RUNTIME_DIR/openid-configuration.json' ./patch_auth_server_local.sh && AUTH_OPENID_CONFIGURATION_FILE='$AUTH_RUNTIME_DIR/openid-configuration.json' exec .venv/bin/python server.py '$AUTH_RUNTIME_DIR/config.json' --cert '$SHARED_CERT_FILE' --key '$SHARED_KEY_FILE'"
 
 start_background_command \
   issuer-backend \
   "$ISSUER_REPO" \
-  "source .venv/bin/activate && MYIP='$PUBLIC_HOST' AUTH_PORT='$AUTH_PORT' ISSUER_PORT='$ISSUER_PORT' FRONTEND_PORT='$FRONTEND_PORT' ./patch_issuer_backend_local.sh && ISSUER_CERT_FILE='$SHARED_CERT_FILE' ISSUER_KEY_FILE='$SHARED_KEY_FILE' exec ./run_backend.sh"
+  "source .venv/bin/activate && MYIP='$PUBLIC_HOST' AUTH_PORT='$AUTH_PORT' ISSUER_PORT='$ISSUER_PORT' FRONTEND_PORT='$FRONTEND_PORT' LOCAL_RUNTIME_DIR='$ISSUER_RUNTIME_DIR' ISSUER_METADATA_OVERRIDES_FILE='$ISSUER_RUNTIME_DIR/metadata_overrides.json' ./patch_issuer_backend_local.sh && ISSUER_METADATA_OVERRIDES_FILE='$ISSUER_RUNTIME_DIR/metadata_overrides.json' ISSUER_CERT_FILE='$SHARED_CERT_FILE' ISSUER_KEY_FILE='$SHARED_KEY_FILE' exec ./run_backend.sh"
 
 start_background_command \
   issuer-frontend \
