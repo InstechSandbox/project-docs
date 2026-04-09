@@ -97,6 +97,8 @@ This document defines the shared working agreement for AI-assisted development a
 - For phase 1, trigger cloud validation and deployment from `push` to `main` plus explicit manual workflows; pull request workflows can be added later once the build is mature.
 - Keep application repository packaging logic separate from the dedicated infrastructure repository `instechsandbox-eudi-deploy`.
 - Prefer reusable GitHub Actions workflows in `.github` and repo-local caller workflows in each application repository.
+- Put infrastructure as code in `instechsandbox-eudi-deploy`, not in `.github`, `project-docs`, or the application repositories.
+- Treat artifact publication as part of application packaging: service repos publish images, while `instechsandbox-eudi-deploy` consumes image references and performs environment deployment.
 
 ## Security Constraints
 

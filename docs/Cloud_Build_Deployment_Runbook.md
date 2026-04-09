@@ -50,9 +50,21 @@ This phase does not replace the local build. The local build remains the effecti
 ### Repository Responsibility Model
 
 - application repositories own source, repo-native tests, Dockerfiles, and packaging logic
+- application repositories also own artifact publication callers, such as Docker image publication to ECR or mobile bundle publication, because publication is part of packaging rather than deployment
 - the `.github` repository should own reusable GitHub Actions workflows
 - cross-repo design, runbooks, and architecture notes belong in `project-docs`
 - infrastructure as code should live in a dedicated deployment repository named `instechsandbox-eudi-deploy`
+
+### Repo Boundary For Packaging vs Deployment
+
+- application repositories should build and publish immutable artifacts on `push` to `main`
+- the dedicated deployment repository should consume published artifact references or digests and deploy them into the `test` environment
+- deployment workflows must not rebuild application artifacts inside the deployment repository
+- reusable workflow primitives should stay in `.github`, but environment-specific AWS logic should not
+
+In practical terms, the next ECR publication step belongs in each service repository package workflow, while the AWS role, ECR repository definitions, ECS services, load balancer wiring, Route 53, ACM, and per-environment deployment orchestration belong in `instechsandbox-eudi-deploy`.
+
+That means the dedicated deployment repository is the home for the phase-1 infrastructure as code.
 
 ## Workstream Rule
 
@@ -160,6 +172,11 @@ Current package workflow behavior:
 
 Registry publication is still intentionally deferred until GitHub OIDC to AWS and the dedicated deployment repository are wired.
 
+When that next step is added, the caller changes should be split this way:
+
+- application repos: assume AWS role for artifact publication, log into ECR, and push the image built by the package workflow
+- `instechsandbox-eudi-deploy`: define the ECR repositories, IAM trust, ECS task and service definitions, environment configuration, and deployment orchestration
+
 ### Environment-Level Deployment Workflow
 
 The dedicated deployment repository should eventually expose:
@@ -178,6 +195,15 @@ Until that repository exists, the reusable deployment scaffold in `.github` is t
 - optional smoke URL or smoke path metadata
 
 That scaffold keeps the source repositories additive and reviewable without pretending deployment automation is already complete.
+
+Once `instechsandbox-eudi-deploy` exists, that repository should contain the actual infrastructure as code for:
+
+- ECR repositories and lifecycle policies
+- IAM roles and GitHub OIDC trust policies
+- ECS clusters, task definitions, services, and service-to-service wiring
+- load balancer listeners, target groups, Route 53 records, and ACM certificates
+- Systems Manager Parameter Store or Secrets Manager bindings
+- per-environment deployment manifests and smoke orchestration
 
 ## Deployment Order
 
