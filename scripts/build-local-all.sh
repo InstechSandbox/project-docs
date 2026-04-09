@@ -15,8 +15,6 @@ require_dir "$VERIFIER_REPO"
 require_dir "$VERIFIER_UI_REPO"
 require_command docker
 require_command bash
-
-section "Python Service Preflight"
 require_file "$AUTH_REPO/.venv/bin/python"
 require_file "$ISSUER_REPO/.venv/bin/flask"
 require_file "$FRONTEND_REPO/.venv/bin/flask"
@@ -24,7 +22,7 @@ printf '[ok]   auth venv    %s\n' "$AUTH_REPO/.venv/bin/python"
 printf '[ok]   issuer venv  %s\n' "$ISSUER_REPO/.venv/bin/flask"
 printf '[ok]   frontend venv %s\n' "$FRONTEND_REPO/.venv/bin/flask"
 
-"$SCRIPT_DIR/refresh-local-certs.sh"
+"$SCRIPT_DIR/refresh-local-certs.sh" --sync-wallet-cert
 sync_wallet_local_demo_host
 
 section "Wallet APK Build"

@@ -24,6 +24,8 @@ cd "$CODE_ROOT/project-docs/scripts"
 
 `./smoke-local-all.sh` is intentionally before `./install-wallet-demo-apk.sh --fresh`. The smoke step validates the local services and verifier stack first, then the APK install step prepares the phone for issuance and verification.
 
+Normal `./build-local-all.sh` and `./start-local-all.sh` runs do not rewrite the wallet app's embedded `backend_cert.pem`. Wallet trust material only changes when you run an explicit cert-rotation step.
+
 You do not need to run `./stop-local-all.sh` before `./start-local-all.sh`. The start wrapper already performs a quiet stop first so it can restart the stack cleanly.
 
 If you only changed Python service configuration, certificates, or wrapper wiring, you do not need a full clean rebuild or APK reinstall. Use this lighter recovery path:
@@ -53,6 +55,8 @@ cd "$CODE_ROOT/project-docs/scripts"
 ./run-issuance-demo.sh
 ./run-verification-demo.sh
 ```
+
+`./run-issuance-demo.sh` now defaults to `eu.europa.ec.eudi.pid_vc_sd_jwt` so the automated local issuance path matches the Irish Life verifier request. Override `CREDENTIAL_CONFIGURATION_ID` only when you intentionally want to test a different credential format.
 
 Logs:
 
@@ -102,10 +106,23 @@ These should stay as wrappers around repo-level build and launch entry points.
 
 ## One-Time Setup
 
-1. Copy `scripts/local-demo.env.example` to `scripts/local-demo.env` if you need to override local paths or other local settings.
-2. Confirm the shared local certificate and key paths are correct.
-3. Confirm Docker Desktop is running if that is your local Docker engine.
-4. Check the current LAN IP with:
+1. Copy `scripts/local-demo.env.example` to `scripts/local-demo.env` if you need local overrides.
+2. If you are using this workstream layout, leave `CODE_ROOT` unset in `scripts/local-demo.env` so the wrappers use the sibling repos under `workstreams/irishlife-verifier`.
+3. Create the repo-local config files before using the wrappers:
+   - copy `eudi-srv-issuer-oidc-py/private/token_jwks.json` into the worktree if your parent checkout already has a generated local token JWKS
+   - copy `eudi-srv-issuer-oidc-py/certs/` into the worktree if your parent checkout already has local auth cert material
+   - copy `eudi-srv-web-issuing-eudiw-py/app/.env.example` to `eudi-srv-web-issuing-eudiw-py/app/.env`
+   - copy `eudi-srv-web-issuing-eudiw-py/local/cert/` into the worktree if your parent checkout already has local trusted CA material
+   - copy `eudi-srv-web-issuing-eudiw-py/local/privKey/` into the worktree if your parent checkout already has local issuer signing keys
+   - copy `eudi-srv-web-issuing-frontend-eudiw-py/.env.example` to `eudi-srv-web-issuing-frontend-eudiw-py/.env`
+   - copy `eudi-app-android-wallet-ui/local.properties.example` to `eudi-app-android-wallet-ui/local.properties`, or copy `local.properties` from a known-good local setup
+4. If you are working from worktrees, copy those local-only files from your parent checkout or recreate them locally before the first build.
+5. Confirm the shared local certificate and key paths are correct.
+   - normal start runs refresh the shared runtime certificate for the local services when needed, but it does not update the wallet PEM
+   - `./build-local-all.sh` and `./build-local-all-clean.sh` now sync the shared cert into the wallet source before compiling the APK
+   - if you rotate the shared cert outside those build wrappers, run `./refresh-local-certs.sh --sync-wallet-cert`, then rebuild and install the wallet APK
+6. Confirm Docker Desktop is running if that is your local Docker engine.
+7. Check the current LAN IP with:
 
 ```bash
 ipconfig getifaddr en0 || ipconfig getifaddr en1
@@ -128,6 +145,94 @@ cd "$CODE_ROOT/project-docs/scripts"
 ```
 
 Use that explicit stop when you want to tear the local stack down at the end, or when you want a manual reset before investigating logs. It is not required before the normal `./start-local-all.sh` path.
+
+## Irish Life Email And Customer Surface Settings
+
+The Irish Life New Business verifier flow now depends on two verifier-backend settings when you want the full agent-plus-customer demo to work end to end.
+
+Required verifier settings for the customer surface and email flow:
+
+- `verifier.irishlife.customerBaseUrl`
+- `verifier.mail.from`
+
+Required SMTP settings for real email sending:
+
+- `spring.mail.host`
+- `spring.mail.port`
+- `spring.mail.username`
+- `spring.mail.password`
+- any required SMTP auth or TLS properties
+
+For local Angular development, `verifier.irishlife.customerBaseUrl` should normally point at the frontend dev server, for example:
+
+```properties
+verifier.irishlife.customerBaseUrl=http://localhost:4200
+verifier.mail.from=no-reply@example.com
+spring.mail.host=smtp.example.com
+spring.mail.port=587
+spring.mail.username=demo-user
+spring.mail.password=demo-password
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+```
+
+The verifier UI now uses same-origin API calls for `/ui`, `/wallet`, and `/utilities` instead of a hardcoded `http://localhost:8080` base URL. That means the Docker-served HTTPS UI can talk to the verifier backend without mixed-content problems, and `npm start` continues to work through the Angular dev-server proxy.
+
+For the local Docker verifier path started by `scripts/start-local-all.sh` or `av-srv-web-verifier-endpoint-23220-4-kt/scripts/start-local-verifier.sh`, the customer surface URL is now derived automatically from the active verifier public host. On a LAN or hotspot IP change, restarting the verifier stack is enough to refresh Irish Life customer links and same-device return URLs.
+
+The Android wallet also bakes `LOCAL_VERIFIER_API` and `LOCAL_ISSUER_URL` into its generated `BuildConfig` from `localDemoHost`. If the Mac's LAN IP changes and you only restart the local services, verification can still fail before the consent screen because the installed APK is still pre-registered against the old verifier URL. `scripts/build-local-all.sh` and `scripts/build-local-all-clean.sh` already resync `local.properties` before rebuilding; `scripts/install-wallet-demo-apk.sh` now also refuses to install a stale APK so the mismatch is caught before device testing.
+
+For local same-device troubleshooting, keep `response_type=vp_token` present on both the outer `eudi-openid4vp://...` deep link and the signed request object served from `request_uri`. Check both the verifier backend response and any verifier UI fallback builder that reconstructs `authorization_request_uri`, because a missing outer `response_type` in either path still triggers wallet-side `MissingResponseType` before consent.
+
+If SMTP is not configured, the verifier backend will still expose the case flow and wallet journey, but invite and completion emails will be reported as not sent.
+
+For local runs, the default placeholder host `smtp.example.com` is now treated as email-disabled on purpose. That prevents the Irish Life `Create case and send invite` action from blocking on a fake SMTP connection while still letting the case move to `INVITE_SENT` and expose the customer portal URL.
+
+The Irish Life agent surface now shows which step is active during case creation versus invite sending, and it clears the spinner locally if the browser waits too long for either step. If the page reports that it stopped waiting, use `Refresh case` before retrying so you can tell whether the backend already created the case or issued the invite.
+
+For the Irish Life SD-JWT PID flow, the local issuer frontend must advertise `eu.europa.ec.eudi.pid_vc_sd_jwt` in `CREDENTIALS_SUPPORTED`. The current local wrapper does this automatically so wallet discovery stays consistent with the verifier request.
+
+For the Irish Life proof-of-address happy path, use the local `FC` dynamic PID form rather than the reduced one-step Utopia form description. The current local issuer backend sends optional PID address claims to the frontend, and the dynamic form exposes them behind `Add Optional Attributes`.
+
+For the simplest end-to-end address proof, add the optional `Address` fields during PID issuance and populate at least:
+
+1. `street_address`
+2. `locality`
+3. `region`
+4. `postal_code`
+
+Example values:
+
+1. `street_address = 1 Main Street`
+2. `locality = Dublin`
+3. `region = Leinster`
+4. `postal_code = D02 XY56`
+
+Then enter the Irish Life New Business `Current address` exactly as:
+
+`1 Main Street, Dublin, Leinster, D02 XY56`
+
+The verifier now requests those structured PID address claims and reconstructs the comparison string in that same comma-separated order. If the issuer form also exposes `Formatted`, you can set it to the same joined value above, but it is not required for the local verifier path.
+
+In the current dynamic issuer UI, the optional address block is rendered from claim keys, so the visible labels appear in this order under `Address`:
+
+1. `Street Address`
+2. `Locality`
+3. `Region`
+4. `Postal Code`
+5. `Country`
+6. `Formatted`
+7. `House Number`
+
+For the local verifier path, only the first four are needed. `Country` can still be entered in the issuer form, but the Irish Life verifier no longer depends on it being disclosed for the address comparison. The verifier comparison now tolerates punctuation-only differences and whitespace-only differences inside the final address string, including cases like `D02 XY56` versus `D02XY56`, but it still expects the same underlying address values.
+
+Once you have completed one successful issuance and Irish Life proof with this address shape, you do not need to rerun the happy path unless you change the verifier request, the issuer address fields, the local host/cert material, or the wallet APK again. Re-running is only useful as a regression check after further changes.
+
+The shared local runtime certificate must advertise SAN URI entries for the local HTTPS service identities, especially `ISSUER_URL`. The verifier's SD-JWT issuer-certificate check does not treat a bare IP SAN as equivalent to the issuer identifier `https://host:5002`, so a cert that only contains `IP:...` and `DNS:localhost` can still let issuance succeed but fail post-share verification with `IssuerCertificateIsNotTrusted`.
+
+The SD-JWT signer certificate under `eudi-srv-web-issuing-eudiw-py/local/cert/PID-DS-0001_UT_cert.{pem,der}` is a separate certificate from the shared runtime TLS cert. `scripts/refresh-local-certs.sh` now validates that signer certificate against the existing `PID-DS-0001_UT.pem` private key and regenerates the PEM and DER files with `URI:$ISSUER_URL` in SAN when needed. After that signer cert changes, restart the issuer backend and reissue the credential before retrying proof.
+
+The Irish Life verifier case flow does not rely on the manual trusted-issuer UI control. For local PID verification, `av-srv-web-verifier-endpoint-23220-4-kt/scripts/start-local-verifier.sh` now mounts `eudi-srv-web-issuing-eudiw-py/local/cert/PID-DS-0001_UT_cert.pem` into the verifier container and injects it as the `issuer_chain` for Irish Life proof transactions. If that signer certificate changes, restart the verifier stack as well so new transactions carry the updated chain.
 
 ## Optional Working Layout
 
@@ -154,14 +259,14 @@ Useful parallel pane commands during build and runtime verification:
 cd "$CODE_ROOT/project-docs/scripts"
 ```
 
-2. Pane 2: wrapped Python service logs
+1. Pane 2: wrapped Python service logs
 
 ```bash
 cd "$CODE_ROOT/project-docs/.local/logs"
 tail -F auth-server.log issuer-backend.log issuer-frontend.log
 ```
 
-3. Pane 3: verifier Docker status
+1. Pane 3: verifier Docker status
 
 ```bash
 cd "$CODE_ROOT/av-srv-web-verifier-endpoint-23220-4-kt"
@@ -181,7 +286,7 @@ docker compose -f docker/docker-compose.local.yml ps -a
 
 `docker compose ... ps` shows only running containers. `docker compose ... ps -a` also shows exited containers such as a failed `verifier-haproxy`.
 
-4. Pane 4: device targeting and install
+1. Pane 4: device targeting and install
 
 ```bash
 "$ADB_BIN" -s "$ANDROID_SERIAL" devices -l
@@ -210,6 +315,11 @@ What this confirms:
 - wallet APK is rebuilt locally
 - verifier Docker images are rebuilt locally
 - Python service environments are present and launchable
+
+What this does not do by default:
+
+- it does not rotate the wallet app's embedded `backend_cert.pem`
+- if you intentionally change wallet trust material, run `./refresh-local-certs.sh --sync-wallet-cert` before rebuilding and reinstalling the APK
 
 `build-local-all.sh` is the faster incremental path. `build-local-all-clean.sh` forces a heavier wallet rebuild and a no-cache Docker rebuild.
 
@@ -257,6 +367,10 @@ If the phone already has a higher-version wallet package installed, use:
 `--fresh` will uninstall the package that matches the APK application ID before reinstalling it.
 
 You do not need `--fresh` after Python-only backend or frontend fixes. Use it when the wallet APK changed, when Android refuses a downgrade, or when you want the cleanest possible device state.
+
+The install wrapper also checks that the wallet's embedded local PEM still matches the current shared runtime certificate. If it fails there, sync the cert into the wallet source and rebuild before retrying the install.
+
+If you explicitly rotate wallet trust material with `./refresh-local-certs.sh --sync-wallet-cert`, the wallet APK has changed and should be reinstalled on the phone before wallet-based testing.
 
 Alternative if you want Gradle to build and install in one step:
 

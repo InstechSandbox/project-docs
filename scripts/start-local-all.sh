@@ -36,7 +36,7 @@ start_background_command \
 start_background_command \
   issuer-frontend \
   "$FRONTEND_REPO" \
-  "source .venv/bin/activate && MYIP='$PUBLIC_HOST' BACKEND_HOST='$PUBLIC_HOST' BACKEND_PORT='$AUTH_PORT' BACKEND_CERT_SOURCE='$SHARED_CERT_FILE' AUTH_PORT='$AUTH_PORT' ISSUER_PORT='$ISSUER_PORT' FRONTEND_PORT='$FRONTEND_PORT' FRONTEND_CERT_FILE='$SHARED_CERT_FILE' FRONTEND_KEY_FILE='$SHARED_KEY_FILE' exec ./run_frontend.sh"
+  "source .venv/bin/activate && MYIP='$PUBLIC_HOST' BACKEND_HOST='$PUBLIC_HOST' BACKEND_PORT='$AUTH_PORT' BACKEND_CERT_SOURCE='$SHARED_CERT_FILE' AUTH_PORT='$AUTH_PORT' ISSUER_PORT='$ISSUER_PORT' FRONTEND_PORT='$FRONTEND_PORT' CREDENTIALS_SUPPORTED='eu.europa.ec.eudi.pid_mdoc,eu.europa.ec.eudi.pid_vc_sd_jwt,eu.europa.ec.eudi.mdl_mdoc' FRONTEND_CERT_FILE='$SHARED_CERT_FILE' FRONTEND_KEY_FILE='$SHARED_KEY_FILE' exec ./run_frontend.sh"
 
 section "Starting Docker Verifier Stack"
 (

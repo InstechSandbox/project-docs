@@ -13,6 +13,8 @@ if [[ "${1:-}" == "--fresh" ]]; then
 fi
 
 metadata_path="$(dirname "$APK_PATH")/output-metadata.json"
+wallet_build_config="$WALLET_REPO/core-logic/build/generated/source/buildConfig/demo/debug/eu/europa/ec/corelogic/BuildConfig.java"
+wallet_cert_file="$WALLET_REPO/network-logic/src/main/res/raw/backend_cert.pem"
 
 apk_application_id=""
 if [[ -f "$metadata_path" ]]; then
@@ -31,6 +33,19 @@ fi
 section "Preflight"
 require_file "$APK_PATH"
 require_android_device
+sync_wallet_local_demo_host
+
+if [[ -f "$wallet_cert_file" ]] && [[ -f "$SHARED_CERT_FILE" ]] && ! cmp -s "$wallet_cert_file" "$SHARED_CERT_FILE"; then
+	fail "Wallet embedded PEM does not match the current shared local certificate. Run $SCRIPT_DIR/refresh-local-certs.sh --sync-wallet-cert and rebuild the wallet APK before installing."
+fi
+
+if [[ -f "$wallet_build_config" ]]; then
+	built_verifier_api=$(awk -F'"' '/LOCAL_VERIFIER_API/ { print $2; exit }' "$wallet_build_config")
+	expected_verifier_api="https://$PUBLIC_HOST"
+	if [[ -n "$built_verifier_api" && "$built_verifier_api" != "$expected_verifier_api" ]]; then
+		fail "Wallet APK was built for $built_verifier_api but current verifier host is $expected_verifier_api. Rebuild with (cd $WALLET_REPO && ./gradlew buildAndInstallDemoDebug --console=plain) or rerun project-docs/scripts/build-local-all.sh."
+	fi
+fi
 
 section "Device"
 printf 'Installing to adb target: %s\n' "$ADB_TARGET_LABEL"
