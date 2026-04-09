@@ -99,6 +99,8 @@ This document defines the shared working agreement for AI-assisted development a
 - Prefer reusable GitHub Actions workflows in `.github` and repo-local caller workflows in each application repository.
 - Put infrastructure as code in `instechsandbox-eudi-deploy`, not in `.github`, `project-docs`, or the application repositories.
 - Treat artifact publication as part of application packaging: service repos publish images, while `instechsandbox-eudi-deploy` consumes image references and performs environment deployment.
+- Keep AWS environment logic centralized in `instechsandbox-eudi-deploy` rather than duplicating environment-specific AWS behaviour in application repositories or `.github`.
+- Factor repeated artifact publication mechanics into reusable workflows in `.github`, with application repositories limited to thin caller workflows.
 
 ## Security Constraints
 

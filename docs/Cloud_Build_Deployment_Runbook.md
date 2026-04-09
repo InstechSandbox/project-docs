@@ -61,6 +61,8 @@ This phase does not replace the local build. The local build remains the effecti
 - the dedicated deployment repository should consume published artifact references or digests and deploy them into the `test` environment
 - deployment workflows must not rebuild application artifacts inside the deployment repository
 - reusable workflow primitives should stay in `.github`, but environment-specific AWS logic should not
+- AWS environment logic should stay centralized in `instechsandbox-eudi-deploy` rather than being spread across application repositories or `.github`
+- repeated artifact publication mechanics should be abstracted into reusable workflows in `.github` rather than copy-pasted caller logic in each application repository
 
 In practical terms, the next ECR publication step belongs in each service repository package workflow, while the AWS role, ECR repository definitions, ECS services, load balancer wiring, Route 53, ACM, and per-environment deployment orchestration belong in `instechsandbox-eudi-deploy`.
 
@@ -174,7 +176,8 @@ Registry publication is still intentionally deferred until GitHub OIDC to AWS an
 
 When that next step is added, the caller changes should be split this way:
 
-- application repos: assume AWS role for artifact publication, log into ECR, and push the image built by the package workflow
+- `.github`: provide reusable publication primitives for AWS login, tagging, registry publication, and shared summary/reporting behaviour
+- application repos: keep thin caller workflows that supply repo-specific image names, tags, and publication inputs without re-implementing shared publish mechanics
 - `instechsandbox-eudi-deploy`: define the ECR repositories, IAM trust, ECS task and service definitions, environment configuration, and deployment orchestration
 
 ### Environment-Level Deployment Workflow
