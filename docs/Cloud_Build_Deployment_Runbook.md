@@ -121,10 +121,44 @@ Current reusable workflows:
 - `reusable-node-validation.yml`
 - `reusable-gradle-validation.yml`
 - `reusable-docker-build.yml`
+- `reusable-deployment-scaffold.yml`
 
 These workflows are intentionally generic. Application repositories are expected to add thin caller workflows that provide their own working directory, install commands, validation commands, Docker context, and tags.
 
-This is a foundation step only. Deployment into AWS `test`, artifact publication, and environment orchestration still belong in later phases.
+This layer now covers reusable validation, reusable Docker packaging, and a deployment scaffold contract.
+
+The deployment scaffold is deliberately non-executing. It creates a deployment manifest artifact and summary that describe what a future deployment repository should consume, but it does not apply infrastructure changes or deploy workloads into AWS.
+
+The first caller workflows now exist in the issuer and verifier application repositories for validation on `push` to `main` and `workflow_dispatch`.
+
+Current caller coverage:
+
+- `eudi-srv-issuer-oidc-py`
+- `eudi-srv-web-issuing-eudiw-py`
+- `eudi-srv-web-issuing-frontend-eudiw-py`
+- `av-srv-web-verifier-endpoint-23220-4-kt`
+- `eudi-web-verifier`
+
+Those caller workflows currently cover validation only. Packaging, registry publication, and deployment callers remain the next phase.
+
+The next caller layer now exists for Docker-based package workflows in the same issuer and verifier repositories.
+
+Current package caller coverage:
+
+- `eudi-srv-issuer-oidc-py`
+- `eudi-srv-web-issuing-eudiw-py`
+- `eudi-srv-web-issuing-frontend-eudiw-py`
+- `av-srv-web-verifier-endpoint-23220-4-kt`
+- `eudi-web-verifier`
+
+Current package workflow behavior:
+
+- triggers after successful `Validation` runs on `main`
+- supports manual `workflow_dispatch`
+- builds the repository Docker image through the reusable Docker build workflow
+- records image tags and build metadata without pushing to a registry yet
+
+Registry publication is still intentionally deferred until GitHub OIDC to AWS and the dedicated deployment repository are wired.
 
 ### Environment-Level Deployment Workflow
 
@@ -134,6 +168,16 @@ The dedicated deployment repository should eventually expose:
 2. service deployment workflow that consumes artifact versions or image digests
 3. post-deploy smoke workflow for the `test` environment
 4. rollback or redeploy workflow
+
+Until that repository exists, the reusable deployment scaffold in `.github` is the handoff contract. It captures:
+
+- target environment
+- deployable component name
+- artifact kind and immutable artifact reference
+- expected deploy repository
+- optional smoke URL or smoke path metadata
+
+That scaffold keeps the source repositories additive and reviewable without pretending deployment automation is already complete.
 
 ## Deployment Order
 
@@ -212,7 +256,8 @@ If the implementation changes any of the following, update this runbook and the 
 1. clean up tracked local-IP drift and convert runtime files to generated inputs
 2. converge the issuer trio on Docker-first packaging while preserving local runs
 3. add thin caller workflows in each application repository that consume the reusable workflows in `.github`
-4. create the `instechsandbox-eudi-deploy` repository for infrastructure as code and environment deployment
-5. add push-to-main validation, packaging, and deployment into `test`
-6. add cloud smoke tests
-7. add Android GitHub Releases publication and iOS TestFlight publication
+4. add package caller workflows that build immutable container artifacts without registry publication drift
+5. create the `instechsandbox-eudi-deploy` repository for infrastructure as code and environment deployment
+6. wire registry publication and deployment into `test`
+7. add cloud smoke tests
+8. add Android GitHub Releases publication and iOS TestFlight publication
