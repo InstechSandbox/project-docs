@@ -111,6 +111,21 @@ Each application repository should eventually expose:
 3. optional repo-local smoke workflow
    - verifies the packaged artifact or built image starts correctly
 
+### Reusable Workflow Foundation In `.github`
+
+The first reusable workflow layer now exists in the InstechSandbox `.github` repository.
+
+Current reusable workflows:
+
+- `reusable-python-validation.yml`
+- `reusable-node-validation.yml`
+- `reusable-gradle-validation.yml`
+- `reusable-docker-build.yml`
+
+These workflows are intentionally generic. Application repositories are expected to add thin caller workflows that provide their own working directory, install commands, validation commands, Docker context, and tags.
+
+This is a foundation step only. Deployment into AWS `test`, artifact publication, and environment orchestration still belong in later phases.
+
 ### Environment-Level Deployment Workflow
 
 The dedicated deployment repository should eventually expose:
@@ -196,7 +211,7 @@ If the implementation changes any of the following, update this runbook and the 
 
 1. clean up tracked local-IP drift and convert runtime files to generated inputs
 2. converge the issuer trio on Docker-first packaging while preserving local runs
-3. add reusable workflows in `.github`
+3. add thin caller workflows in each application repository that consume the reusable workflows in `.github`
 4. create the `instechsandbox-eudi-deploy` repository for infrastructure as code and environment deployment
 5. add push-to-main validation, packaging, and deployment into `test`
 6. add cloud smoke tests
