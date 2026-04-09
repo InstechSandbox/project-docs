@@ -59,6 +59,13 @@ Record recurring lessons that are worth turning into shared engineering guidance
 
 ## Seed Entries
 
+### 2026-04-09 - New workstream repos must be added as linked worktrees, not standalone clones
+
+- Context: A new repository added to the `cloud-build` workspace appeared with a different VS Code icon and an unexpected nested duplicate pointing at local `main`.
+- What happened: The workstream path was created as the primary clone and the canonical `main` checkout was later attached beneath it as a worktree, which inverted the layout used by the rest of the workspace.
+- Reusable lesson: In the shared multi-repo workspace, the canonical checkout should stay on `main` outside the workstream directory and each `wip/<stream>` copy should be created with `git worktree add` so the on-disk git metadata shape is consistent across repositories.
+- Follow-up doc or rule update: Add explicit worktree setup rules to the AI working agreement so new repositories are not inferred from branch naming alone.
+
 ### 2026-04-08 - Local Python bootstrap should prefer the cloud runtime minor version
 
 - Context: Local issuer validation failed because one repo-local `.venv` had been created under Python 3.14 while the current container packaging path used Python 3.11.

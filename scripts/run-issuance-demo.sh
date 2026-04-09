@@ -15,7 +15,13 @@ adb_cmd shell am force-stop eu.europa.ec.euidi.dev >/dev/null 2>&1 || true
 adb_cmd shell am force-stop eu.europa.ec.euidi >/dev/null 2>&1 || true
 
 section "Run Issuance Deep Link"
-ADB_BIN="$ADB_BIN" \
-ANDROID_SERIAL="$ANDROID_SERIAL" \
-ISSUER_BACKEND_URL="$ISSUER_URL" \
-"$ISSUER_REPO/scripts/generate-issuance-deeplink.sh" --run
+if [[ -n "$ANDROID_SERIAL" ]]; then
+	ADB_BIN="$ADB_BIN" \
+	ANDROID_SERIAL="$ANDROID_SERIAL" \
+	ISSUER_BACKEND_URL="$ISSUER_URL" \
+	"$ISSUER_REPO/scripts/generate-issuance-deeplink.sh" --run
+else
+	ADB_BIN="$ADB_BIN" \
+	ISSUER_BACKEND_URL="$ISSUER_URL" \
+	"$ISSUER_REPO/scripts/generate-issuance-deeplink.sh" --run
+fi

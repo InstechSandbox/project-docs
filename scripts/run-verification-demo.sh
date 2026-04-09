@@ -15,8 +15,15 @@ adb_cmd shell am force-stop eu.europa.ec.euidi.dev >/dev/null 2>&1 || true
 adb_cmd shell am force-stop eu.europa.ec.euidi >/dev/null 2>&1 || true
 
 section "Run Verification Deep Link"
-ADB_BIN="$ADB_BIN" \
-ANDROID_SERIAL="$ANDROID_SERIAL" \
-VERIFIER_PUBLIC_HOST="$VERIFIER_PUBLIC_HOST" \
-VERIFIER_PUBLIC_URL="$VERIFIER_PUBLIC_URL" \
-"$VERIFIER_REPO/scripts/generate-verifier-deeplink.sh" --run
+if [[ -n "$ANDROID_SERIAL" ]]; then
+	ADB_BIN="$ADB_BIN" \
+	ANDROID_SERIAL="$ANDROID_SERIAL" \
+	VERIFIER_PUBLIC_HOST="$VERIFIER_PUBLIC_HOST" \
+	VERIFIER_PUBLIC_URL="$VERIFIER_PUBLIC_URL" \
+	"$VERIFIER_REPO/scripts/generate-verifier-deeplink.sh" --run
+else
+	ADB_BIN="$ADB_BIN" \
+	VERIFIER_PUBLIC_HOST="$VERIFIER_PUBLIC_HOST" \
+	VERIFIER_PUBLIC_URL="$VERIFIER_PUBLIC_URL" \
+	"$VERIFIER_REPO/scripts/generate-verifier-deeplink.sh" --run
+fi

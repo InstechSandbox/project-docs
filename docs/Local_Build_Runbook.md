@@ -473,6 +473,16 @@ cd "$CODE_ROOT/project-docs/scripts"
 
 Only edit `scripts/local-demo.env` if you intentionally want to force a manual `PUBLIC_HOST` or `VERIFIER_PUBLIC_HOST` override.
 
+### Issuer Frontend Looks Wrong
+
+If the issuer credential choices differ from the known-good local flow, or the country-selection page renders without the expected sizing, regenerate the frontend env and restart the frontend.
+
+The local frontend config must write concrete `SERVICE_URL`, `ISSUER_URL`, and `OAUTH_URL` values into `.env`, and the default demo credential list should include `eu.europa.ec.eudi.pid_vc_sd_jwt` alongside the mdoc options.
+
+If the Tailwind-based issuer pages render unstyled after a clean checkout or rebuild, the local frontend startup path now rebuilds `app/static/css/tailwind.css` automatically. If that still fails, run `npm install --no-package-lock` and `npm run build` inside `eudi-srv-web-issuing-frontend-eudiw-py` and then restart only the issuer frontend.
+
+If issuance fails after the form step with the generic backend error page, check that `eudi-srv-web-issuing-eudiw-py/local/privKey/nonce_rsa2048.pem` and `credential_request_ec.pem` exist. The local backend patch helper now generates those files automatically when missing.
+
 ## Next Evolution
 
 When the build system grows up, keep this split:

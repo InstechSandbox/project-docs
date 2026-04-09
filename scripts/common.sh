@@ -107,6 +107,10 @@ ANDROID_SDK_DIR="${ANDROID_SDK_DIR:-$(detect_android_sdk_dir)}"
 APK_PATH="${APK_PATH:-$WALLET_REPO/app/build/outputs/apk/demo/debug/app-demo-debug.apk}"
 ANDROID_SERIAL="${ANDROID_SERIAL:-}"
 
+case "$ANDROID_SERIAL" in
+  "''"|'""') ANDROID_SERIAL="" ;;
+esac
+
 ADB_TARGET_LABEL="${ANDROID_SERIAL:-default adb target}"
 
 LOCAL_STATE_DIR="${LOCAL_STATE_DIR:-$PROJECT_DOCS_DIR/.local}"
