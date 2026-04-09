@@ -52,6 +52,14 @@ This document defines the shared working agreement for AI-assisted development a
 - Publishing a `wip/<stream>` branch is optional and should be treated as an explicit exception for remote persistence, not as the default promotion path.
 - Workstream names should stay consistent across repos, workspace files, issue references, and acceptance criteria.
 
+### Default Git Promotion Rule
+
+- The default promotion path is: commit locally on `wip/<stream>`, keep that local branch tracking `origin/main`, and promote ready work with `git push origin HEAD:main`.
+- Do not publish `wip/<stream>` to `origin` by default.
+- Do not create remote `wip/<stream>` branches unless remote persistence is explicitly requested.
+- Treat `git push origin HEAD:main` as the normal promotion step for ready work, not as an exceptional fallback.
+- After promotion, keep the local `wip/<stream>` branch aligned to and tracking `origin/main`.
+
 ### Recommended Local Setup Pattern
 
 - create the workspace or worktree using the same `wip/<stream>` branch name across the participating repos
@@ -85,6 +93,7 @@ This document defines the shared working agreement for AI-assisted development a
 - Keep pre-commit hooks fast and deterministic.
 - Keep pre-push hooks repo-aware and meaningful.
 - While pull requests are not yet the primary delivery mechanism, `push` to `main` must still be treated as a controlled integration event with deterministic remote validation.
+- Do not replace the direct-to-`main` promotion model with remote workstream branches unless the user explicitly asks for that exception.
 - Strengthen verifier-focused smoke and acceptance coverage as the Irish Life workstream evolves.
 
 ## AWS Deployment Principles

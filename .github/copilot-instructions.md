@@ -5,6 +5,7 @@
 - This repo owns cross-repo runbooks, architecture notes, standards summaries, and working agreements.
 - If behaviour, architecture, environment setup, CI/CD, or test strategy changes anywhere in scope, update this repo in the same task.
 - Record recurring lessons in `docs/Engineering_Lessons_Log.md` rather than rediscovering them repeatedly.
+- Default Git flow in this workspace is local `wip/<stream>` commits promoted directly with `git push origin HEAD:main`; do not publish remote `wip/<stream>` branches unless explicitly requested.
 
 ## Local Checks
 
