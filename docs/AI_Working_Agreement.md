@@ -101,6 +101,7 @@ This document defines the shared working agreement for AI-assisted development a
 - Treat artifact publication as part of application packaging: service repos publish images, while `instechsandbox-eudi-deploy` consumes image references and performs environment deployment.
 - Keep AWS environment logic centralized in `instechsandbox-eudi-deploy` rather than duplicating environment-specific AWS behaviour in application repositories or `.github`.
 - Factor repeated artifact publication mechanics into reusable workflows in `.github`, with application repositories limited to thin caller workflows.
+- Use Terraform in `instechsandbox-eudi-deploy` for the phase-1 AWS infrastructure baseline unless and until the documented deployment toolchain changes.
 
 ## Security Constraints
 

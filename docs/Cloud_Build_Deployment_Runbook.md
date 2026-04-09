@@ -135,11 +135,12 @@ Current reusable workflows:
 - `reusable-node-validation.yml`
 - `reusable-gradle-validation.yml`
 - `reusable-docker-build.yml`
+- `reusable-ecr-publish.yml`
 - `reusable-deployment-scaffold.yml`
 
 These workflows are intentionally generic. Application repositories are expected to add thin caller workflows that provide their own working directory, install commands, validation commands, Docker context, and tags.
 
-This layer now covers reusable validation, reusable Docker packaging, and a deployment scaffold contract.
+This layer now covers reusable validation, reusable Docker packaging, reusable ECR publication, and a deployment scaffold contract.
 
 The deployment scaffold is deliberately non-executing. It creates a deployment manifest artifact and summary that describe what a future deployment repository should consume, but it does not apply infrastructure changes or deploy workloads into AWS.
 
@@ -174,6 +175,23 @@ Current package workflow behavior:
 
 Registry publication is still intentionally deferred until GitHub OIDC to AWS and the dedicated deployment repository are wired.
 
+The first thin publish caller workflows now also exist in the issuer and verifier service repositories.
+
+Current publish caller coverage:
+
+- `eudi-srv-issuer-oidc-py`
+- `eudi-srv-web-issuing-eudiw-py`
+- `eudi-srv-web-issuing-frontend-eudiw-py`
+- `av-srv-web-verifier-endpoint-23220-4-kt`
+- `eudi-web-verifier`
+
+Current publish workflow behavior:
+
+- triggers by manual `workflow_dispatch`
+- requires the operator to provide the AWS region and OIDC role ARN as manual workflow inputs until environment-level publication settings are standardized
+- uses the reusable ECR publication workflow in `.github` for AWS login, ECR authentication, build-and-push, and summary output
+- keeps caller logic thin by passing only repo-specific image names, Dockerfile paths, and target repository names
+
 When that next step is added, the caller changes should be split this way:
 
 - `.github`: provide reusable publication primitives for AWS login, tagging, registry publication, and shared summary/reporting behaviour
@@ -189,7 +207,7 @@ The dedicated deployment repository should eventually expose:
 3. post-deploy smoke workflow for the `test` environment
 4. rollback or redeploy workflow
 
-Until that repository exists, the reusable deployment scaffold in `.github` is the handoff contract. It captures:
+Until full deployment automation is in place, the reusable deployment scaffold in `.github` is the handoff contract. It captures:
 
 - target environment
 - deployable component name
@@ -199,7 +217,7 @@ Until that repository exists, the reusable deployment scaffold in `.github` is t
 
 That scaffold keeps the source repositories additive and reviewable without pretending deployment automation is already complete.
 
-Once `instechsandbox-eudi-deploy` exists, that repository should contain the actual infrastructure as code for:
+`instechsandbox-eudi-deploy` now exists and contains the initial Terraform-based phase-1 AWS baseline. That repository is the home for the actual infrastructure as code for:
 
 - ECR repositories and lifecycle policies
 - IAM roles and GitHub OIDC trust policies
@@ -208,9 +226,11 @@ Once `instechsandbox-eudi-deploy` exists, that repository should contain the act
 - Systems Manager Parameter Store or Secrets Manager bindings
 - per-environment deployment manifests and smoke orchestration
 
-The `cloud-build` workstream now includes a local scaffold for `instechsandbox-eudi-deploy` so the repository boundary and directory ownership are explicit before remote repository creation.
+The deploy repository currently includes:
 
-That local scaffold is preparatory only. The remote repository still needs to be created before shared deployment automation can be published or executed through GitHub.
+- a Terraform root for the shared `test` environment
+- a first shared foundation module covering ECR, ECS cluster, and log-group scaffolding
+- repository-local workflow scaffolding for Terraform validation and deployment-plan rendering
 
 ## Deployment Order
 
@@ -290,7 +310,7 @@ If the implementation changes any of the following, update this runbook and the 
 2. converge the issuer trio on Docker-first packaging while preserving local runs
 3. add thin caller workflows in each application repository that consume the reusable workflows in `.github`
 4. add package caller workflows that build immutable container artifacts without registry publication drift
-5. create the remote `instechsandbox-eudi-deploy` repository from the local scaffold for infrastructure as code and environment deployment
-6. wire registry publication and deployment into `test`
+5. apply the Terraform-based `test` environment baseline from `instechsandbox-eudi-deploy`
+6. wire reusable ECR publication and deployment into `test`
 7. add cloud smoke tests
 8. add Android GitHub Releases publication and iOS TestFlight publication
