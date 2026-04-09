@@ -208,6 +208,10 @@ Once `instechsandbox-eudi-deploy` exists, that repository should contain the act
 - Systems Manager Parameter Store or Secrets Manager bindings
 - per-environment deployment manifests and smoke orchestration
 
+The `cloud-build` workstream now includes a local scaffold for `instechsandbox-eudi-deploy` so the repository boundary and directory ownership are explicit before remote repository creation.
+
+That local scaffold is preparatory only. The remote repository still needs to be created before shared deployment automation can be published or executed through GitHub.
+
 ## Deployment Order
 
 The first-phase deployment order should be explicit and automated:
@@ -286,7 +290,7 @@ If the implementation changes any of the following, update this runbook and the 
 2. converge the issuer trio on Docker-first packaging while preserving local runs
 3. add thin caller workflows in each application repository that consume the reusable workflows in `.github`
 4. add package caller workflows that build immutable container artifacts without registry publication drift
-5. create the `instechsandbox-eudi-deploy` repository for infrastructure as code and environment deployment
+5. create the remote `instechsandbox-eudi-deploy` repository from the local scaffold for infrastructure as code and environment deployment
 6. wire registry publication and deployment into `test`
 7. add cloud smoke tests
 8. add Android GitHub Releases publication and iOS TestFlight publication
