@@ -240,7 +240,7 @@ The intended operating rule is:
 - use GitHub Actions as the standard operating path after that
 - keep local development cloud-light unless cloud-specific behavior is the thing being validated
 
-In the current workspace, the deploy repository is owned by `InstechSandbox` while the five publish-capable service repositories are owned by `eu-digital-identity-wallet`, so the AWS bootstrap trust configuration must allow separate GitHub owners for deploy and publish role subjects.
+In the current workspace, the deploy repository publishes from `InstechSandbox`, while the service repositories may be worked on as `InstechSandbox` origins with `eu-digital-identity-wallet` upstream remotes, so the AWS bootstrap trust configuration must allow the publish role to trust both owners where needed.
 
 `instechsandbox-eudi-deploy` now exists and contains the initial Terraform-based phase-1 AWS baseline. That repository is the home for the actual infrastructure as code for:
 
