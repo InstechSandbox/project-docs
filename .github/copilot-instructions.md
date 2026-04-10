@@ -6,6 +6,8 @@
 - If behaviour, architecture, environment setup, CI/CD, or test strategy changes anywhere in scope, update this repo in the same task.
 - Record recurring lessons in `docs/Engineering_Lessons_Log.md` rather than rediscovering them repeatedly.
 - Default Git flow in this workspace is local `wip/<stream>` commits promoted directly with `git push origin HEAD:main`; do not publish remote `wip/<stream>` branches unless explicitly requested.
+- For the `cloud-build` workstream, keep guidance biased toward the lowest-cost architecture that still supports a public-internet end-to-end mobile credential request plus proof/verification demo.
+- Call out when a proposed cloud design adds fixed or always-on cost, and prefer additive steps that defer those costs until they are necessary for the public demo target.
 
 ## Local Checks
 
