@@ -46,6 +46,7 @@ This phase does not replace the local build. The local build remains the effecti
 - ECR should store container images
 - AWS Systems Manager Parameter Store or Secrets Manager should hold environment-specific configuration and secrets
 - GitHub OIDC to AWS must be used instead of long-lived AWS keys in GitHub secrets
+- local self-signed certificates are a local-only development convenience and should not be copied into the cloud runtime model; cloud-facing endpoints should use ACM-managed certificates unless a separately documented private trust requirement exists
 
 ### Repository Responsibility Model
 
@@ -318,6 +319,12 @@ Phase 1 design choices should therefore prefer:
 - explicit shutdown, scale, or minimal-capacity defaults where they do not undermine repeatability
 
 The current runtime scaffold follows that rule by creating ECS task definitions and ECS services from immutable image references, but keeping every service at `desired_count = 0` until the runtime configuration and secret contract is explicitly wired for cloud execution.
+
+That runtime configuration contract should stay explicit and reviewable:
+
+- plain non-secret settings should be represented as reviewed environment-variable config
+- secret values should enter ECS through Parameter Store or Secrets Manager references rather than tracked files or image rebuilds
+- cloud-facing TLS should terminate with ACM-managed certificates on ingress rather than by carrying the local self-signed certificate model into AWS
 
 Do not distort the architecture solely for short-term savings, but prefer the smallest viable infrastructure footprint that keeps the design maintainable.
 

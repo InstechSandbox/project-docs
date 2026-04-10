@@ -82,6 +82,8 @@ This document defines the shared working agreement for AI-assisted development a
 - Factor repeated artifact publication mechanics into reusable workflows in `.github`, with application repositories limited to thin caller workflows.
 - Use Terraform in `instechsandbox-eudi-deploy` for the phase-1 AWS infrastructure baseline unless and until the documented deployment toolchain changes.
 - When moving from image publication to ECS runtime scaffolding, prefer a separate low-cost runtime layer that consumes immutable image refs and keeps `desired_count = 0` by default until the cloud runtime configuration contract is explicitly documented and wired.
+- For cloud-facing TLS, treat local self-signed certificates as a local-only development convenience. The cloud path should use explicit DNS and ACM-managed certificates unless a separately documented private trust model is required.
+- When wiring ECS runtime configuration, keep plain settings in reviewed config and inject secrets through Parameter Store or Secrets Manager references rather than committing secret values or rebuilding images per environment.
 
 ## Security Constraints
 
