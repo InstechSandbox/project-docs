@@ -255,7 +255,8 @@ The deploy repository currently includes:
 
 - a Terraform root for the shared `test` environment
 - a first shared foundation module covering ECR, ECS cluster, and log-group scaffolding
-- repository-local workflow scaffolding for Terraform validation and deployment-plan rendering
+- a separate Terraform root for `test-runtime` that consumes the foundation remote state and creates low-cost ECS runtime scaffolding
+- repository-local workflow scaffolding for Terraform validation, deployment-plan rendering, and runtime scaffold apply
 
 ## Deployment Order
 
@@ -316,6 +317,8 @@ Phase 1 design choices should therefore prefer:
 - only the components needed for end-to-end issuer and verifier interaction
 - explicit shutdown, scale, or minimal-capacity defaults where they do not undermine repeatability
 
+The current runtime scaffold follows that rule by creating ECS task definitions and ECS services from immutable image references, but keeping every service at `desired_count = 0` until the runtime configuration and secret contract is explicitly wired for cloud execution.
+
 Do not distort the architecture solely for short-term savings, but prefer the smallest viable infrastructure footprint that keeps the design maintainable.
 
 ## Documentation Rule For This Stream
@@ -337,5 +340,7 @@ If the implementation changes any of the following, update this runbook and the 
 4. add package caller workflows that build immutable container artifacts without registry publication drift
 5. apply the Terraform-based `test` environment baseline from `instechsandbox-eudi-deploy`
 6. wire reusable ECR publication and deployment into `test`
-7. add cloud smoke tests
-8. add Android GitHub Releases publication and iOS TestFlight publication
+7. apply the separate `test-runtime` scaffold with immutable image refs and zero desired count as the low-cost runtime bridge
+8. add runtime configuration, secret injection, and then scale selected services above zero
+9. add cloud smoke tests
+10. add Android GitHub Releases publication and iOS TestFlight publication

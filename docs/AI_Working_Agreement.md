@@ -48,42 +48,8 @@ This document defines the shared working agreement for AI-assisted development a
 - In `/Users/bg/Dropbox/svn/code/workstreams/<stream>/...`, the expected git layout is a `.git` file that points back to the canonical checkout; a `.git` directory usually means the repo was added incorrectly.
 - When introducing a new repository into an existing workstream, first clone or confirm the canonical `main` checkout, then add `wip/<stream>` with `git worktree add` so VS Code workspace and Source Control views stay consistent across repos.
 - Local worktrees may use short-lived or medium-lived `wip/<stream>` branches to isolate active work.
-- Prefer short-lived workstreams that are rebased or selectively promoted into `main` frequently, ideally daily and no less often than weekly.
-- The default flow is local-first: commit on `wip/<stream>`, selectively promote ready increments into `main`, then rebase `wip/<stream>` onto the updated `main` so the workstream stays current.
-- Unpublished local `wip/<stream>` branches may track `origin/main` as their comparison base so drift from trunk stays visible during isolated work.
-- Tracking `origin/main` for an unpublished `wip/<stream>` branch is a local comparison aid only; it does not publish the branch or make it a long-lived feature branch.
-- Publishing a `wip/<stream>` branch is optional and should be treated as an explicit exception for remote persistence, not as the default promotion path.
+- Rebase or selectively promote ready increments from `wip/<stream>` into `main` frequently.
 - Workstream names should stay consistent across repos, workspace files, issue references, and acceptance criteria.
-
-### Default Git Promotion Rule
-
-- The default promotion path is: commit locally on `wip/<stream>`, keep that local branch tracking `origin/main`, and promote ready work with `git push origin HEAD:main`.
-- Do not publish `wip/<stream>` to `origin` by default.
-- Do not create remote `wip/<stream>` branches unless remote persistence is explicitly requested.
-- Treat `git push origin HEAD:main` as the normal promotion step for ready work, not as an exceptional fallback.
-- After promotion, keep the local `wip/<stream>` branch aligned to and tracking `origin/main`.
-
-### Recommended Local Setup Pattern
-
-- create the workspace or worktree using the same `wip/<stream>` branch name across the participating repos
-- keep `origin` pointed at the InstechSandbox repository for each repo
-- keep `upstream` only where a forked reference repository exists and use it for sync and comparison, not for day-to-day pushes
-- allow the local unpublished `wip/<stream>` branch to track `origin/main` so trunk drift stays visible during short-lived isolated work
-- promote ready increments back to `main` frequently rather than allowing the workstream to become long-lived
-- after promotion, rebase `wip/<stream>` onto the updated `main` before continuing work
-
-### New Workstream Bootstrap Checklist
-
-1. Choose a single workstream name and use it everywhere as `wip/<stream>`.
-2. Create or refresh the local workspace clones for the repos that belong in that workstream.
-3. Confirm `origin` points to the matching `InstechSandbox` repository in each clone.
-4. Keep `upstream` only on repos that have a forked reference repository and verify it points to the correct upstream source.
-5. Check out or create the same local `wip/<stream>` branch in every participating repo.
-6. Set the local `wip/<stream>` branch to track `origin/main` as the comparison base while the branch remains unpublished.
-7. Open or create the matching workspace file and keep the same workstream name in the file path and folder set.
-8. Update `project-docs` when the workstream changes repo scope, workflow conventions, runtime assumptions, or test strategy.
-9. Keep the branch unpublished by default unless remote persistence is explicitly needed.
-10. Commit on `wip/<stream>`, selectively promote ready increments into `main`, and then rebase the workstream onto updated `main`.
 
 ## Documentation Rule
 
@@ -98,7 +64,6 @@ This document defines the shared working agreement for AI-assisted development a
 - For the local issuer Python services, prefer Python 3.11 for `.venv` bootstrap so local runtime stays close to the current Docker packaging baseline; use 3.10 or 3.9 only as explicit fallback choices.
 - If local Python runtime drift is detected, rebuild the affected `.venv` with `project-docs/scripts/bootstrap-local-python-venvs.sh` rather than patching around the drift inside repo code or cloud deployment scripts.
 - While pull requests are not yet the primary delivery mechanism, `push` to `main` must still be treated as a controlled integration event with deterministic remote validation.
-- Do not replace the direct-to-`main` promotion model with remote workstream branches unless the user explicitly asks for that exception.
 - Strengthen verifier-focused smoke and acceptance coverage as the Irish Life workstream evolves.
 
 ## AWS Deployment Principles
@@ -116,6 +81,7 @@ This document defines the shared working agreement for AI-assisted development a
 - Keep AWS environment logic centralized in `instechsandbox-eudi-deploy` rather than duplicating environment-specific AWS behaviour in application repositories or `.github`.
 - Factor repeated artifact publication mechanics into reusable workflows in `.github`, with application repositories limited to thin caller workflows.
 - Use Terraform in `instechsandbox-eudi-deploy` for the phase-1 AWS infrastructure baseline unless and until the documented deployment toolchain changes.
+- When moving from image publication to ECS runtime scaffolding, prefer a separate low-cost runtime layer that consumes immutable image refs and keeps `desired_count = 0` by default until the cloud runtime configuration contract is explicitly documented and wired.
 
 ## Security Constraints
 
