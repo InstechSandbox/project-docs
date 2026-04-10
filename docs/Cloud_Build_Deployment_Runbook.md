@@ -255,7 +255,7 @@ The deploy repository currently includes:
 
 - a Terraform root for the shared `test` environment
 - a first shared foundation module covering ECR, ECS cluster, and log-group scaffolding
-- a separate Terraform root for `test-runtime` that consumes the foundation remote state and creates low-cost ECS runtime scaffolding
+- a separate Terraform root for `test-runtime` that consumes the foundation remote state, creates low-cost ECS runtime scaffolding, and provisions the ECS service-linked role automatically when a blank AWS account does not have it yet
 - repository-local workflow scaffolding for Terraform validation, deployment-plan rendering, and runtime scaffold apply
 
 ## Deployment Order
