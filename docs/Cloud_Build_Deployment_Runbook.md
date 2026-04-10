@@ -218,6 +218,30 @@ Until full deployment automation is in place, the reusable deployment scaffold i
 
 That scaffold keeps the source repositories additive and reviewable without pretending deployment automation is already complete.
 
+The current phase-1 handoff contract is:
+
+- service publish workflows push container images to ECR through the shared reusable workflow in `.github`
+- each publish workflow then emits a deployment scaffold artifact that records the immutable image digest for the `test` environment
+- `instechsandbox-eudi-deploy` remains the repository that consumes those immutable artifact references for deployment planning and rollout
+- the deploy repository can render a test deployment manifest directly from immutable image references passed into its planning workflow, so candidate rollouts do not require hand-editing the checked-in manifest first
+- the deploy repository now has a manual bootstrap foundation-apply workflow for the current Terraform root, and that workflow explicitly uses runner-local state artifacts until a remote backend is introduced
+- the same foundation workflow can switch to an S3 backend through explicit workflow inputs once the backend bucket and optional lock table exist
+
+For a blank AWS account, the correct point to start cloud testing is now the durable account bootstrap layer:
+
+- create the Terraform state bucket and optional lock table first
+- create GitHub OIDC trust and the minimal deploy and publish roles next
+- apply the Terraform test foundation after that
+- only then move on to publishing a real service image and later runtime wiring
+
+The intended operating rule is:
+
+- bootstrap the AWS account once from a local admin-authenticated shell
+- use GitHub Actions as the standard operating path after that
+- keep local development cloud-light unless cloud-specific behavior is the thing being validated
+
+In the current workspace, the deploy repository is owned by `InstechSandbox` while the five publish-capable service repositories are owned by `eu-digital-identity-wallet`, so the AWS bootstrap trust configuration must allow separate GitHub owners for deploy and publish role subjects.
+
 `instechsandbox-eudi-deploy` now exists and contains the initial Terraform-based phase-1 AWS baseline. That repository is the home for the actual infrastructure as code for:
 
 - ECR repositories and lifecycle policies
