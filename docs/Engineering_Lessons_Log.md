@@ -4,6 +4,83 @@
 
 Record recurring lessons that are worth turning into shared engineering guidance.
 
+### 2026-04-10 - Scripted same-device verifier deep links are better triage than repeated Safari retries on iOS simulator
+
+- Context: A local same-device verifier deeplink on iOS could switch from Safari into the wallet app, yet still fail to start the actual proof request.
+- What happened: That handoff proved the URL scheme registration existed, but it did not prove that the generated OpenID4VP deep link itself was complete. The CLI verifier deep-link generator could also rebuild links without `response_type=vp_token`, which makes the wallet open and then stop before proof handling starts.
+- Reusable lesson: When iOS same-device verification appears to stall after app switch, test first with a scripted deep link that opens directly in the simulator. That isolates wallet-side deep-link parsing from Safari or verifier-UI handoff issues and catches missing required parameters earlier.
+- Follow-up doc or rule update: Keep the verifier deep-link generator preserving `authorization_request_uri` when available, and keep a shared `run-ios-verification-deeplink.sh` wrapper for simulator triage.
+
+### 2026-04-13 - Local verifier deep-link generators must preserve the trusted TLS port
+
+- Context: A same-device iOS simulator proof switched from the previous verifier-auth failure into `Invalid DCQL query`, but the visible wallet message was now a server-certificate warning for `192.168.0.131`.
+- What happened: The direct verifier deep-link generator defaulted `VERIFIER_PUBLIC_URL` to `https://<lan-ip>` without the local verifier TLS port, even though the shared local stack, simulator trust, and verifier wrappers were aligned to `https://<lan-ip>:4443`. The wallet then fetched a request URI from the wrong TLS endpoint and surfaced the certificate mismatch as another misleading DCQL error.
+- Reusable lesson: For the shared local verifier stack, every deep-link generator must derive its default public URL from `VERIFIER_TLS_HOST_PORT` rather than assuming bare `443`. Otherwise direct script usage can silently bypass the trusted local verifier endpoint even while the wrapper scripts stay correct.
+- Follow-up doc or rule update: Keep direct verifier deep-link scripts using the same `VERIFIER_TLS_HOST_PORT` and `VERIFIER_PUBLIC_URL` defaulting logic as the local verifier startup wrappers.
+
+### 2026-04-13 - ExtensionKit proof flows must not derive keychain service names from the extension bundle id
+
+- Context: The iOS simulator proof flow continued to report `Invalid pin` after the entered value was confirmed and the quick-PIN compare path was instrumented.
+- What happened: Simulator-only debug logs showed the proof authorization flow receiving the entered six-digit PIN while the stored PIN lookup returned `nil`. The failing screen was hosted by `EudiReferenceWalletIDProvider`, and the shared bundle helper only recognized classic `.appex` paths as extensions. In the ExtensionKit-hosted proof flow that can leave the extension deriving its own bundle id instead of the main app bundle id, which points keychain-backed PIN lookup at an empty namespace.
+- Reusable lesson: For iOS ExtensionKit integrations, bundle-id normalization must detect extension contexts from plist extension attributes as well as `.appex` paths. Otherwise auth and document service names can diverge between the main app and provider-hosted proof flows even though both are in the same local wallet build.
+- Follow-up doc or rule update: Keep `Bundle.getMainAppBundleID()` treating `EXAppExtensionAttributes` and related extension markers as authoritative extension signals when deriving shared keychain and storage service names.
+
+### 2026-04-13 - Unsigned iOS simulator builds cannot rely on keychain-backed quick PIN storage
+
+- Context: The iOS simulator wallet repeatedly reported `Invalid pin` during same-device proof even after the entered digits and bundle/service namespace had been confirmed.
+- What happened: Explicit keychain error logging showed the unsigned simulator build had neither `application-identifier` nor `keychain-access-groups` entitlements, so both quick-PIN reads and writes were failing inside the local simulator workflow. Earlier subscript-based keychain APIs masked that failure and made it look like the PIN had been stored and then lost.
+- Reusable lesson: For the shared unsigned iOS simulator path, do not depend on keychain-backed quick-PIN storage. Use a simulator-only non-keychain persistence backend for local proof triage, and reserve keychain-backed PIN storage for signed builds that actually carry the required entitlements.
+- Follow-up doc or rule update: Keep simulator quick-PIN storage separate from the signed-device keychain path, and use explicit throwing keychain APIs when debugging entitlement-sensitive storage failures.
+
+### 2026-04-10 - iOS local simulator wrappers should fail before a build ships without the local issuer override
+
+- Context: The simulator wallet could build, install, and launch, but the issuance screen showed no local credential types because the app had only the local verifier override compiled in.
+- What happened: The shared iOS wrapper defaulted the local verifier URL but still treated the local issuer and attestation URLs as opt-in. That produced a misleading half-local simulator build that passed launch smoke but could never exercise the local issuance path.
+- Reusable lesson: For the shared local iOS simulator path, default the whole local stack together and assert the compiled bundle values during smoke. Missing local issuer metadata is not just a runtime nuisance; it is a build-time misconfiguration that should fail fast.
+- Follow-up doc or rule update: Keep `IOS_USE_LOCAL_STACK` enabled by default in the shared wrappers and keep `smoke-ios-wallet-simulator.sh` validating the compiled local issuer, attestation, and verifier plist values before launch.
+
+### 2026-04-10 - Local iOS same-device verifier flows need preregistered verifier metadata compiled into the wallet
+
+- Context: A local same-device verifier deeplink on the iOS simulator opened the wallet app, but the verifier backend never saw a follow-up `/wallet/request.jwt/...` fetch.
+- What happened: The local verifier backend still advertised the default preregistered `client_id=Verifier`, while the iOS wallet build only enabled `x509_san_dns` and `x509_hash` OpenID4VP client id schemes. That let the custom-scheme deeplink reach the app, then fail inside wallet-side request validation before `request_uri` dereferencing even started.
+- Reusable lesson: When a local verifier relies on a preregistered OpenID4VP client id, the iOS wallet must be built with matching preregistered verifier metadata for that local verifier URL and client id. Otherwise a deeplink can appear to work while the flow dies before any network activity.
+- Follow-up doc or rule update: Keep the local iOS simulator build wrappers forwarding `IOS_LOCAL_VERIFIER_URL` and `IOS_LOCAL_VERIFIER_CLIENT_ID` into the wallet's plist-backed VP configuration so same-device verifier runs stay aligned with the local verifier backend defaults.
+
+### 2026-04-10 - Local iOS verifier proof currently requires single-credential PID issuance
+
+- Context: A scripted local OpenID4VP deeplink on iOS reached the wallet, but the app crashed immediately before showing the proof request.
+- What happened: The crash report showed `Dictionary.init(uniqueKeysWithValues:)` failing inside `EudiWallet.prepareServiceDataParameters(format:)` while building presentation data from issued documents. The current wallet-kit issuance path stores every credential in a one-time-use PID batch under the same document id, so presentation crashes as soon as more than one credential from that batch is present.
+- Reusable lesson: For local iOS verifier testing, a real device does not avoid wallet-side duplicate document-id crashes. If the wallet still issues one-time-use PID batches with shared ids, keep local PID issuance to a single credential until the upstream wallet-kit batch-save path assigns unique document ids.
+- Follow-up doc or rule update: Keep the iOS local verifier path on `numberOfCredentials = 1` for PID issuance until the upstream wallet-kit batch issuance bug is fixed.
+
+### 2026-04-12 - Simulator issued-document loading must collapse batch entries to primary document ids
+
+- Context: Same-device verifier deeplinks on the iOS simulator still crashed even after the extra JWT PID credential had been deleted from the wallet UI.
+- What happened: The simulator-only storage service returned both the primary issued record and its per-credential batch entries from `loadDocuments(status: .issued)`. Wallet-kit then built `Dictionary(uniqueKeysWithValues:)` maps keyed by document id during OpenID4VP setup and trapped as soon as more than one stored record shared that id.
+- Reusable lesson: For simulator-backed wallet storage, issued-document enumeration must expose one logical document per document id. Batch credential records can remain addressable for key selection, but they must not be surfaced as separate issued documents during presentation setup.
+- Follow-up doc or rule update: Keep `SimulatorDataStorageService.loadDocuments(status:)` deduplicating by document id and preferring the primary issued record over batch-key entries so local same-device verifier triage is not blocked by simulator storage shape.
+
+### 2026-04-10 - Local mdoc signer refresh must preserve the DS-under-IACA chain
+
+- Context: iOS issuance moved past the OpenID4VCI request-encryption failure and then failed during mdoc MSO validation with `the signed date is not within the validity period of the cert in the MSO`.
+- What happened: The local issuer preferred the `PID-DS-LOCAL-UT` filenames, but `scripts/refresh-local-certs.sh` still validated that signer cert like a host-bound TLS leaf and regenerated it as a self-signed `Local Utopia DS` certificate. Android tolerated that local shortcut, while iOS rejected the resulting MSO signer certificate.
+- Reusable lesson: When local mdoc signer material uses the preferred `PID-DS-LOCAL-UT` filenames, shared refresh scripts must validate that DS certificate against the active key and local IACA chain instead of host-style SAN rules.
+- Follow-up doc or rule update: Keep local signer refresh paths regenerating the full IACA plus DS chain via `scripts/generate-local-mdoc-signer-chain.sh` rather than minting a self-signed DS leaf.
+
+### 2026-04-13 - Local SD-JWT signer chains still need the issuer URL in the leaf certificate SAN
+
+- Context: Same-device iOS proof moved past the simulator PIN issue and still failed verifier validation with `Failed to find https://192.168.0.131:15002 in SAN URI or SAN DNS entries of provided leaf certificate`.
+- What happened: The shared local DS-under-IACA generator fixed the mdoc certificate profile, but the regenerated `PID-DS-LOCAL-UT` leaf no longer carried `URI:$ISSUER_URL` in `subjectAltName`. The verifier uses that SD-JWT issuer certificate SAN to bind the presented credential to the local issuer HTTPS identity, so proof kept failing even after reissuing the JWT PID.
+- Reusable lesson: The local DS leaf serves two jobs at once in this stack: mdoc signer profiling and SD-JWT issuer binding. Regenerating the DS-under-IACA chain must preserve the issuer HTTPS identity in the leaf SAN, not just the chain shape.
+- Follow-up doc or rule update: Keep `scripts/generate-local-mdoc-signer-chain.sh` and `scripts/refresh-local-certs.sh` enforcing `URI:$ISSUER_URL` plus the local host entries on `PID-DS-LOCAL-UT_cert.pem`.
+
+### 2026-04-10 - Local mdoc signer certs must start slightly before current issuance time
+
+- Context: After restoring the DS-under-IACA chain, iOS still rejected a newly issued mdoc because the MSO `signed` timestamp landed just before the signer certificate `notBefore` second.
+- What happened: The local signer generator minted certificates with a `notBefore` equal to generation time down to the second, while the issued MSO timestamp could be normalized slightly earlier by the formatting stack. That made a same-minute cert and MSO look valid to an operator but still fail strict certificate-window checks.
+- Reusable lesson: For local interoperability signer chains, backdate generated certificate validity slightly so the MSO `signed` timestamp cannot fall a few seconds before the signer certificate becomes valid.
+- Follow-up doc or rule update: Keep `scripts/generate-local-mdoc-signer-chain.sh` generating local IACA and DS certificates with a small negative validity offset instead of starting exactly at creation time.
+
 ## Entry Template
 
 ### YYYY-MM-DD - Short lesson title
@@ -119,8 +196,8 @@ Record recurring lessons that are worth turning into shared engineering guidance
 
 - Context: The Irish Life case API created same-device PID proof requests without using the verifier UI's manual trusted-issuer control, and proof sharing still failed after the local signer cert itself had been fixed.
 - What happened: The verifier only had default trust-source rules for age-verification documents, so SD-JWT PID validation in the Irish Life flow still had no trusted issuer chain unless one was passed in the transaction init request. The wallet could fetch the request object and reach Share, then direct-post failed with `IssuerCertificateIsNotTrusted` because the transaction carried no PID `issuer_chain`.
-- Reusable lesson: When a local verifier journey bypasses the manual trusted-issuer UI, the flow itself must supply the issuer chain or an equivalent verifier-side trust source for the requested VCT.
-- Follow-up doc or rule update: Mount the local PID signer cert into the verifier runtime and inject it into Irish Life transaction init requests so same-device SD-JWT proofs use the same trust anchor path as the local issuer.
+- Reusable lesson: When a local verifier journey bypasses the manual trusted-issuer UI, the flow itself must supply the issuer chain or an equivalent verifier-side trust source for the requested VCT. In the Irish Life PID flow that `issuer_chain` is parsed as PKIX trust anchors, so the correct local input is the issuer CA PEM, not the DS leaf PEM embedded into the SD-JWT.
+- Follow-up doc or rule update: Mount the local PID issuer CA PEM into the verifier runtime and inject it into Irish Life transaction init requests. Keep the DS PEM only as a compatibility fallback, and restart the verifier whenever the local IACA or DS signer material changes.
 
 ### 2026-04-05 - Agent spinners need browser-side guardrails even after backend fixes
 
@@ -150,6 +227,32 @@ Record recurring lessons that are worth turning into shared engineering guidance
 - Reusable lesson: Once a wallet response has already been persisted for a submitted presentation, backend case refresh logic must be able to observe it without requiring the same-device redirect `response_code` again.
 - Follow-up doc or rule update: Keep Irish Life support-agent polling and any similar backend case refresh path compatible with submitted same-device presentations after the original customer redirect has finished.
 
+### 2026-04-09 - Local mdoc signer chains should target the strictest wallet validator
+
+- Context: The Irish Life local issuer stack was exercised against both Android and iPhone wallets for PID mdoc issuance while using local LAN services and self-signed transport TLS.
+- What happened: Android accepted the locally signed mdoc flow, but iPhone rejected the MSO `x5chain` because the configured local signer certificate was self-issued instead of behaving like an end-entity document signer certificate under an IACA.
+- Reusable lesson: Do not treat a more permissive wallet as proof that local mdoc signer material is correctly profiled. For cross-platform local demos, keep self-signed HTTPS as a transport-only convenience, but shape mdoc signer certificates to the stricter DS-under-IACA model that production trust chains are expected to follow.
+- Follow-up doc or rule update: Use local demo signer material that mirrors the production trust shape for mdoc issuance, and treat platform-specific acceptance of weaker local chains as a compatibility trap rather than a target design.
+
+### 2026-04-09 - Bundled demo DS certificates can expire before the local runbook does
+
+- Context: The local issuance stack was rebuilt with generated runtime metadata overrides for OpenID4VCI credential-request encryption, but one runtime file still embedded an older nested request-encryption key while the backend decrypted with the current private key.
+- What happened: The issuer backend code could repair that mismatch in memory when started with the correct overrides, but any stale process or consumer reading the generated override file directly still saw an inconsistent key set. That surfaced on iOS as `OpenID4vci.credentialissuanceerror error 5` after authorization completed, because the wallet encrypted the credential request JWE to a different public key than the backend private key expected.
+- Reusable lesson: Generated OpenID4VCI metadata overrides must be internally self-consistent. Do not rely on a later in-memory merge step to reconcile a stale nested `credential_request_encryption.jwks` block with a newer top-level override key.
+- Follow-up doc or rule update: Keep the issuer local patch generator replacing the nested `credential_request_encryption.jwks` entry with the active public JWK derived from `credential_request_ec.pem`, then verify the live `/.well-known/openid-credential-issuer` response after restart.
+
+- Context: The issuer repo ships sample Utopia DS bundles under `api_docs/test_tokens/DS-token/`, and they looked like the simplest way to move from a self-issued signer to a DS-under-IACA model.
+- What happened: All tracked sample DS leaves were already expired in April 2026, so switching to the bundled examples fixed the certificate profile shape but still failed OpenSSL validation on certificate freshness.
+- Reusable lesson: Treat repo-shipped demo signer bundles as short-lived examples, not durable local runtime dependencies. Local mdoc flows need a refreshable signer-generation path, not a hidden assumption that example DS material will still be valid months later.
+- Follow-up doc or rule update: Keep a local signer-generation script in the shared runbook path and prefer optional local trust-root loading in the wallets over committing machine-specific demo trust artifacts.
+
+### 2026-04-07 - Short-lived workstreams need an explicit comparison-base rule
+
+- Context: Multiple isolated workspaces were created for Irish Life verifier, iOS wallet, and cloud build work using local `wip/<stream>` branches.
+- What happened: The intended trunk-friendly model was applied intentionally in some workspaces, but the branch comparison rule was not documented clearly enough, which made the workspaces look inconsistent even though they followed the same delivery style.
+- Reusable lesson: If unpublished short-lived workstream branches are intended to compare against `origin/main`, document that explicitly so branch metadata is treated as part of the workflow contract rather than as accidental local state.
+- Follow-up doc or rule update: Record the short-lived `wip/<stream>` cadence and the optional `origin/main` comparison-base rule in the AI working agreement and cloud-build runbook.
+
 ### 2026-03-31 - Local runtime artifacts must remain untracked
 
 - Context: Local EUDI orchestration relies on certificates, JWKS files, and generated runtime assets that differ per machine.
@@ -177,3 +280,52 @@ Record recurring lessons that are worth turning into shared engineering guidance
 - What happened: `por` initially looked like a possible Proof of Residence or Proof of Address candidate, but metadata inspection showed it actually meant Power Of Representation.
 - Reusable lesson: Do not infer business meaning from credential ids or abbreviations alone; verify the actual metadata claims and display name before using a credential in a standards-sensitive journey.
 - Follow-up doc or rule update: Keep credential selection decisions tied to inspected metadata and record naming pitfalls in design notes when they can mislead future work.
+
+### 2026-04-05 - Command Line Tools are not enough for iOS build reconnaissance
+
+- Context: The new `ios-wallet` workstream started validating the local build path for `eudi-app-ios-wallet-ui`.
+- What happened: `xcodebuild` failed immediately because `xcode-select` pointed at `/Library/Developer/CommandLineTools`, and no full Xcode app was installed in the normal application locations.
+- Reusable lesson: Treat full Xcode installation and `xcode-select` validation as the first gate in any repeatable iOS build runbook; Command Line Tools alone are insufficient.
+- Follow-up doc or rule update: Keep iOS runbooks explicit about checking both Xcode presence and the active developer directory before attempting simulator or device builds.
+
+### 2026-04-07 - iOS local issuer overrides must follow the published credential_issuer, not every local port
+
+- Context: The iOS wallet was being connected to the local issuer and auth stack while preserving the upstream hosted Dev and Demo defaults.
+- What happened: The iOS issuer map keys services by URL host only, so a naive local mirror of both `5002` and `5003` would collide even though the stack uses separate ports.
+- Reusable lesson: When a client indexes issuer services by host rather than host plus port, local overrides must target the canonical published `credential_issuer` URL and treat auxiliary local services like attestation separately.
+- Follow-up doc or rule update: Keep the iOS local runbook explicit that the wallet uses the frontend issuer URL on `5003`, the auth server attestation URL on `5001`, and host-scoped self-signed TLS overrides only for configured local hosts.
+
+### 2026-04-08 - iOS simulator trust must match the live local stack cert, not just the current workspace cert
+
+- Context: The iOS wallet simulator smoke path imported the shared local cert from this worktree before browser-based issuance handoff.
+- What happened: Another sibling worktree was already running auth and issuer services on the same local ports with a different certificate, so the simulator trusted one cert while Safari connected to another and kept showing the private-connection warning.
+- Reusable lesson: In a multi-worktree local environment, always compare the live endpoint certificate fingerprint against the worktree's expected shared cert before treating simulator root-cert import as sufficient.
+- Follow-up doc or rule update: Keep the shared smoke scripts checking live TLS certificate alignment for auth and issuer endpoints, and fail fast when another local stack is bound to the same ports.
+
+### 2026-04-08 - iOS simulator issuance cannot rely on access-group keychain entitlements
+
+- Context: The local iOS issuance path was exercised on an iOS 26 simulator build after browser trust had been fixed.
+- What happened: Credential issuance hit KeychainAccess error `-34018` with the message that a required entitlement was not present, because the simulator app did not have effective `application-identifier` and `keychain-access-groups` entitlements for the configured access-group keychain path.
+- Reusable lesson: Keep simulator-only issuance paths off shared access-group keychain configuration unless the simulator build is signed in a way that actually provides those entitlements.
+- Follow-up doc or rule update: Simulator builds now fall back to the default app keychain without an access group, while device builds keep the access-group path for the signed app and extension setup.
+
+### 2026-04-08 - iOS simulator issuance cannot assume Identity Document Services entitlements either
+
+- Context: After removing the shared keychain access-group path from the simulator issuance flow, the same entitlement error still appeared when the wallet fetched freshly issued CBOR documents on an iOS 26 simulator.
+- What happened: The wallet still called `IdentityDocumentProviderRegistrationStore` through `DocumentRegistrationManagerImpl` during post-issuance document registration, and that simulator path also depends on entitlements that are not effectively present in the unsigned local simulator workflow.
+- Reusable lesson: For local iOS simulator validation, treat Identity Document Services registration like other entitlement-gated runtime features and use a no-op fallback unless the simulator build is signed with effective capabilities.
+- Follow-up doc or rule update: Simulator builds now resolve `DocumentRegistrationManagerNoOp`; only non-simulator iOS 26+ builds use the real Identity Document Services registration manager.
+
+### 2026-04-08 - Unsigned iOS 26 simulators may not support wallet keychain persistence at all
+
+- Context: Even after removing the shared access-group path and the Identity Document Services registration path, local issuance on the simulator still failed with the same entitlement message.
+- What happened: Fresh simulator logs showed raw `SecItemAdd` failures with `-34018` from the main `EudiWallet` process, which traced back to wallet-kit's default `KeyChainStorageService` and `KeyChainSecureKeyStorage` persistence path.
+- Reusable lesson: On unsigned simulator builds, treat wallet persistence itself as potentially non-viable on the keychain path; if the goal is local flow validation, inject a simulator-only in-memory storage backend rather than assuming `nil` access-group alone is sufficient.
+- Follow-up doc or rule update: Simulator builds now inject in-memory document storage and in-memory secure-key storage into wallet-kit, while device builds keep the normal persistent keychain-backed storage.
+
+### 2026-04-08 - Local wallet PID issuance batches must stay aligned with the issuer-authored credential policy
+
+- Context: After the simulator entitlement blockers were removed, local PID issuance reached the credential step but still failed after authorization and token exchange.
+- What happened: The iOS wallet `DEV` build requested 60 one-time PID credentials, while the local issuer's PID credential metadata was authored with a policy batch size of 15 even though the top-level issuer metadata allowed larger global batches.
+- Reusable lesson: Treat credential-specific issuance policy as the safer local compatibility target; avoid oversized wallet-side batch overrides unless the live issuer flow has been verified end-to-end for that credential.
+- Follow-up doc or rule update: The iOS wallet local `DEV` PID issuance batch is aligned back to 15 so local issuance matches the issuer-authored PID policy.

@@ -37,6 +37,8 @@ cd "$CODE_ROOT/project-docs/scripts"
 ./smoke-local-all.sh
 ```
 
+`./smoke-local-all.sh` now also verifies that the live auth, issuer backend, and issuer frontend endpoints are serving the same TLS certificate file that this worktree expects. That matters when multiple sibling worktrees can start local stacks on the same ports.
+
 Use a full clean rebuild plus fresh APK install only when you want maximum confidence, when the wallet APK changed, or when you want to prove the entire stack can be rebuilt from scratch.
 
 If you want a heavier rebuild for maximum confidence, use this instead of `./build-local-all.sh`:
@@ -55,9 +57,20 @@ Functional verification path:
 cd "$CODE_ROOT/project-docs/scripts"
 ./run-issuance-demo.sh
 ./run-verification-demo.sh
+./run-ios-verification-deeplink.sh
 ```
 
 `./run-issuance-demo.sh` now defaults to `eu.europa.ec.eudi.pid_vc_sd_jwt` so the automated local issuance path matches the Irish Life verifier request. Override `CREDENTIAL_CONFIGURATION_ID` only when you intentionally want to test a different credential format.
+
+`./run-ios-verification-deeplink.sh` now asks the local verifier for JWT PID `dc+sd-jwt` by default because that is the most reliable current iOS simulator proof path. Set `PID_PRESENTATION_FORMAT=mdoc` to probe the mdoc path, or `PID_PRESENTATION_FORMAT=dual` to ask for either representation when you explicitly want to test mixed local wallet state.
+
+The verifier deeplink generators must target the same TLS endpoint as the local verifier smoke path: `VERIFIER_PUBLIC_URL` if explicitly set, otherwise `https://${VERIFIER_PUBLIC_HOST:-<lan-ip>}:4443` unless `VERIFIER_TLS_HOST_PORT=443`. If a generated `request_uri` drops `:4443` in the shared local stack, iOS may surface that as a misleading DCQL error with a certificate warning instead of a verifier URL misconfiguration.
+
+The current local iOS same-device verifier path also assumes the verifier request object is signed with `ES256`. The local verifier backend already defaults to `verifier.jar.signing.algorithm=ES256`; if you change that for local testing, keep the iOS wallet's pre-registered verifier configuration aligned or the wallet will fail request resolution before DCQL handling.
+
+For simulator proof runs that enter the `EudiReferenceWalletIDProvider` authorization flow, the extension must derive the same main-app bundle identifier as the wallet when computing document-storage and quick-PIN keychain service names. If the extension falls back to its own bundle id, proof-time PIN validation can report `Invalid pin` even when the entered value is correct because the extension is reading an empty keychain namespace.
+
+The shared unsigned simulator build path also does not carry the Apple keychain entitlements required for quick-PIN storage. In that local path, simulator-only quick-PIN persistence must use a non-keychain local store. Do not treat simulator `Invalid pin` errors as proof that the entered digits are wrong until you confirm the build actually has a working PIN persistence backend.
 
 Logs:
 
@@ -65,6 +78,37 @@ Logs:
 cd "$CODE_ROOT/project-docs/.local/logs"
 tail -F auth-server.log issuer-backend.log issuer-frontend.log
 ```
+
+iOS wallet preflight, build, and simulator smoke path:
+
+```bash
+cd "$CODE_ROOT/project-docs/scripts"
+./preflight-ios-wallet.sh
+./build-ios-wallet-simulator.sh
+./smoke-ios-wallet-simulator.sh
+```
+
+If iOS browser-based issuance still shows a private-connection warning after simulator trust import, treat that first as a live-cert alignment problem, not as an app build problem. The simulator smoke path now checks that the configured local auth and issuer endpoints are serving the same certificate fingerprint as `SHARED_CERT_FILE` before importing the cert into the simulator.
+
+For local mdoc issuance, generate a fresh local IACA plus DS chain before rebuilding the wallets or issuer runtime:
+
+```bash
+cd "$CODE_ROOT/project-docs/scripts"
+./generate-local-mdoc-signer-chain.sh
+```
+
+The script writes fresh private signer material only into the issuer repo's ignored `local/` paths and writes the matching public IACA root into ignored wallet-local resource paths so Android and iOS can trust the same local mdoc chain without committing machine-specific trust artifacts.
+
+What this local mdoc signer chain means:
+
+- It is a local POC trust model for interoperability testing, not production PKI.
+- It exists so the reference issuer and both reference wallets validate the same local signer shape during end-to-end testing.
+- It intentionally moves the local demo closer to the trust-chain structure expected by real mdoc validation instead of relying on a self-issued shortcut that one wallet may tolerate and another may reject.
+- It does not by itself claim formal eIDAS conformity, certification, or production readiness.
+
+For client-facing POC use, this is the preferred local approach because it keeps verifier, issuer, and wallet testing aligned on one explicit signer-chain model. Treat it as standards-aligned local plumbing, not as a substitute for production trust onboarding.
+
+These iOS scripts assume a full Xcode installation is present and selected through `xcode-select`. They do not install Xcode, create Apple Developer assets, or configure provisioning profiles for device builds.
 
 ## Goal
 
@@ -75,6 +119,13 @@ Confirm that:
 3. a fresh wallet APK can be installed
 4. issuance works
 5. verification works
+
+For the iOS wallet path, the current goal is narrower until Apple signing is validated:
+
+1. Xcode preflight passes
+2. the wallet builds for simulator into a deterministic `DerivedData` path
+3. the built app installs into a booted simulator
+4. the app launches to the onboarding or PIN setup flow
 
 ## Component Grouping
 
@@ -103,7 +154,17 @@ For orientation, treat the six components as three groups:
 - `scripts/run-issuance-demo.sh`
 - `scripts/run-verification-demo.sh`
 
+For iOS wallet enablement, the shared workflow now also includes:
+
+- `scripts/preflight-ios-wallet.sh`
+- `scripts/build-ios-wallet-simulator.sh`
+- `scripts/generate-local-mdoc-signer-chain.sh`
+- `scripts/run-ios-verification-deeplink.sh`
+- `scripts/smoke-ios-wallet-simulator.sh`
+
 These should stay as wrappers around repo-level build and launch entry points.
+
+The iOS wrappers deliberately stop at simulator build and launch. They are not a replacement for Apple Developer signing setup, provisioning, or TestFlight packaging.
 
 ## One-Time Setup
 
@@ -123,12 +184,12 @@ If you are working from linked worktrees and a repo-local `.env`, JWKS file, cer
 If the issuer backend local checkout does not already contain the local Utopia PID signer assets needed for mdoc issuance, set `LOCAL_UTOPIA_SIGNER_SOURCE_DIR` in `scripts/local-demo.env` to a local seed directory that contains:
 
 ```bash
-privKey/PID-DS-0001_UT.pem
-cert/PID-DS-0001_UT_cert.der
-cert/PID-DS-0001_UT_cert.pem
+privKey/PID-DS-LOCAL-UT.pem
+cert/PID-DS-LOCAL-UT_cert.der
+cert/PID-DS-LOCAL-UT_cert.pem
 ```
 
-The issuer backend bootstrap uses that seed directory to populate the local signer files before startup. Without those assets, the issuance flow will fail after form submission when the backend tries to build the PID mdoc.
+The issuer backend bootstrap uses that seed directory to populate the local signer files before startup. Legacy `PID-DS-0001_UT` filenames remain accepted as a fallback, but the generated local-chain workflow now uses `PID-DS-LOCAL-UT`. Without those assets, the issuance flow will fail after form submission when the backend tries to build the PID mdoc.
 
 If Gradle cannot find the Android SDK automatically, set `ANDROID_SDK_DIR` in `scripts/local-demo.env`. The shared wrappers will mirror that into the wallet `local.properties` file as `sdk.dir` during the local build flow.
 
@@ -147,6 +208,7 @@ Use these rules as the default operator path:
    - normal start runs refresh the shared runtime certificate for the local services when needed, but they do not update the wallet PEM by default
    - `./build-local-all.sh` and `./build-local-all-clean.sh` sync the shared cert into the wallet source before compiling the APK
    - if you rotate the shared cert outside those build wrappers, run `./refresh-local-certs.sh --sync-wallet-cert`, then rebuild and install the wallet APK
+   - if you want local mdoc issuance to work cross-platform, run `./generate-local-mdoc-signer-chain.sh` before rebuilding the wallets so both wallets trust the same freshly generated local IACA root
 8. Confirm Docker Desktop is running if that is your local Docker engine.
 9. Check the current LAN IP with:
 
@@ -156,8 +218,26 @@ ipconfig getifaddr en0 || ipconfig getifaddr en1
 
 The wrappers now auto-detect this Mac's LAN IP by default. You only need to uncomment `PUBLIC_HOST` and `VERIFIER_PUBLIC_HOST` in `scripts/local-demo.env` if you want to force a manual override.
 
+For iOS work, also confirm that:
+
+1. a full stable Xcode app is installed
+1. `xcode-select -p` points at the Xcode developer directory rather than Command Line Tools
+1. if needed, switch it explicitly with:
+
+```bash
+sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+```
+
+1. confirm the toolchain with:
+
+```bash
+xcodebuild -version
+```
+
+1. the target simulator named by `IOS_SIMULATOR_NAME` exists on this Mac
+
 1. Confirm your Android SDK `adb` path is correct if you want the runbook to show device status.
-2. Set `ANDROID_SERIAL` in `scripts/local-demo.env` if you want deterministic device targeting for install and deep-link steps.
+1. Set `ANDROID_SERIAL` in `scripts/local-demo.env` if you want deterministic device targeting for install and deep-link steps.
 
 Docker Desktop is fine for this workflow, but use the runbook commands as the source of truth for starting and checking the verifier stack. Docker Desktop is useful as a visual status view, not as a replacement for the scripted `docker compose` flow.
 
@@ -208,7 +288,13 @@ For the local Docker verifier path started by `scripts/start-local-all.sh` or `a
 
 The Android wallet also bakes `LOCAL_VERIFIER_API` and `LOCAL_ISSUER_URL` into its generated `BuildConfig` from `localDemoHost`. If the Mac's LAN IP changes and you only restart the local services, verification can still fail before the consent screen because the installed APK is still pre-registered against the old verifier URL. `scripts/build-local-all.sh` and `scripts/build-local-all-clean.sh` already resync `local.properties` before rebuilding; `scripts/install-wallet-demo-apk.sh` now also refuses to install a stale APK so the mismatch is caught before device testing.
 
+The iOS wallet does not accept the verifier backend's default local `client_id=Verifier` through its upstream OpenID4VP config unless you compile in a matching preregistered verifier entry. If the same-device verifier deeplink opens the wallet on the simulator but the verifier backend never receives a `/wallet/request.jwt/...` fetch, rebuild the simulator app with `IOS_LOCAL_VERIFIER_URL` and `IOS_LOCAL_VERIFIER_CLIENT_ID` set so the wallet trusts the local preregistered verifier before it tries to dereference `request_uri`.
+
 For local same-device troubleshooting, keep `response_type=vp_token` present on both the outer `eudi-openid4vp://...` deep link and the signed request object served from `request_uri`. Check both the verifier backend response and any verifier UI fallback builder that reconstructs `authorization_request_uri`, because a missing outer `response_type` in either path still triggers wallet-side `MissingResponseType` before consent.
+
+For iOS simulator troubleshooting, prefer `project-docs/scripts/run-ios-verification-deeplink.sh` before repeated Safari retries. If Safari already switches into the wallet, the custom-scheme registration is usually fine; the scripted path is more useful because it removes verifier-UI and browser handoff noise and proves whether the generated OpenID4VP deep link itself can start the proof flow.
+
+Current iOS wallet builds also need single-credential PID issuance for local same-device verifier testing. The upstream wallet-kit batch issuance path currently saves every credential in a one-time-use PID batch under the same document id, and OpenID4VP presentation then crashes when it constructs a dictionary keyed by document id. Until that upstream path is fixed, keep iOS PID issuance at `numberOfCredentials = 1` for both mdoc and SD-JWT VC variants before using the simulator or a real iPhone for local verifier proof runs.
 
 If SMTP is not configured, the verifier backend will still expose the case flow and wallet journey, but invite and completion emails will be reported as not sent.
 
@@ -256,9 +342,11 @@ Once you have completed one successful issuance and Irish Life proof with this a
 
 The shared local runtime certificate must advertise SAN URI entries for the local HTTPS service identities, especially `ISSUER_URL`. The verifier's SD-JWT issuer-certificate check does not treat a bare IP SAN as equivalent to the issuer identifier `https://host:5002`, so a cert that only contains `IP:...` and `DNS:localhost` can still let issuance succeed but fail post-share verification with `IssuerCertificateIsNotTrusted`.
 
-The SD-JWT signer certificate under `eudi-srv-web-issuing-eudiw-py/local/cert/PID-DS-0001_UT_cert.{pem,der}` is a separate certificate from the shared runtime TLS cert. `scripts/refresh-local-certs.sh` now validates that signer certificate against the existing `PID-DS-0001_UT.pem` private key and regenerates the PEM and DER files with `URI:$ISSUER_URL` in SAN when needed. After that signer cert changes, restart the issuer backend and reissue the credential before retrying proof.
+The issuer signer certificate under `eudi-srv-web-issuing-eudiw-py/local/cert/PID-DS-LOCAL-UT_cert.{pem,der}` is separate from the shared runtime TLS cert. `scripts/refresh-local-certs.sh` now validates that signer certificate against the active local signer private key and, when the local IACA is present, verifies that the DS certificate chains to `PIDIssuerCALocalUT.pem`. The same DS leaf must also carry `URI:$ISSUER_URL` in `subjectAltName`, because the verifier uses that SAN entry to trust SD-JWT issuer certificates during proof. If the signer material is stale, the script regenerates the full local IACA plus DS chain via `scripts/generate-local-mdoc-signer-chain.sh` instead of minting a self-signed DS leaf. The generated local CA and DS certificates are intentionally backdated by a few minutes so a freshly issued MSO cannot fail strict iOS validation because the cert `notBefore` second is later than the MSO `signed` timestamp. Legacy `PID-DS-0001_UT` paths still work as a fallback. After that signer cert changes, restart the issuer backend and reissue the credential before retrying proof.
 
-The Irish Life verifier case flow does not rely on the manual trusted-issuer UI control. For local PID verification, `av-srv-web-verifier-endpoint-23220-4-kt/scripts/start-local-verifier.sh` now mounts `eudi-srv-web-issuing-eudiw-py/local/cert/PID-DS-0001_UT_cert.pem` into the verifier container and injects it as the `issuer_chain` for Irish Life proof transactions. If that signer certificate changes, restart the verifier stack as well so new transactions carry the updated chain.
+The Irish Life verifier case flow does not rely on the manual trusted-issuer UI control. For local PID verification, `av-srv-web-verifier-endpoint-23220-4-kt/scripts/start-local-verifier.sh` now mounts the active local issuer CA PEM as the Irish Life `issuer_chain`, preferring `eudi-srv-web-issuing-eudiw-py/local/cert/PIDIssuerCALocalUT.pem` and falling back to `PIDIssuerCAUT01.pem`. The verifier parses that `issuer_chain` as PKIX trust anchors, not as directly trusted DS leaves, so `PID-DS-LOCAL-UT_cert.pem` is only a last-resort fallback for older local setups. If the local IACA or signer certificate changes, restart the verifier stack as well so new transactions carry the updated trust anchor.
+
+The generic local proof helper `av-srv-web-verifier-endpoint-23220-4-kt/scripts/generate-verifier-deeplink.sh` must also include that same `issuer_chain` when it posts to `/ui/presentations`. Without it, the resulting transaction validates SD-JWT PID proofs with no local trust anchors and the verifier logs show `issuerChainCertificates='none'` during `PostWalletResponse`, even when the wallet presents the correct local DS certificate.
 
 ## Optional Working Layout
 
@@ -355,6 +443,40 @@ The wallet APK artifact used by this flow is expected at:
 
 - `$CODE_ROOT/eudi-app-android-wallet-ui/app/build/outputs/apk/demo/debug/app-demo-debug.apk`
 
+### iOS Simulator Build
+
+From `project-docs/scripts` run:
+
+```bash
+./preflight-ios-wallet.sh
+./build-ios-wallet-simulator.sh
+```
+
+What this confirms:
+
+- the iOS repo is present
+- full Xcode is installed and selected
+- the configured simulator exists
+- the wallet builds into a deterministic repo-local `DerivedData` path
+
+The simulator app artifact used by this flow is expected at:
+
+- `$CODE_ROOT/eudi-app-ios-wallet-ui/.build/DerivedData/Build/Products/Debug Dev-iphonesimulator/EudiWallet.app`
+
+If you want the simulator build to target the local issuer stack instead of the hosted Dev defaults, set the iOS override values in `project-docs/scripts/local-demo.env` before running the build wrapper:
+
+- `IOS_LOCAL_ISSUER_URL=${FRONTEND_URL}` so the wallet uses the local frontend `credential_issuer` value on `5003`
+- `IOS_LOCAL_WALLET_ATTESTATION_URL=${AUTH_URL}` so wallet attestation resolves against the local auth server on `5001`
+- `IOS_LOCAL_ISSUER_CLIENT_ID=wallet-dev-local` unless your local auth stack expects a different public client id
+- `IOS_LOCAL_VERIFIER_URL=${VERIFIER_PUBLIC_URL}` so same-device OpenID4VP uses the active local verifier URL as preregistered verifier metadata
+- `IOS_LOCAL_VERIFIER_CLIENT_ID=Verifier` so the simulator build accepts the local verifier backend's default preregistered client id
+- `IOS_LOCAL_TRUSTED_HOSTS=${PUBLIC_HOST},localhost,127.0.0.1` only when the simulator must accept the local self-signed runtime certificate
+- `IOS_INSTALL_LOCAL_ROOT_CERT=true` so the smoke script imports the shared runtime cert into the simulator root store before Safari or the in-app browser opens the local issuer URL
+
+The wrapper forwards those values as Xcode build settings. If they are unset, the iOS wallet keeps the upstream hosted Dev or Demo endpoints.
+
+The shared iOS wrappers now default `IOS_USE_LOCAL_STACK=true`, which means they automatically compile the active local issuer frontend, auth server, verifier URL, and local trusted-host list into the simulator build unless you explicitly opt out. Set `IOS_USE_LOCAL_STACK=false` only when you intentionally want a hosted-only simulator build.
+
 ### 2. Runtime
 
 Run:
@@ -379,6 +501,24 @@ At this point the service logs should exist under `$CODE_ROOT/project-docs/.loca
 By default, the ADB check is informational. If you want the smoke run to fail when the configured Android target is unavailable, set `SMOKE_REQUIRE_ANDROID_DEVICE=true` in `scripts/local-demo.env`.
 
 The runtime summary now prints both the detected LAN IP and the source used for the host selection. If a service URL is unreachable even though the runtime summary looks correct, compare that summary with the LAN IP command above and then check `docker compose ... ps -a` for exited containers.
+
+### iOS Simulator Smoke
+
+After the simulator build succeeds, run:
+
+```bash
+./smoke-ios-wallet-simulator.sh
+```
+
+What this confirms:
+
+- the configured simulator can boot
+- the simulator can trust the shared local runtime cert when local iOS issuer or attestation overrides are enabled
+- the built app can be installed into that simulator
+- the built app actually contains the expected local issuer, attestation, and verifier overrides, so the wallet can show the local credential list and same-device verifier path
+- the app can be launched by bundle identifier
+
+This is still a launch smoke, not a full issuance or verifier proof. The iOS app now has explicit local issuer, attestation, and host-scoped TLS override seams, but end-to-end issuance and same-device verifier validation remain separate follow-up checks.
 
 ### 3. Fresh APK Installation
 

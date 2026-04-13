@@ -15,6 +15,11 @@ http_check "Issuer metadata" "$ISSUER_URL/.well-known/openid-credential-issuer" 
 http_check "Frontend root" "$FRONTEND_URL/" || failures=$((failures + 1))
 http_check "Verifier public" "$VERIFIER_PUBLIC_URL/" || failures=$((failures + 1))
 
+section "TLS Certificate Alignment"
+tls_cert_matches_shared_cert "Auth server" "$AUTH_URL" || failures=$((failures + 1))
+tls_cert_matches_shared_cert "Issuer backend" "$ISSUER_URL" || failures=$((failures + 1))
+tls_cert_matches_shared_cert "Issuer frontend" "$FRONTEND_URL" || failures=$((failures + 1))
+
 section "Docker Status"
 (
   cd "$VERIFIER_REPO"

@@ -49,6 +49,11 @@ This document defines the shared working agreement for AI-assisted development a
 - When introducing a new repository into an existing workstream, first clone or confirm the canonical `main` checkout, then add `wip/<stream>` with `git worktree add` so VS Code workspace and Source Control views stay consistent across repos.
 - Local worktrees may use short-lived or medium-lived `wip/<stream>` branches to isolate active work.
 - Rebase or selectively promote ready increments from `wip/<stream>` into `main` frequently.
+- Prefer short-lived workstreams that are rebased or selectively promoted into `main` frequently, ideally daily and no less often than weekly.
+- The default flow is local-first: commit on `wip/<stream>`, selectively promote ready increments into `main`, then rebase `wip/<stream>` onto the updated `main` so the workstream stays current.
+- Unpublished local `wip/<stream>` branches may track `origin/main` as their comparison base so drift from trunk stays visible during isolated work.
+- Tracking `origin/main` for an unpublished `wip/<stream>` branch is a local comparison aid only; it does not publish the branch or make it a long-lived feature branch.
+- Publishing a `wip/<stream>` branch is optional and should be treated as an explicit exception for remote persistence, not as the default promotion path.
 - Workstream names should stay consistent across repos, workspace files, issue references, and acceptance criteria.
 
 ## Documentation Rule

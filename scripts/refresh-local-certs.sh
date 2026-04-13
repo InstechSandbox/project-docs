@@ -7,9 +7,49 @@ SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 source "$SCRIPT_DIR/common.sh"
 
 WALLET_LOCAL_CERT_FILE="${WALLET_LOCAL_CERT_FILE:-$WALLET_REPO/network-logic/src/main/res/raw/backend_cert.pem}"
-UTOPIA_SIGNER_KEY_FILE="${UTOPIA_SIGNER_KEY_FILE:-$ISSUER_REPO/local/privKey/PID-DS-0001_UT.pem}"
-UTOPIA_SIGNER_CERT_PEM="${UTOPIA_SIGNER_CERT_PEM:-$ISSUER_REPO/local/cert/PID-DS-0001_UT_cert.pem}"
-UTOPIA_SIGNER_CERT_DER="${UTOPIA_SIGNER_CERT_DER:-$ISSUER_REPO/local/cert/PID-DS-0001_UT_cert.der}"
+
+resolve_first_existing_path() {
+  local fallback=$1
+  shift
+
+  local candidate
+  for candidate in "$@"; do
+    if [[ -f "$candidate" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+
+  printf '%s\n' "$fallback"
+}
+
+if [[ -z "${UTOPIA_SIGNER_KEY_FILE:-}" ]]; then
+  UTOPIA_SIGNER_KEY_FILE=$(resolve_first_existing_path \
+    "$ISSUER_REPO/local/privKey/PID-DS-LOCAL-UT.pem" \
+    "$ISSUER_REPO/local/privKey/PID-DS-LOCAL-UT.pem" \
+    "$ISSUER_REPO/local/privKey/PID-DS-0001_UT.pem")
+fi
+
+if [[ -z "${UTOPIA_SIGNER_CERT_PEM:-}" ]]; then
+  UTOPIA_SIGNER_CERT_PEM=$(resolve_first_existing_path \
+    "$ISSUER_REPO/local/cert/PID-DS-LOCAL-UT_cert.pem" \
+    "$ISSUER_REPO/local/cert/PID-DS-LOCAL-UT_cert.pem" \
+    "$ISSUER_REPO/local/cert/PID-DS-0001_UT_cert.pem")
+fi
+
+if [[ -z "${UTOPIA_SIGNER_CERT_DER:-}" ]]; then
+  UTOPIA_SIGNER_CERT_DER=$(resolve_first_existing_path \
+    "$ISSUER_REPO/local/cert/PID-DS-LOCAL-UT_cert.der" \
+    "$ISSUER_REPO/local/cert/PID-DS-LOCAL-UT_cert.der" \
+    "$ISSUER_REPO/local/cert/PID-DS-0001_UT_cert.der")
+fi
+
+if [[ -z "${UTOPIA_IACA_CERT_PEM:-}" ]]; then
+  UTOPIA_IACA_CERT_PEM=$(resolve_first_existing_path \
+    "$ISSUER_REPO/local/cert/PIDIssuerCALocalUT.pem" \
+    "$ISSUER_REPO/local/cert/PIDIssuerCAUT01.pem")
+fi
+
 SYNC_WALLET_CERT=false
 
 if [[ "${1:-}" == "--sync-wallet-cert" ]]; then
@@ -79,6 +119,7 @@ utopia_signer_cert_matches_issuer_identity() {
   local key_file=$1
   local cert_pem=$2
   local cert_der=$3
+  local iaca_cert_pem=${4:-}
   local key_fp
   local pem_fp
   local der_fp
@@ -88,7 +129,17 @@ utopia_signer_cert_matches_issuer_identity() {
   [[ -f "$cert_der" ]] || return 1
 
   cert_has_san_entry "$cert_pem" "URI:$ISSUER_URL" || return 1
-  cert_has_san_entry "$cert_pem" "$PUBLIC_HOST" || return 1
+
+  if [[ -n "$PUBLIC_HOST" ]]; then
+    cert_has_san_entry "$cert_pem" "$PUBLIC_HOST" || return 1
+  fi
+
+  if [[ -n "${DETECTED_LAN_IP:-}" ]] && [[ "$DETECTED_LAN_IP" != "127.0.0.1" ]] && [[ "$DETECTED_LAN_IP" != "$PUBLIC_HOST" ]]; then
+    cert_has_san_entry "$cert_pem" "$DETECTED_LAN_IP" || return 1
+  fi
+
+  cert_has_san_entry "$cert_pem" "127.0.0.1" || return 1
+  cert_has_san_entry "$cert_pem" "localhost" || return 1
 
   key_fp=$(public_key_fingerprint key "$key_file") || return 1
   pem_fp=$(public_key_fingerprint cert-pem "$cert_pem") || return 1
@@ -97,6 +148,10 @@ utopia_signer_cert_matches_issuer_identity() {
   [[ -n "$key_fp" ]] || return 1
   [[ "$key_fp" == "$pem_fp" ]] || return 1
   [[ "$key_fp" == "$der_fp" ]] || return 1
+
+  if [[ -n "$iaca_cert_pem" ]] && [[ -f "$iaca_cert_pem" ]]; then
+    openssl verify -CAfile "$iaca_cert_pem" "$cert_pem" >/dev/null 2>&1 || return 1
+  fi
 }
 
 generate_shared_cert() {
@@ -157,57 +212,7 @@ EOF
 }
 
 generate_utopia_signer_cert() {
-  local temp_config
-  temp_config=$(mktemp)
-  trap 'rm -f "$temp_config"' RETURN
-
-  local alt_names="URI.1 = ${ISSUER_URL}"
-  local next_dns_index=1
-  local next_ip_index=1
-
-  case "$PUBLIC_HOST" in
-    *[!0-9.]*)
-      alt_names+="
-DNS.${next_dns_index} = $PUBLIC_HOST"
-      next_dns_index=$((next_dns_index + 1))
-      ;;
-    *)
-      alt_names+="
-IP.${next_ip_index} = $PUBLIC_HOST"
-      next_ip_index=$((next_ip_index + 1))
-      ;;
-  esac
-
-  if [[ -n "${DETECTED_LAN_IP:-}" ]] && [[ "$DETECTED_LAN_IP" != "$PUBLIC_HOST" ]] && [[ "$DETECTED_LAN_IP" != "127.0.0.1" ]]; then
-    alt_names+="
-IP.${next_ip_index} = ${DETECTED_LAN_IP}"
-    next_ip_index=$((next_ip_index + 1))
-  fi
-
-  alt_names+="
-IP.${next_ip_index} = 127.0.0.1
-DNS.${next_dns_index} = localhost"
-
-  cat >"$temp_config" <<EOF
-[req]
-prompt = no
-distinguished_name = dn
-x509_extensions = v3_req
-
-[dn]
-CN = Local Utopia DS
-
-[v3_req]
-basicConstraints = critical,CA:false
-keyUsage = critical,digitalSignature
-subjectAltName = @alt_names
-
-[alt_names]
-${alt_names}
-EOF
-
-  openssl req -new -x509 -sha256 -days 365 -key "$UTOPIA_SIGNER_KEY_FILE" -out "$UTOPIA_SIGNER_CERT_PEM" -config "$temp_config"
-  openssl x509 -in "$UTOPIA_SIGNER_CERT_PEM" -outform der -out "$UTOPIA_SIGNER_CERT_DER"
+  "$SCRIPT_DIR/generate-local-mdoc-signer-chain.sh" >/dev/null
 }
 
 section "Shared Certificate"
@@ -255,15 +260,17 @@ fi
 
 section "Issuer Signer Certificate"
 
-if ! utopia_signer_cert_matches_issuer_identity "$UTOPIA_SIGNER_KEY_FILE" "$UTOPIA_SIGNER_CERT_PEM" "$UTOPIA_SIGNER_CERT_DER"; then
-  printf 'Refreshing Utopia SD-JWT signer certificate for %s\n' "$ISSUER_URL"
+if ! utopia_signer_cert_matches_issuer_identity "$UTOPIA_SIGNER_KEY_FILE" "$UTOPIA_SIGNER_CERT_PEM" "$UTOPIA_SIGNER_CERT_DER" "$UTOPIA_IACA_CERT_PEM"; then
+  printf 'Refreshing local Utopia issuer signer chain\n'
   generate_utopia_signer_cert
   utopia_signer_cert_changed=true
 else
-  printf 'Utopia SD-JWT signer certificate already matches %s\n' "$ISSUER_URL"
+  printf 'Local Utopia issuer signer chain already matches the active key material\n'
 fi
 
 if [[ "$utopia_signer_cert_changed" == true ]]; then
   printf 'Signer certificate fingerprint: '
   openssl x509 -in "$UTOPIA_SIGNER_CERT_PEM" -noout -fingerprint -sha256 | sed 's/^SHA256 Fingerprint=//'
+  printf 'Signer subjectAltName:\n'
+  openssl x509 -in "$UTOPIA_SIGNER_CERT_PEM" -noout -ext subjectAltName 2>/dev/null | sed '1d'
 fi
