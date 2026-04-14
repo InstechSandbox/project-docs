@@ -158,7 +158,7 @@ SHARED_KEY_FILE="${SHARED_KEY_FILE:-$ISSUER_REPO/local/runtime/runtime-ec.key}"
 
 ADB_BIN="${ADB_BIN:-$(detect_adb_bin)}"
 ANDROID_SDK_DIR="${ANDROID_SDK_DIR:-$(detect_android_sdk_dir)}"
-APK_PATH="${APK_PATH:-$WALLET_REPO/app/build/outputs/apk/demo/debug/app-demo-debug.apk}"
+APK_PATH="${APK_PATH:-$WALLET_REPO/app/build/outputs/apk/dev/debug/app-dev-debug.apk}"
 ANDROID_SERIAL="${ANDROID_SERIAL:-}"
 
 case "$ANDROID_SERIAL" in

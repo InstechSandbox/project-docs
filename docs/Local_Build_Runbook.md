@@ -20,10 +20,12 @@ cd "$CODE_ROOT/project-docs/scripts"
 ./build-local-all.sh
 ./start-local-all.sh
 ./smoke-local-all.sh
-./install-wallet-demo-apk.sh --fresh
+./install-wallet-local-apk.sh --fresh
 ```
 
-`./smoke-local-all.sh` is intentionally before `./install-wallet-demo-apk.sh --fresh`. The smoke step validates the local services and verifier stack first, then the APK install step prepares the phone for issuance and verification.
+`./smoke-local-all.sh` is intentionally before `./install-wallet-local-apk.sh --fresh`. The smoke step validates the local services and verifier stack first, then the APK install step prepares the phone for issuance and verification.
+
+For local Android installation, the repo-native command is `./gradlew buildAndInstallDevDebug`. The shared wrapper `./install-wallet-local-apk.sh --fresh` now runs that command for you after checking local certificates, LAN host settings, and optional uninstall.
 
 Normal `./build-local-all.sh` and `./start-local-all.sh` runs do not rewrite the wallet app's embedded `backend_cert.pem`. Wallet trust material only changes when you run an explicit cert-rotation step.
 
@@ -48,7 +50,7 @@ cd "$CODE_ROOT/project-docs/scripts"
 ./build-local-all-clean.sh
 ./start-local-all.sh
 ./smoke-local-all.sh
-./install-wallet-demo-apk.sh --fresh
+./install-wallet-local-apk.sh --fresh
 ```
 
 Functional verification path:
@@ -150,7 +152,8 @@ For orientation, treat the six components as three groups:
 - `scripts/start-local-all.sh`
 - `scripts/stop-local-all.sh`
 - `scripts/smoke-local-all.sh`
-- `scripts/install-wallet-demo-apk.sh`
+- `scripts/install-wallet-local-apk.sh`
+- `scripts/install-wallet-demo-apk.sh` as a compatibility alias for the local wallet install path
 - `scripts/run-issuance-demo.sh`
 - `scripts/run-verification-demo.sh`
 
@@ -165,6 +168,48 @@ For iOS wallet enablement, the shared workflow now also includes:
 These should stay as wrappers around repo-level build and launch entry points.
 
 The iOS wrappers deliberately stop at simulator build and launch. They are not a replacement for Apple Developer signing setup, provisioning, or TestFlight packaging.
+
+## Wallet Flavor Contract
+
+The Android wallet flavors now have explicit environment meaning in this workspace:
+
+- `Dev` is the local wallet build and is the one that the local runbook uses
+- `Demo` is the shared cloud or tester wallet build and is reserved for public `test.instech-eudi-poc.com` flows
+
+This split matters for document readers and verifier requests because the wallet bakes environment-specific issuer and verifier hosts into `BuildConfig`.
+
+- local document-reader and verifier requests require the `Dev` build because they target the current LAN host and local trust material
+- shared cloud document-reader and verifier requests require the `Demo` build because they target the public issuer and verifier hosts
+
+Do not reuse a local `Dev` APK for the public cloud verifier, and do not reuse a cloud `Demo` APK for the local verifier stack.
+
+Use these as the source-of-truth local install paths:
+
+- repo-native install command: `cd "$CODE_ROOT/eudi-app-android-wallet-ui" && LOCAL_DEMO_HOST="$(ipconfig getifaddr en0 || ipconfig getifaddr en1)" ./gradlew buildAndInstallDevDebug --console=plain`
+- wrapper install command: `cd "$CODE_ROOT/project-docs/scripts" && ./install-wallet-local-apk.sh --fresh`
+- local APK output path: `$CODE_ROOT/eudi-app-android-wallet-ui/app/build/outputs/apk/dev/debug/app-dev-debug.apk`
+
+The cloud tester APK is different: it comes from GitHub Releases in the Android wallet repository and is built from `demoRelease`.
+
+## SD-JWT PID Credential Count Guardrail
+
+The current Android wallet rule for `DocumentIdentifier.SdJwtPid` is intentionally `numberOfCredentials = 1` in both `Dev` and `Demo`.
+
+Keep that value at `1` for now.
+
+Why this is an explicit rule:
+
+- the current SD-JWT PID issuance path returns a single credential
+- the current wallet-core storage path expects the number of issuer-provided credentials to match the number of precreated pending credentials on the unsigned document
+- raising the wallet rule to `10`, `60`, or any other larger pool without a matching multi-credential SD-JWT issuance contract can make issuance fail after the issuer already returned `POST /credential 200`
+
+Treat `MdocPid` and `SdJwtPid` as different issuance shapes, not as two formats that should share the same pool size.
+
+Only revisit this guardrail when all of the following are true:
+
+1. the issuer really returns multiple SD-JWT credentials for the same issuance rule
+2. wallet-core storage is verified to support that larger SD-JWT pending-credential pool
+3. an end-to-end regression test proves the larger value works in both local and cloud-targeted wallet builds
 
 ## One-Time Setup
 
@@ -314,7 +359,7 @@ The verifier UI now uses same-origin API calls for `/ui`, `/wallet`, and `/utili
 
 For the local Docker verifier path started by `scripts/start-local-all.sh` or `av-srv-web-verifier-endpoint-23220-4-kt/scripts/start-local-verifier.sh`, the customer surface URL is now derived automatically from the active verifier public host. On a LAN or hotspot IP change, restarting the verifier stack is enough to refresh Irish Life customer links and same-device return URLs.
 
-The Android wallet also bakes `LOCAL_VERIFIER_API` and `LOCAL_ISSUER_URL` into its generated `BuildConfig` from `localDemoHost`. If the Mac's LAN IP changes and you only restart the local services, verification can still fail before the consent screen because the installed APK is still pre-registered against the old verifier URL. `scripts/build-local-all.sh` and `scripts/build-local-all-clean.sh` already resync `local.properties` before rebuilding; `scripts/install-wallet-demo-apk.sh` now also refuses to install a stale APK so the mismatch is caught before device testing.
+The Android wallet also bakes environment-specific verifier and issuer hosts into its generated `BuildConfig`. For the local `Dev` path those values are still derived from `localDemoHost`. If the Mac's LAN IP changes and you only restart the local services, verification can still fail before the consent screen because the installed APK is still pre-registered against the old verifier URL. `scripts/build-local-all.sh` and `scripts/build-local-all-clean.sh` already resync `local.properties` before rebuilding; `scripts/install-wallet-local-apk.sh` now also refuses to install a stale local APK so the mismatch is caught before device testing.
 
 The iOS wallet does not accept the verifier backend's default local `client_id=Verifier` through its upstream OpenID4VP config unless you compile in a matching preregistered verifier entry. If the same-device verifier deeplink opens the wallet on the simulator but the verifier backend never receives a `/wallet/request.jwt/...` fetch, rebuild the simulator app with `IOS_LOCAL_VERIFIER_URL` and `IOS_LOCAL_VERIFIER_CLIENT_ID` set so the wallet trusts the local preregistered verifier before it tries to dereference `request_uri`.
 
@@ -583,13 +628,13 @@ This is still a launch smoke, not a full issuance or verifier proof. The iOS app
 ### 3. Fresh APK Installation
 
 ```bash
-./install-wallet-demo-apk.sh
+./install-wallet-local-apk.sh
 ```
 
 If the phone already has a higher-version wallet package installed, use:
 
 ```bash
-./install-wallet-demo-apk.sh --fresh
+./install-wallet-local-apk.sh --fresh
 ```
 
 `--fresh` will uninstall the package that matches the APK application ID before reinstalling it.

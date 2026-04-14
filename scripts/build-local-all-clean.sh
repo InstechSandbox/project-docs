@@ -29,7 +29,7 @@ sync_wallet_local_properties
 section "Wallet APK Clean Build"
 (
   cd "$WALLET_REPO"
-  LOCAL_DEMO_HOST="$PUBLIC_HOST" ./gradlew clean :app:assembleDemoDebug --console=plain
+  LOCAL_DEMO_HOST="$PUBLIC_HOST" ./gradlew clean :app:assembleDevDebug --console=plain
 )
 
 require_file "$APK_PATH"
@@ -44,5 +44,5 @@ section "Verifier Docker Clean Build"
 print_runtime_summary
 
 section "Clean Build Complete"
-printf 'Fresh demo APK: %s\n' "$APK_PATH"
+printf 'Fresh local APK: %s\n' "$APK_PATH"
 printf 'Next step:      %s/start-local-all.sh\n' "$SCRIPT_DIR"

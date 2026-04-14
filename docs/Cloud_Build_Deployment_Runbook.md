@@ -109,6 +109,25 @@ The verifier backend and verifier UI should publish deployable artifacts indepen
 - iOS should target TestFlight in phase 1
 - mobile artifact publication should be treated as part of the ecosystem release flow, but it should remain separate from the service deployment mechanics
 
+For the wallet apps, environment targeting and distribution channel are related but distinct:
+
+- Android `Dev` is the local engineering flavor and should stay bound to local issuer and local verifier readers
+- Android `Demo` is the shared cloud tester flavor and should stay bound to the public `test.instech-eudi-poc.com` issuer and verifier readers
+
+The reader or verifier environment matters as much as the app binary origin. A local-reader wallet build should not be reused against the public verifier slice, and a cloud-reader wallet build should not be reused against the local verifier slice, because preregistered verifier assumptions and redirect handling are environment-specific.
+
+The Android `publish-test-apk` workflow currently expects these repository secrets before it can generate a downloadable signed `Demo` APK:
+
+- `ANDROID_KEY_ALIAS`: alias of the release signing key inside that keystore
+- `ANDROID_KEY_PASSWORD`: password used for both the key and store in the current Gradle signing config; because the workflow generates a JKS keystore on the runner, this must be at least 6 characters
+
+The workflow now builds with `-x workspaceClean` because the current Android repo clean graph can race with generated outputs during assemble tasks even though the wallet flavor wiring itself is valid.
+
+The resulting GitHub release should contain at least:
+
+- one signed `demoRelease` APK from `app/build/outputs/apk/demo/release/`
+- one compliance sidecar zip generated under `.local/mobile-compliance/<release-tag>-android-compliance.zip`
+
 ## Recommended Workflow Shape
 
 ### Repository-Level Workflows

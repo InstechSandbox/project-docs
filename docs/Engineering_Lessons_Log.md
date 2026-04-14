@@ -4,6 +4,34 @@
 
 Record recurring lessons that are worth turning into shared engineering guidance.
 
+### 2026-04-14 - SD-JWT PID issuance must not precreate an mdoc-sized credential pool
+
+- Context: Cloud JWT PID issuance completed successfully on the auth server and issuer backend, including `POST /credential 200`, but the Android wallet still returned a generic issuance error after the browser came back to the app.
+- What happened: The wallet's SD-JWT PID issuance rule reused the mdoc-style `numberOfCredentials = 60` setting. In the Android wallet-core SDK, `DocumentManagerImpl.storeIssuedDocument(...)` requires the number of issuer-provided credentials to match the number of precreated pending credentials on the unsigned document. SD-JWT PID issuance returns a single VC, so wallet storage failed after a successful issuer response because the wallet had precreated 60 pending credentials.
+- Reusable lesson: Do not assume SD-JWT VC issuance uses the same credential-pool semantics as mdoc. For SD-JWT PID in the current Android wallet stack, precreate one credential unless the issuer and wallet-core explicitly support multi-credential SD-JWT issuance.
+- Follow-up doc or rule update: Keep Android wallet issuance rules separate by format. `MdocPid` can retain its current one-time-use credential pool, but `SdJwtPid` should use a single precreated credential until wallet-core and issuer behavior are aligned for larger SD-JWT pools.
+- Maintainer guardrail: Leave `DocumentIdentifier.SdJwtPid` at `numberOfCredentials = 1` in both wallet flavors for now. Do not raise it speculatively to values like `10` or `60` for future-proofing. Revisit only when a verified multi-credential SD-JWT issuance path exists end to end and the wallet-core storage contract is confirmed to accept that larger pending-credential pool.
+
+### 2026-04-13 - Wallet issuance auth return needs a replay path, not only a live broadcast
+
+- Context: The Android wallet could complete a local authorization activity and return to `MainActivity`, yet the JWT PID issuance UI sometimes stayed stuck or silently failed to advance even though the app had already bounced back from the auth WebView.
+- What happened: The issuance auth return was delivered as `VCI_RESUME_ACTION`, an in-memory broadcast emitted immediately when the activity handled the issuance deep link. If `AddDocumentScreen` or `DocumentOfferScreen` was not yet mounted and listening, that broadcast was lost. Both screens already replayed cached pending deep links on `ON_RESUME`, but their viewmodels ignored cached `ISSUANCE` deep links, so there was no fallback resume path.
+- Follow-on finding: Even after caching and replaying the issuance URI, the dashboard route still dropped `DeepLinkType.ISSUANCE` returns because it only reopened presentation and credential-offer flows. On devices where the app resumed to the dashboard before issuance screens remounted, JWT PID issuance could still fail while the cloud issuer had already completed successfully.
+- Final fix shape: When dashboard consumes a cached `ISSUANCE` deep link, the generic deep-link helper must re-cache that URI and navigate back into `ISSUANCE_ADD_DOCUMENT` using the existing issuance arguments. Re-broadcasting `VCI_RESUME_ACTION` from dashboard is still race-prone because the issuance screen may not be mounted yet.
+- Reusable lesson: For wallet issuance resumption, treat the authorization-return URI as resumable state, not as a fire-and-forget UI event. Cache it long enough for the issuance screen to replay on resume, and make the screen-level deep-link handler able to consume `ISSUANCE` links directly.
+
+### 2026-04-13 - Cloud issuer revocation URLs must never fall back to local `.env`
+
+- Context: The issuer backend container loads `app/.env` at startup, including revocation settings intended for local development.
+- What happened: In cloud, missing ECS overrides for revocation URLs caused fallback to the local `https://${MYIP}:${ISSUER_PORT}/token_status_list/*` values, which resolved to a private LAN IP and added 30-second issuance delays until the internal credential-generation call timed out.
+- Reusable lesson: Treat revocation URL overrides as required cloud runtime config, not optional defaults.
+
+### 2026-04-13 - Cloud verifier UI must proxy backend API paths, not just serve the SPA
+
+- Context: The public Irish Life agent page on `verifier.test.instech-eudi-poc.com` showed `Failed to create or invite the case.` even though the verifier backend routes were present and healthy on `verifier-api.test.instech-eudi-poc.com`.
+- What happened: The Angular UI issued same-origin requests such as `POST /ui/irish-life/new-business/cases`, but the cloud Nginx container only served static assets and had no `/ui` reverse proxy. Those requests therefore died in the UI container with `405 Method Not Allowed` before the Kotlin backend saw them.
+- Reusable lesson: When a frontend is built around relative API paths, the cloud UI container must preserve the same reverse-proxy contract as local development. Rewriting a few absolute URLs is not enough if the browser can still call `/ui`, `/wallet`, or `/utilities` on the SPA origin.
+
 ### 2026-04-10 - Scripted same-device verifier deep links are better triage than repeated Safari retries on iOS simulator
 
 - Context: A local same-device verifier deeplink on iOS could switch from Safari into the wallet app, yet still fail to start the actual proof request.
