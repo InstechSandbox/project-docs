@@ -252,6 +252,34 @@ cd "$CODE_ROOT/project-docs/scripts"
 
 Use that explicit stop when you want to tear the local stack down at the end, or when you want a manual reset before investigating logs. It is not required before the normal `./start-local-all.sh` path.
 
+## Multiple Local Stacks
+
+The local wrapper model can support more than one local backend stack on the same machine when you need separate worktrees for different testing goals, for example one Irish Life verifier stack and one wallet-focused stack.
+
+The safe rule is:
+
+- keep the Python issuer/auth/frontend ports separate if you want two full stacks
+- keep the verifier Docker host ports, fixed Docker container names, and Docker Compose project name separate for the second stack
+- give each worktree its own `project-docs/scripts/local-demo.env`
+
+For a second full stack, override values such as:
+
+```bash
+AUTH_PORT=15001
+ISSUER_PORT=15002
+FRONTEND_PORT=15003
+COMPOSE_PROJECT_NAME=ioswalletlocal
+VERIFIER_TLS_HOST_PORT=4443
+VERIFIER_BACKEND_HOST_PORT=18080
+VERIFIER_UI_HOST_PORT=14300
+VERIFIER_BACKEND_CONTAINER_NAME=verifier-backend-ios
+VERIFIER_UI_CONTAINER_NAME=verifier-ui-ios
+VERIFIER_HAPROXY_CONTAINER_NAME=verifier-haproxy-ios
+VERIFIER_PUBLIC_URL=https://<host-ip>:4443
+```
+
+This keeps the primary local stack on its default ports while allowing a second full stack to run without colliding on Python service ports, Docker port bindings, fixed container names, or Compose project scoping.
+
 ## Irish Life Email And Customer Surface Settings
 
 The Irish Life New Business verifier flow now depends on two verifier-backend settings when you want the full agent-plus-customer demo to work end to end.
@@ -303,6 +331,38 @@ For local runs, the default placeholder host `smtp.example.com` is now treated a
 The Irish Life agent surface now shows which step is active during case creation versus invite sending, and it clears the spinner locally if the browser waits too long for either step. If the page reports that it stopped waiting, use `Refresh case` before retrying so you can tell whether the backend already created the case or issued the invite.
 
 For the Irish Life SD-JWT PID flow, the local issuer frontend must advertise `eu.europa.ec.eudi.pid_vc_sd_jwt` in `CREDENTIALS_SUPPORTED`. The current local wrapper does this automatically so wallet discovery stays consistent with the verifier request.
+
+## Existing Business Local Demo Flow
+
+The Existing Business local journey is now customer-driven.
+
+Use it as follows:
+
+1. Open the customer page at `/irish-life/existing-business/customer`.
+2. Enter policy number `12345678`.
+3. Click `Request withdrawal`.
+4. The verifier will create the case and start wallet proof automatically.
+5. Use the agent page at `/irish-life/existing-business/agent` only as a read-only monitor.
+
+The local verifier accepts only policy number `12345678` for this demo. Any other policy number is rejected immediately and no Existing Business case is created.
+
+The customer entry page also short-circuits unsupported policy numbers locally so the demo fails immediately in the browser instead of waiting for a verifier round trip.
+
+The verifier resolves policy `12345678` to a hard-coded internal Irish Life policy record. For the Existing Business happy path, issue a PID that matches:
+
+1. `given_name = Patrick`
+2. `family_name = Murphy`
+3. `birthdate = 1980-04-12`
+4. `street_address = 1 Main Street`
+5. `locality = Dublin`
+6. `region = Leinster`
+7. `postal_code = D02 XY56`
+
+The verifier reconstructs the expected address as:
+
+`1 Main Street, Dublin, Leinster, D02 XY56`
+
+The Existing Business agent surface no longer creates cases or sends invites. It monitors all in-memory Existing Business cases and should auto-expand the active withdrawal while the customer journey is in progress.
 
 For the Irish Life proof-of-address happy path, use the local `FC` dynamic PID form rather than the reduced one-step Utopia form description. The current local issuer backend sends optional PID address claims to the frontend, and the dynamic form exposes them behind `Add Optional Attributes`.
 

@@ -85,6 +85,20 @@ Record recurring lessons that are worth turning into shared engineering guidance
 
 ### YYYY-MM-DD - Short lesson title
 
+### 2026-04-13 - Customer-driven verifier journeys must compare wallet proof against server-owned records, not operator-entered values
+
+- Context: The first Existing Business implementation let the agent create the withdrawal case and type the identity and address values later used for PID comparison.
+- What happened: That produced a coherent demo technically, but it inverted the intended ownership model and weakened the credibility of the automated checks because the verifier was matching against agent-entered data instead of an internal Irish Life policy record.
+- Reusable lesson: If a journey is described as customer-driven and automated, the verifier must own the comparison baseline server-side and treat the agent surface as a monitor unless manual intervention is explicitly part of the design.
+- Follow-up doc or rule update: Keep policy, account, and comparison-record lookup in the backend for Existing Business-style journeys, and avoid building operator forms that become the de facto source of truth.
+
+### 2026-04-10 - Customer entry surfaces must not imply business-reference lookup unless the backend supports it
+
+- Context: The Irish Life customer-entry pages invited users to enter a case or claim reference, but the implemented routes actually load journeys by internal verifier case ID only.
+- What happened: The wording drifted ahead of the real backend capability, which risked sending operators or customers down a path that could never resolve successfully without an additional lookup endpoint.
+- Reusable lesson: Entry-page language is part of the contract. If a verifier flow is keyed by internal case ID, the UI must say so explicitly until a real business-identifier lookup exists.
+- Follow-up doc or rule update: Keep Irish Life entry forms aligned with the actual backend lookup capability, and do not use policy reference or claim reference wording on direct-entry pages unless those identifiers are truly resolvable.
+
 ### 2026-04-06 - Same-device Irish Life mismatch outcomes must be finalized server-side
 
 - Context: After wallet Share completed with intentionally mismatched PID data, the agent view still had no terminal `FAILED` outcome unless the customer browser also returned through the Angular callback path.
