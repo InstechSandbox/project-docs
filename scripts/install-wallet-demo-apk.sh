@@ -40,7 +40,7 @@ if [[ -f "$wallet_cert_file" ]] && [[ -f "$SHARED_CERT_FILE" ]] && ! cmp -s "$wa
 fi
 
 if [[ -f "$wallet_build_config" ]]; then
-	built_verifier_api=$(awk -F'"' '/LOCAL_VERIFIER_API/ { print $2; exit }' "$wallet_build_config")
+	built_verifier_api=$(awk -F'"' '/VERIFIER_API/ { print $2; exit }' "$wallet_build_config")
 	expected_verifier_api="https://$PUBLIC_HOST"
 	if [[ -n "$built_verifier_api" && "$built_verifier_api" != "$expected_verifier_api" ]]; then
 		fail "Wallet APK was built for $built_verifier_api but current verifier host is $expected_verifier_api. Rebuild with (cd $WALLET_REPO && ./gradlew buildAndInstallDemoDebug --console=plain) or rerun project-docs/scripts/build-local-all.sh."

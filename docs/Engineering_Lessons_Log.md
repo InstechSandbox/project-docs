@@ -185,6 +185,13 @@ Record recurring lessons that are worth turning into shared engineering guidance
 - Reusable lesson: When local verifier or issuer hosts are compiled into the wallet, a LAN IP change requires a wallet rebuild and reinstall, not just a service restart.
 - Follow-up doc or rule update: Keep wallet install wrappers aligned with the current `localDemoHost`, and fail fast if the built APK still targets an older verifier URL.
 
+### 2026-04-14 - DemoDebug local builds must not inherit cloud verifier trust metadata
+
+- Context: The Irish Life local verifier returned a valid request object and the wallet held a PID with the requested address values, but proof still failed before consent submission.
+- What happened: The installed DemoDebug wallet fetched the local request object from the LAN verifier, then validated it against `https://verifier.test.instech-eudi-poc.com/wallet/public-keys.json` because the demo flavor still defaulted `VERIFIER_API` to the cloud verifier. The install wrapper only checked `LOCAL_VERIFIER_API`, so it falsely reported the APK as aligned even though the wallet's preregistered verifier trust metadata still pointed at cloud.
+- Reusable lesson: For this local Irish Life workspace, DemoDebug must default to local verifier and issuer endpoints unless an explicit demo override is supplied. Wrapper validation must check the generated `VERIFIER_API` field that the wallet actually uses for preregistered verifier trust.
+- Follow-up doc or rule update: Keep the wallet demo build defaults local-first in this workspace and reserve explicit `demo*` overrides for workflows that intentionally target cloud endpoints.
+
 ### 2026-04-03 - Local issuance trust must cover every self-call path
 
 - Context: The Irish Life SD-JWT local issuance flow had already been fixed for frontend metadata startup order, wallet trust, and auth-server attester trust, but the wallet still failed after returning from browser authorization.
