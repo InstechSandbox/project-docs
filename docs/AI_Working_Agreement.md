@@ -10,6 +10,7 @@ This document defines the shared working agreement for AI-assisted development a
 - The next major delivery objective is an Irish Life branded verifier proof of concept that mimics selected real member journeys.
 - Subsequent streams include AWS deployment automation, stronger smoke and acceptance testing, iPhone enablement, and continuous `project-docs` updates.
 - The active cloud deployment workstream is `cloud-build`, which targets one shared AWS environment named `test` while preserving the local build as the effective development baseline.
+- The immediate `cloud-build` target is the smallest viable public-internet deployment that lets a mobile wallet request a credential and complete a proof or verification flow against the cloud-hosted services.
 
 ## Deliverables
 
@@ -89,6 +90,9 @@ This document defines the shared working agreement for AI-assisted development a
 - When moving from image publication to ECS runtime scaffolding, prefer a separate low-cost runtime layer that consumes immutable image refs and keeps `desired_count = 0` by default until the cloud runtime configuration contract is explicitly documented and wired.
 - For cloud-facing TLS, treat local self-signed certificates as a local-only development convenience. The cloud path should use explicit DNS and ACM-managed certificates unless a separately documented private trust model is required.
 - When wiring ECS runtime configuration, keep plain settings in reviewed config and inject secrets through Parameter Store or Secrets Manager references rather than committing secret values or rebuilding images per environment.
+- In `cloud-build`, prefer the most cost-efficient architecture that still reaches the public-internet end-to-end demo target. Make fixed-cost and always-on cost tradeoffs explicit before adding them.
+- For the first public-internet ingress step in `cloud-build`, prefer one shared ALB with host-based routing plus Route 53 and ACM rather than separate always-on public entry points per service, unless a documented exception is required.
+- Treat those Route 53 names behind the shared ALB as the durable external contract. Do not use direct ECS task public IPs or Elastic-IP-per-service as the default public naming strategy.
 
 ## Security Constraints
 

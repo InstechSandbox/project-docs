@@ -674,6 +674,14 @@ Trigger verification using the wrapper:
 
 This confirms that the issued credential can be presented to the local verifier stack.
 
+If you need live Android wallet evidence during a failing presentation attempt, tail the wallet request-matching logs in a second terminal:
+
+```bash
+./watch-android-wallet-presentation-logs.sh --clear
+```
+
+This follows the same `ADB_BIN` and `ANDROID_SERIAL` resolution as the other shared wrappers and focuses on the OpenID4VP request-receipt and `NoData` matching path.
+
 ## Why This Is Not Throwaway
 
 This orchestration is intentionally limited to:

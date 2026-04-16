@@ -60,6 +60,35 @@ For iOS, TestFlight does not naturally bundle text notice files with the app bin
 
 A reusable blank release note is maintained in [Mobile App Release Record Template](Mobile_App_Release_Record_Template.md).
 
+## Evidence-Based Device Statements
+
+For Android APK distribution in this workspace, keep device-compatibility language evidence-based.
+
+The current repository evidence supports only these hard statements for the Android wallet APK:
+
+- software floor: Android 10 or later, because the Gradle convention sets `minSdk = 29`
+- manifest-declared required hardware features: `android.hardware.camera.any`, `android.hardware.bluetooth`, and `android.hardware.bluetooth_le`
+- manifest-declared optional hardware feature: `android.hardware.nfc`
+
+The current repository does not establish a defensible minimum for:
+
+- RAM
+- free storage
+- CPU or SoC class
+- biometric sensor presence as an install-time requirement
+- specific handset families or OEM models
+
+That means release notes and tester communications should not claim a broader Android hardware minimum unless that statement is backed by recorded test evidence.
+
+When the exact minimum hardware profile is not proven, the Android release record should include a `Tested on` declaration instead of an invented minimum-device claim. That declaration should list:
+
+1. device make and model
+2. Android version
+3. build variant and build identifier
+4. whether the run was on physical hardware or emulator
+5. flows exercised, for example launch, PIN setup, issuance, same-device presentation, or proximity
+6. outcome, including any known limitations
+
 ## Third-Party Notices
 
 The repository-level `LICENSE.txt` and `NOTICE.txt` files are necessary, but they are not the whole compliance story for packaged mobile apps.
@@ -82,6 +111,7 @@ The shared generator script now automates the creation of this sidecar bundle, i
 
 - Direct APK sharing to testers counts as redistribution.
 - The APK release record should include the repo-level license and notice files plus the third-party notice inventory.
+- The APK release record should include either an evidence-backed minimum-device statement or, when that is not proven, a `Tested on` declaration with the exact devices and Android versions exercised.
 - If the dependency set changes materially, refresh the third-party inventory before distribution.
 
 ### iOS Wallet

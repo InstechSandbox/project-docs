@@ -404,17 +404,21 @@ In `eudi-srv-web-issuing-eudiw-py`:
 
 ## DCQL Design
 
-For this increment, the New Business presentation request should request one PID credential and the subset of identity and address claims needed for the journey.
+For this increment, the New Business presentation request should request one PID credential and only the core claims needed to let the wallet select the existing JWT PID reliably in the current cloud and local demo environment.
 
 Use:
 
 - one credential query for PID
-- claims for identity matching and address matching
+- claims for identity matching and credential validity evaluation
 - credential-level expiry validation on the presented PID
 
 If a dedicated POA credential is introduced later, the DCQL design can evolve to a two-credential request at that point.
 
 This keeps the current implementation aligned with the available sandbox-ready credential set.
+
+The verifier still treats address as part of the business comparison, and current wallet interoperability in this workspace requires the initial JWT PID request to keep the address claims in the DCQL query. In practice, the wallet matcher does not classify the stripped-down PID request as a selectable document even when the SD-JWT PID is stored locally.
+
+For current wallet interoperability, the request should also emit an explicit single-entry `credential_sets` clause that references the PID query. The current working request shape is therefore: full PID claim set, including address claims, plus a single-entry `credential_sets` clause for the PID query.
 
 ## Validation Design
 

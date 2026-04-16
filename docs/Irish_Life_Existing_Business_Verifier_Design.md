@@ -187,6 +187,9 @@ The current workstream implementation includes:
 - The Existing Business happy path is only expected to succeed when the issued PID matches the hard-coded policy record above.
 - The local address should therefore continue to use `1 Main Street, Dublin, Leinster, D02 XY56`.
 - The customer journey no longer depends on an emailed invite to begin proof sharing.
+- The wallet request stays JWT-first, but current wallet interoperability in this workspace requires the initial PID DCQL query to include the address claims as well as the identity claims.
+- The request should also emit an explicit single-entry `credential_sets` clause for the PID query so the current wallet can map the stored SD-JWT PID to the requested document set during presentation matching.
+- The current working request shape is therefore the full PID claim set, including address claims, plus the single-entry `credential_sets` clause.
 
 ## Next Runtime Checks
 

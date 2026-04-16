@@ -57,6 +57,31 @@ Keep one completed record per distributed tester build.
   - `<item>`
   - `<item>`
 
+## Device Compatibility Statement
+
+- Evidence-backed minimum OS statement: `<for Android: Android 10 / API 29 or later; otherwise platform-specific statement>`
+- Evidence-backed required hardware statement: `<for Android: camera, Bluetooth, Bluetooth LE; NFC optional; otherwise platform-specific statement>`
+- Hardware not proven as minimum: `<RAM|storage|CPU class|specific device family|none>`
+
+## Tested On Declaration
+
+- Required because definitive minimum hardware is proven: `<yes/no>`
+- Device type: `<physical device|emulator|both>`
+- Device make and model:
+  - `<item>`
+  - `<item>`
+- OS version(s):
+  - `<item>`
+  - `<item>`
+- Build tested: `<variant, version name, version code, or release tag>`
+- Flows exercised:
+  - `<launch|PIN setup|issuance|same-device presentation|proximity|other>`
+  - `<item>`
+- Outcome summary: `<passed with noted limitations|passed|failed>`
+- Known limitations or gaps:
+  - `<item>`
+  - `<item>`
+
 ## Links
 
 - Compliance bundle: `<path or URL>`

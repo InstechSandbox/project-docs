@@ -4,6 +4,34 @@
 
 Record recurring lessons that are worth turning into shared engineering guidance.
 
+### 2026-04-15 - Cloud SD-JWT issuer demo certs must bind to the public issuer URL, not the packaged local IP
+
+- Context: The Irish Life proof flow progressed past wallet consent in the public `test` environment and then failed at verifier response processing with `IssuerCertificateIsNotTrusted`.
+- What happened: The verifier accepted the posted proof shape but rejected the SD-JWT VC issuer certificate because the embedded `x5c` leaf carried `URI:https://192.168.0.131:5002` and local host entries from the packaged demo Utopia signer assets, while the live issuer metadata advertised `https://issuer-api.test.instech-eudi-poc.com`. The verifier library binds the issuer HTTPS identity to SAN URI or SAN DNS values on the credential leaf certificate, so the stale local SAN caused proof rejection even though the public ingress TLS certificate was correct.
+- Reusable lesson: In this proof-of-concept stack, the SD-JWT signer leaf certificate is protocol-facing data, not just local packaging detail. Any cloud deployment that reuses the packaged demo signer assets must rewrite or replace the DS leaf certificate so its SAN matches the configured public issuer URL before credentials are issued.
+- Follow-up doc or rule update: Keep the issuer backend startup path aligning the packaged Utopia DS certificate SAN with `SERVICE_URL`, and treat verifier-side SAN failures against the issuer URL as an issuer asset/config mismatch before changing verifier trust logic.
+
+### 2026-04-16 - Public issuer regressions can come from deploying the right repo name but the wrong build context
+
+- Context: The public issuer browser journey started returning page-not-found at `credential_offer_choice` immediately after an issuer-backend rollout, even though the backend task definition, ALB host rules, and public service URLs looked correct.
+- What happened: The backend ECS service was updated to an image tag that had been built from the frontend repository working tree by mistake. Because both services are Flask apps on the same internal port and both publish similar landing pages and discovery-style responses, the issue first looked like host-routing drift or a route regression instead of an image provenance problem.
+- Reusable lesson: For multi-repo services with similar runtime shapes, a successful image push and healthy ECS rollout are not enough evidence that the right app was deployed. Promotion needs one provenance check that ties the image to the intended source repo and one backend-only smoke check that the frontend image cannot satisfy.
+- Follow-up doc or rule update: Keep issuer rollouts verifying the pushed digest against the running ECS task and probing a backend-only route such as `issuer-api/.../credential_offer_choice` before declaring the public browser path ready to retest.
+
+### 2026-04-16 - Public verifier SD-JWT proof needs an explicit Irish Life issuer-chain trust anchor
+
+- Context: After the issuer-side SAN rewrite fix and a fresh JWT PID issuance, both Irish Life proof journeys in the public `test` environment still failed on the verifier side with `IssuerCertificateIsNotTrusted`.
+- What happened: Temporary verifier logging first showed both flows were running with `issuerChainConfigured=false`. After the cloud runtime was corrected, the same trust failure remained. Correlated issuer-side logging then proved why: the issuer currently embeds a self-signed SD-JWT leaf with `subject=CN=Local Utopia DS` and `issuer=CN=Local Utopia DS` while the verifier had been configured to trust the Utopia issuer CA. A CA trust anchor cannot validate that self-signed leaf.
+- Reusable lesson: For these public Irish Life proof flows, trust shape matters as much as trust presence. If the issuer emits a self-signed SD-JWT leaf, the verifier must either trust that exact leaf or the issuer must be changed to emit a CA-signed public-SAN leaf. Pointing the verifier at the CA while the issuer emits a self-signed DS certificate is a guaranteed failure.
+- Follow-up doc or rule update: Keep the public verifier runtime wiring aligned with the issuer's actual SD-JWT certificate shape. The current emergency setting is `VERIFIER_IRISHLIFE_PIDISSUERCHAIN_PATH=classpath:irishlife/LocalUtopiaDsSelfSigned.pem`; replace it with the reviewed issuer CA chain only after cloud signer material allows CA-signed leaf issuance again.
+
+### 2026-04-15 - Do not overstate Android APK device minimums when the repo only proves install-time floors
+
+- Context: The workspace needed a defensible statement of minimum Android device requirements for redistributed wallet APKs.
+- What happened: The repository proved `minSdk = 29` and manifest-declared required hardware features, but it did not prove a minimum RAM, storage, CPU, or handset family. A generic "minimum device" claim would therefore overstate what had actually been validated.
+- Reusable lesson: Separate install-time requirements from tested runtime evidence. If the codebase only proves Android version floor and manifest-declared hardware features, publish those as the hard requirements and add a `Tested on` declaration for the exact devices and flows exercised.
+- Follow-up doc or rule update: Keep Android release records carrying an evidence-backed OS and feature statement plus a tested-on section whenever hardware minimums are not explicitly validated.
+
 ### 2026-04-14 - SD-JWT PID issuance must not precreate an mdoc-sized credential pool
 
 - Context: Cloud JWT PID issuance completed successfully on the auth server and issuer backend, including `POST /credential 200`, but the Android wallet still returned a generic issuance error after the browser came back to the app.
@@ -11,6 +39,13 @@ Record recurring lessons that are worth turning into shared engineering guidance
 - Reusable lesson: Do not assume SD-JWT VC issuance uses the same credential-pool semantics as mdoc. For SD-JWT PID in the current Android wallet stack, precreate one credential unless the issuer and wallet-core explicitly support multi-credential SD-JWT issuance.
 - Follow-up doc or rule update: Keep Android wallet issuance rules separate by format. `MdocPid` can retain its current one-time-use credential pool, but `SdJwtPid` should use a single precreated credential until wallet-core and issuer behavior are aligned for larger SD-JWT pools.
 - Maintainer guardrail: Leave `DocumentIdentifier.SdJwtPid` at `numberOfCredentials = 1` in both wallet flavors for now. Do not raise it speculatively to values like `10` or `60` for future-proofing. Revisit only when a verified multi-credential SD-JWT issuance path exists end to end and the wallet-core storage contract is confirmed to accept that larger pending-credential pool.
+
+### 2026-04-16 - Reusable SD-JWT PID proofs must not use one-time credential policy with a single credential
+
+- Context: In the public Irish Life verifier flows, the first successful SD-JWT PID proof consistently caused the next and all subsequent proofs to fail with the wallet reporting no available requested documents.
+- What happened: Android wallet-core builds SD-JWT proofs through `verifiablePresentationForSdJwtVc()`, which calls `IssuedDocument.consumingCredential()`. In the document-manager library, `consumingCredential()` applies the document credential policy after a successful proof. With `CredentialPolicy.OneTimeUse`, it deletes the credential. The app was configuring `DocumentIdentifier.SdJwtPid` as `OneTimeUse` with `numberOfCredentials = 1`, so the first successful proof deleted the only usable SD-JWT PID credential and every later proof failed at `findCredential() != null`.
+- Reusable lesson: For reusable SD-JWT PID verifier journeys in the current Android wallet stack, a single issued credential must use `CredentialPolicy.RotateUse`, not `OneTimeUse`. One-time-use only works when the issuance path actually provisions a pool of independent credentials sized for the intended number of presentations.
+- Follow-up doc or rule update: Keep `DocumentIdentifier.SdJwtPid` on `CredentialPolicy.RotateUse` with `numberOfCredentials = 1` in both Demo and Dev configs unless and until the issuer and wallet/document-manager stack support multi-credential SD-JWT issuance for one-time-use rotation.
 
 ### 2026-04-13 - Wallet issuance auth return needs a replay path, not only a live broadcast
 
@@ -177,6 +212,41 @@ Record recurring lessons that are worth turning into shared engineering guidance
 - Follow-up doc or rule update: Keep Irish Life verifier surfaces on a consistent blue/white palette across selector, agent, and customer pages, and avoid reintroducing generic verifier green in those routes.
 
 ## Seed Entries
+
+### 2026-04-12 - Reserve wallet Dev for local readers and Demo for cloud readers
+
+- Context: The local orchestration wrappers were still building and installing the Android `Demo` flavor even though the cloud-build workstream also needs `Demo` to mean the shared public tester build.
+- What happened: That made the local-versus-cloud split ambiguous and encouraged operators to reuse one wallet APK across incompatible reader environments. It also hid the fact that the two wallet installs should stay side by side with different app names and distinct package or bundle identifiers.
+- Reusable lesson: In the mobile repos, environment semantics should be explicit. Keep `Dev` for local reader and verifier work, keep `Demo` for shared cloud tester work, and make the launcher names visibly different so operators do not confuse them on-device.
+- Follow-up doc or rule update: Keep local build wrappers targeting Android `Dev`, keep Android or iOS tester publication targeting `Demo`, and document that document-reader flows are environment-bound rather than interchangeable across local and cloud builds.
+
+### 2026-04-12 - Frontend credential offers must refresh live issuer metadata after startup fallbacks
+
+- Context: The public issuer frontend came up while the issuer API was still unhealthy, then continued rendering the credential-offer page without `PID (SD-JWT VC)` even after the issuer metadata endpoint was later fixed.
+- What happened: Frontend startup fetched issuer metadata once, fell back to the bundled local credential JSON set on error, and kept serving that incomplete in-memory list for the lifetime of the process. The fallback bundle also lacked a `pid_vc_sd_jwt` entry, so the offer page only showed mdoc credentials.
+- Reusable lesson: Credential-offer surfaces should not treat startup-time issuer metadata as immutable. Refresh live metadata at render time when practical, and keep the bundled fallback set aligned with the real issuer metadata so temporary startup races do not create persistent UI drift.
+- Follow-up doc or rule update: Keep the issuer frontend credential-offer path able to refresh `credential_configurations_supported` from the issuer on demand, and maintain the fallback credential metadata bundle with both mdoc and SD-JWT PID entries.
+
+### 2026-04-12 - Drive iOS issuer hosts from variant xcconfig
+
+- Context: The wallet display names and Dev-versus-Demo intent were already separated, but the iOS wallet still hardcoded upstream issuer hosts in `WalletKitConfig.swift`.
+- What happened: That left the workspace with a naming split but not a real local-versus-public issuer split, and any physical-device local testing risked pushing a machine-specific LAN host into tracked source files.
+- Reusable lesson: For iOS wallet environment targeting, feed issuer frontend and backend URLs from variant xcconfig into `Wallet.plist`, let `WalletKitConfig.swift` consume those values, and keep any device-specific LAN override in an ignored local xcconfig file rather than committing per-machine hosts.
+- Follow-up doc or rule update: Keep `Dev` defaulted to local issuer URLs, keep `Demo` defaulted to the public `test.instech-eudi-poc.com` issuer URLs, and preserve `Wallet/Config/WalletLocalOverrides.xcconfig` as the local-only escape hatch for physical-device testing.
+
+### 2026-04-11 - Optional integrations must not fail shared health checks in first public slices
+
+- Context: The first public verifier slice came up with Route 53, ACM, ALB, and ECS, but the verifier backend still failed the ALB health check even though the process itself was running.
+- What happened: Spring Boot exposed mail health through the shared `/actuator/health` endpoint while the verifier runtime still used placeholder SMTP settings for an optional invite-email integration. The ALB therefore saw the backend as unhealthy and returned `503` even though the core verifier APIs were otherwise available.
+- Reusable lesson: In first public slices, optional integrations such as outbound email must not participate in the primary load-balancer health contract unless their real cloud credentials are provisioned.
+- Follow-up doc or rule update: Keep generated runtime-config profiles able to disable optional mail health contributors until the corresponding SMTP configuration is intentionally enabled.
+
+### 2026-04-11 - Cloud runtime defaults must not assume local writable paths or local mount points
+
+- Context: The first full public issuer deployment scaled all issuer services to one task each, but the auth server and issuer backend still failed immediately after startup in ECS.
+- What happened: The auth server kept a template `logging.FileHandler` target under `/tmp/oidc_log_dev/logs.log` without ensuring that directory existed in the container, while the issuer backend still defaulted to `/etc/eudiw/pid-issuer/...` trust and key paths even though the proof-of-concept image packaged its demo assets under the application tree.
+- Reusable lesson: When promoting a local-first service into the first cloud runtime, convert every startup-critical path into an explicit runtime contract. Writable log paths, trust stores, and signing-key locations must not depend on developer-machine mount points or undeclared local directory conventions.
+- Follow-up doc or rule update: Keep the public runtime-config generator responsible for passing explicit auth log-file and issuer asset paths that match the current packaged image layout, and treat path mismatches as deployment-contract bugs rather than infrastructure noise.
 
 ### 2026-04-09 - New workstream repos must be added as linked worktrees, not standalone clones
 
