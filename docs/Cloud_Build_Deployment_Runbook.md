@@ -128,6 +128,23 @@ The Android `publish-test-apk` workflow currently expects these repository secre
 
 The current workflow generates a JKS keystore on the runner from `ANDROID_KEY_ALIAS` and `ANDROID_KEY_PASSWORD` rather than restoring a binary keystore blob from secrets. That keeps the publication path reliable in GitHub Actions, but it also means the signing identity is workflow-generated unless a persistent keystore transport is added later.
 
+For local `demoRelease` packaging in the cloud-build workspace, the Android repo now supports an untracked `local.signing.properties` file alongside the ignored repo-root `sign` keystore. The local contract is:
+
+- `sign`: local JKS keystore file in the Android repo root
+- `local.signing.properties`: untracked file containing `androidKeyAlias` and `androidKeyPassword`
+- `./preflight-demo-release-signing.sh`: local guardrail that verifies the alias and password resolve and actually match `sign` before Gradle reaches `packageDemoRelease`
+
+Recommended local sequence:
+
+```bash
+cd "$CODE_ROOT/eudi-app-android-wallet-ui"
+cp local.signing.properties.example local.signing.properties
+./preflight-demo-release-signing.sh
+LOCAL_DEMO_HOST=test.instech-eudi-poc.com ./gradlew :app:assembleDemoRelease --console=plain
+```
+
+If the preflight fails with an alias or password mismatch, do not continue into Gradle packaging. Update `local.signing.properties` to match the local keystore or replace the ignored `sign` file with the intended local release keystore first.
+
 The workflow now builds with `-x workspaceClean` because the current Android repo clean graph can race with generated outputs during assemble tasks even though the wallet flavor wiring itself is valid.
 
 The workflow is also self-contained for release-sidecar generation. Instead of checking out the private `project-docs` repo during GitHub Actions, it now creates a minimal Android compliance bundle directly from the wallet repo by packaging:
