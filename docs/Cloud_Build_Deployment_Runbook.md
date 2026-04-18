@@ -326,6 +326,7 @@ The current phase-1 handoff contract is:
 - the shared reusable deploy workflow in `.github` checks out `instechsandbox-eudi-deploy`, consumes the just-published component digest plus the current `main` tag of the other four components, resolves every artifact reference to an immutable ECR digest, and applies the runtime scaffold automatically
 - digest resolution happens inside the deploy workflow before Terraform renders tfvars, so ECS rollouts do not rely on mutable `:main` tags alone
 - the deploy repository keeps the manual foundation bootstrap path, while runtime deploy is now the standard post-publish path for the five cloud services
+- because GitHub OIDC presents the caller repository identity even when the reusable workflow lives in `.github`, the deploy IAM role must trust the five service repositories as well as `instechsandbox-eudi-deploy`; otherwise runtime deploy fails at `sts:AssumeRoleWithWebIdentity` after publish succeeds
 
 The current automatic runtime-deploy defaults are:
 
