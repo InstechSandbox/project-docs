@@ -291,13 +291,13 @@ Current publish workflow behavior:
 - defaults to the current test AWS region and publish-role ARN while still allowing manual override through workflow inputs
 - uses the reusable ECR publication workflow in `.github` for AWS login, ECR authentication, build-and-push, and summary output
 - keeps caller logic thin by passing only repo-specific image names, Dockerfile paths, and target repository names
-- calls the deploy repository runtime workflow after a successful publish so the shared `test` stack converges automatically
+- calls the shared reusable test-runtime deploy workflow in `.github`, which checks out `instechsandbox-eudi-deploy` and converges the shared `test` stack automatically after a successful publish
 
 The caller changes are now split this way:
 
 - `.github`: provide reusable publication primitives for AWS login, tagging, registry publication, and shared summary/reporting behaviour
 - application repos: keep thin caller workflows that supply repo-specific image names, tags, publication inputs, and the single changed component digest without re-implementing shared publish mechanics
-- `instechsandbox-eudi-deploy`: define the ECR repositories, IAM trust, ECS task and service definitions, environment configuration, deployment orchestration, and manifest digest resolution
+- `instechsandbox-eudi-deploy`: define the ECR repositories, IAM trust, ECS task and service definitions, environment configuration, deployment orchestration, and manifest digest resolution consumed by the shared deploy workflow
 
 ### Environment-Level Deployment Workflow
 
@@ -322,7 +322,7 @@ The current phase-1 handoff contract is:
 
 - service publish workflows push container images to ECR through the shared reusable workflow in `.github`
 - each publish workflow then emits a deployment scaffold artifact that records the immutable image digest for the `test` environment
-- `instechsandbox-eudi-deploy` consumes the just-published component digest plus the current `main` tag of the other four components, resolves every artifact reference to an immutable ECR digest, and applies the runtime scaffold automatically
+- the shared reusable deploy workflow in `.github` checks out `instechsandbox-eudi-deploy`, consumes the just-published component digest plus the current `main` tag of the other four components, resolves every artifact reference to an immutable ECR digest, and applies the runtime scaffold automatically
 - digest resolution happens inside the deploy workflow before Terraform renders tfvars, so ECS rollouts do not rely on mutable `:main` tags alone
 - the deploy repository keeps the manual foundation bootstrap path, while runtime deploy is now the standard post-publish path for the five cloud services
 
