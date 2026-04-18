@@ -9,6 +9,7 @@ This repository holds documentation that applies across the current implementati
 - [EIDAS ARF Implementation Brief](docs/EIDAS_ARF_Implementation_Brief.md) - local implementation guardrails for ARF alignment, protocol assumptions, trust boundaries, and verifier-first delivery
 - [AI Working Agreement](docs/AI_Working_Agreement.md) - canonical AI-assisted engineering rules, repo map, testing expectations, and docs-update policy
 - [Irish Life New Business Verifier Design](docs/Irish_Life_New_Business_Verifier_Design.md) - business analysis, credential strategy, support-agent UX design, and pre-implementation architecture for the first Irish Life verifier journey
+- [Irish Insurance Verifier FAQ](docs/Irish_Insurance_Verifier_FAQ.md) - concise insurer-facing FAQ covering verifier concepts, trust, formats, privacy, and adoption questions
 - [Engineering Lessons Log](docs/Engineering_Lessons_Log.md) - reusable lessons captured as the project evolves
 - [Repo Gate Debt Backlog](docs/Repo_Gate_Debt_Backlog.md) - tracked follow-up items for repo-native gates surfaced by the shared hooks
 - [Local Deployment Notes](docs/Local_Deployment_Notes.md) - explains the fork-to-baseline commit set, the rationale behind the local deployment changes, and the coordinated baseline tags
