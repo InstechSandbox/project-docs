@@ -254,7 +254,7 @@ Current caller coverage:
 - `av-srv-web-verifier-endpoint-23220-4-kt`
 - `eudi-web-verifier`
 
-Those caller workflows currently cover validation only. Packaging, registry publication, and deployment callers remain the next phase.
+Those caller workflows now cover validation, manual packaging, automatic publish after successful validation, and automatic runtime deploy for the shared AWS test environment.
 
 The next caller layer now exists for Docker-based package workflows in the same issuer and verifier repositories.
 
@@ -268,12 +268,11 @@ Current package caller coverage:
 
 Current package workflow behavior:
 
-- triggers after successful `Validation` runs on `main`
 - supports manual `workflow_dispatch`
 - builds the repository Docker image through the reusable Docker build workflow
-- records image tags and build metadata without pushing to a registry yet
+- records image tags and build metadata without pushing to a registry
 
-Registry publication is still intentionally deferred until GitHub OIDC to AWS and the dedicated deployment repository are wired.
+Package is now manual-only so a normal `main` push does not spend runner time on a second non-publishing image build after validation.
 
 The first thin publish caller workflows now also exist in the issuer and verifier service repositories.
 
@@ -287,27 +286,29 @@ Current publish caller coverage:
 
 Current publish workflow behavior:
 
-- triggers by manual `workflow_dispatch`
-- requires the operator to provide the AWS region and OIDC role ARN as manual workflow inputs until environment-level publication settings are standardized
+- triggers automatically after successful `Validation` runs on `main`
+- supports manual `workflow_dispatch`
+- defaults to the current test AWS region and publish-role ARN while still allowing manual override through workflow inputs
 - uses the reusable ECR publication workflow in `.github` for AWS login, ECR authentication, build-and-push, and summary output
 - keeps caller logic thin by passing only repo-specific image names, Dockerfile paths, and target repository names
+- calls the deploy repository runtime workflow after a successful publish so the shared `test` stack converges automatically
 
-When that next step is added, the caller changes should be split this way:
+The caller changes are now split this way:
 
 - `.github`: provide reusable publication primitives for AWS login, tagging, registry publication, and shared summary/reporting behaviour
-- application repos: keep thin caller workflows that supply repo-specific image names, tags, and publication inputs without re-implementing shared publish mechanics
-- `instechsandbox-eudi-deploy`: define the ECR repositories, IAM trust, ECS task and service definitions, environment configuration, and deployment orchestration
+- application repos: keep thin caller workflows that supply repo-specific image names, tags, publication inputs, and the single changed component digest without re-implementing shared publish mechanics
+- `instechsandbox-eudi-deploy`: define the ECR repositories, IAM trust, ECS task and service definitions, environment configuration, deployment orchestration, and manifest digest resolution
 
 ### Environment-Level Deployment Workflow
 
-The dedicated deployment repository should eventually expose:
+The dedicated deployment repository should expose:
 
 1. infrastructure plan/apply workflow
 2. service deployment workflow that consumes artifact versions or image digests
 3. post-deploy smoke workflow for the `test` environment
 4. rollback or redeploy workflow
 
-Until full deployment automation is in place, the reusable deployment scaffold in `.github` is the handoff contract. It captures:
+The reusable deployment scaffold in `.github` remains the reviewable handoff contract. It captures:
 
 - target environment
 - deployable component name
@@ -315,15 +316,25 @@ Until full deployment automation is in place, the reusable deployment scaffold i
 - expected deploy repository
 - optional smoke URL or smoke path metadata
 
-That scaffold keeps the source repositories additive and reviewable without pretending deployment automation is already complete.
+That scaffold keeps the source repositories additive and reviewable while the deploy repository owns the actual AWS rollout.
 
 The current phase-1 handoff contract is:
 
 - service publish workflows push container images to ECR through the shared reusable workflow in `.github`
 - each publish workflow then emits a deployment scaffold artifact that records the immutable image digest for the `test` environment
-- `instechsandbox-eudi-deploy` remains the repository that consumes those immutable artifact references for deployment planning and rollout
-- the deploy repository can render a test deployment manifest directly from immutable image references passed into its planning workflow, so candidate rollouts do not require hand-editing the checked-in manifest first
-- the deploy repository now has a manual bootstrap foundation-apply workflow for the current Terraform root, and that workflow explicitly uses runner-local state artifacts until a remote backend is introduced
+- `instechsandbox-eudi-deploy` consumes the just-published component digest plus the current `main` tag of the other four components, resolves every artifact reference to an immutable ECR digest, and applies the runtime scaffold automatically
+- digest resolution happens inside the deploy workflow before Terraform renders tfvars, so ECS rollouts do not rely on mutable `:main` tags alone
+- the deploy repository keeps the manual foundation bootstrap path, while runtime deploy is now the standard post-publish path for the five cloud services
+
+The current automatic runtime-deploy defaults are:
+
+- publish role: `arn:aws:iam::718959508203:role/GitHubActionsInstechSandboxPublish`
+- deploy role: `arn:aws:iam::718959508203:role/GitHubActionsInstechSandboxDeploy`
+- runtime and foundation state bucket: `instechsandbox-eudi-terraform-state-718959508203-eu-west-1`
+- runtime lock table: `instechsandbox-eudi-terraform-locks`
+- public base domain: `test.instech-eudi-poc.com`
+- public hosted zone id: `Z01745022CR6TI0M2DI9E`
+- runtime profile: `full-public-demo`
 - the same foundation workflow can switch to an S3 backend through explicit workflow inputs once the backend bucket and optional lock table exist
 
 For the current public issuer slice, the generated runtime config must also preserve two cloud-specific contracts:
