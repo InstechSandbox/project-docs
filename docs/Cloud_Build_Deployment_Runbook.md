@@ -292,6 +292,7 @@ Current publish workflow behavior:
 - uses the reusable ECR publication workflow in `.github` for AWS login, ECR authentication, build-and-push, and summary output
 - keeps caller logic thin by passing only repo-specific image names, Dockerfile paths, and target repository names
 - calls the shared reusable test-runtime deploy workflow in `.github`, which checks out `instechsandbox-eudi-deploy` and converges the shared `test` stack automatically after a successful publish
+- cross-repo checkout of `instechsandbox-eudi-deploy` needs an inherited `DEPLOY_REPOSITORY_TOKEN` secret with read access to that private repository; without it, the publish path can still build and push images but the runtime deploy step will fail at checkout
 
 The caller changes are now split this way:
 
