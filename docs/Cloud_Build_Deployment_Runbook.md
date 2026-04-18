@@ -324,6 +324,7 @@ The current phase-1 handoff contract is:
 - service publish workflows push container images to ECR through the shared reusable workflow in `.github`
 - each publish workflow then emits a deployment scaffold artifact that records the immutable image digest for the `test` environment
 - the shared reusable deploy workflow in `.github` checks out `instechsandbox-eudi-deploy`, consumes the just-published component digest plus the current `main` tag of the other four components, resolves every artifact reference to an immutable ECR digest, and applies the runtime scaffold automatically
+- the shared runtime deploy now waits for the Terraform state lock instead of failing immediately, so closely spaced publishes queue behind the same `test-runtime` state rather than racing each other into a DynamoDB lock error
 - digest resolution happens inside the deploy workflow before Terraform renders tfvars, so ECS rollouts do not rely on mutable `:main` tags alone
 - the deploy repository keeps the manual foundation bootstrap path, while runtime deploy is now the standard post-publish path for the five cloud services
 - because GitHub OIDC presents the caller repository identity even when the reusable workflow lives in `.github`, the deploy IAM role must trust the five service repositories as well as `instechsandbox-eudi-deploy`; otherwise runtime deploy fails at `sts:AssumeRoleWithWebIdentity` after publish succeeds
