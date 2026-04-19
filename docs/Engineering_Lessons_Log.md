@@ -4,6 +4,13 @@
 
 Record recurring lessons that are worth turning into shared engineering guidance.
 
+### 2026-04-19 - Cloud ECS images must not depend on ignored local proof assets
+
+- Context: The public `test` issuer-backend ECS rollout remained stuck in `IN_PROGRESS` with repeated `EssentialContainerExited` task failures even after image publish and deploy automation were working.
+- What happened: The runtime renderer pointed `TRUSTED_CAS_PATH`, `PRIVKEY_PATH`, `NONCE_KEY`, and `CREDENTIAL_KEY` at `/app/local/*`, but those files only existed in the developer workspace and were ignored by git. GitHub-built images therefore started without signer assets, crashed on `os.listdir('/app/local/cert/')`, and never reached steady state.
+- Reusable lesson: If a cloud task depends on protocol-facing signer files, treat them as explicit runtime contract, not accidental workspace baggage. Put fixed trust material behind reviewed ECS secret references, bootstrap it into writable runtime paths before app startup, and generate only the ephemeral keys that do not need cross-service trust continuity.
+- Follow-up doc or rule update: Keep issuer cloud runtime config using secret-backed bootstrap for the Utopia signer assets and writable temp paths for generated request-encryption and nonce keys. Do not point ECS at ignored repository directories like `/app/local/*` again.
+
 ### 2026-04-15 - Cloud SD-JWT issuer demo certs must bind to the public issuer URL, not the packaged local IP
 
 - Context: The Irish Life proof flow progressed past wallet consent in the public `test` environment and then failed at verifier response processing with `IssuerCertificateIsNotTrusted`.
