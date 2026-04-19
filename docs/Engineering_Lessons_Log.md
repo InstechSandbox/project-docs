@@ -4,6 +4,13 @@
 
 Record recurring lessons that are worth turning into shared engineering guidance.
 
+### 2026-04-19 - ECS secret refs require explicit Parameter Store access on the task execution role
+
+- Context: After the issuer-backend moved its signer material into ECS secret references, the public `test` runtime still failed to start the service even though the container image and runtime config were correct.
+- What happened: The ECS task never reached container startup. Service events showed `ResourceInitializationError` because the shared `test-ecs-task-execution` role only had `AmazonECSTaskExecutionRolePolicy`, which did not allow `ssm:GetParameters` on the new `/test/runtime/issuer-backend/*` SecureString parameters.
+- Reusable lesson: In this runtime scaffold, switching from tracked files to SSM-backed secret refs is a two-part change: wire the manifest secret references and extend the execution role so ECS can fetch them before container launch. Otherwise the service fails before logs ever reach the application container.
+- Follow-up doc or rule update: Keep the test runtime execution role allowed to read `/${environment}/runtime/*` Parameter Store entries and decrypt them via SSM whenever reviewed runtime-config manifests use ECS secret references.
+
 ### 2026-04-19 - Verifier backend needs a longer ALB grace period than the rest of the runtime slice
 
 - Context: The public `test` verifier-backend rollout stayed `IN_PROGRESS` for over an hour even though new tasks were starting and the container process itself was not crash-looping.

@@ -555,6 +555,7 @@ That runtime configuration contract should stay explicit and reviewable:
 
 - plain non-secret settings should be represented as reviewed environment-variable config
 - secret values should enter ECS through Parameter Store or Secrets Manager references rather than tracked files or image rebuilds
+- when ECS task definitions consume Parameter Store references, the shared task execution role must also be allowed to read `/${environment}/runtime/*` parameters. The stock `AmazonECSTaskExecutionRolePolicy` is not sufficient on its own for this runtime path
 - cloud-facing TLS should terminate with ACM-managed certificates on ingress rather than by carrying the local self-signed certificate model into AWS
 - when required cloud values are not available yet, keep `environment` and `secrets` empty for that service rather than inventing placeholders, and capture the missing inputs as explicit required keys and blockers in the reviewed runtime-config manifest
 - use the runtime-config manifest as the evidence-backed handoff between repo-level config discovery and the later ingress, DNS, and secret-provisioning steps
