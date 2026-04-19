@@ -159,15 +159,15 @@ The workflow is also self-contained for release-sidecar generation. Instead of c
 - source repository and commit metadata
 - a generated proof-of-concept release record markdown file
 
-The Android wallet fork now also publishes a GitHub prerelease automatically on every push to `main` in `InstechSandbox/eudi-app-android-wallet-ui`. Those automatic drops use a generated `demo-main-r<run-number>-<short-sha>` tag and stay marked as prereleases so the Releases page can act as a rolling tester-download surface without implying that every merge is a stable milestone release.
+The Android wallet fork now also publishes a GitHub release automatically on every push to `main` in `InstechSandbox/eudi-app-android-wallet-ui`. Those automatic drops use a generated `demo-main-r<run-number>-<short-sha>` tag and are published as normal releases so the newest successful `main` build becomes the repository's visible `Latest` APK.
 
-Manual dispatch is still available for deliberate named releases. Use `workflow_dispatch` when you want to control the tag, title, or prerelease flag explicitly rather than accepting the generated rolling prerelease metadata.
+Manual dispatch is still available for deliberate named releases. Use `workflow_dispatch` when you want to control the tag, title, or prerelease flag explicitly rather than accepting the generated rolling mainline release metadata.
 
 ### Android Test APK Publication Steps
 
 The minimum publication sequence is now one of:
 
-1. push to `main` and let the repository publish the next rolling prerelease automatically
+1. push to `main` and let the repository publish the next rolling release automatically
 2. dispatch the workflow manually when you want a deliberate named release
 
 For a manual named release, the sequence is:
@@ -219,8 +219,8 @@ Expected workflow-dispatch inputs:
 Expected automatic push-to-main metadata:
 
 - `release_tag`: generated as `demo-main-r<run-number>-<short-sha>`
-- `release_name`: generated as `Demo main prerelease r<run-number> (<short-sha>, vc<versionCode>)`
-- `prerelease`: always `true` for the automatic rolling mainline publication path
+- `release_name`: generated as `Demo main release r<run-number> (<short-sha>, vc<versionCode>)`
+- `prerelease`: always `false` for the automatic rolling mainline publication path so GitHub marks the newest one as `Latest`
 
 The resulting GitHub release should contain at least:
 
@@ -433,6 +433,32 @@ The first-phase deployment order should be explicit and automated:
 8. Android and iOS distribution publication as required by the release flow
 
 Manual documentation of the order is useful, but the deployment system should enforce the order rather than relying on operator memory.
+
+For operator-driven verification after the automation is in place, use the same practical order when deciding whether a fresh multi-repo rollout is coherent:
+
+1. issuer authorization server
+2. issuer backend
+3. issuer frontend
+4. verifier backend
+5. verifier UI
+6. Android APK publication
+
+That order is not a build-system requirement because the repositories publish independently and the runtime consumes immutable image digests. It is a verification convenience that reduces transient issuer-verifier mismatch while ECS rollouts are still converging.
+
+## Final Acceptance Sequence
+
+Once the automated pushes and publications are green, run the final stack validation in this exact order:
+
+1. confirm the five runtime services in ECS are at steady state with desired count satisfied
+2. confirm the newest Android GitHub release exists and exposes the signed `demoRelease` APK plus the compliance zip
+3. install that newest APK on the target Android device
+4. open the public issuer journey and complete one credential issuance flow with the newly installed APK
+5. verify the issued PID is visible in the wallet before starting verifier tests
+6. open the existing-business verifier journey and complete one successful proof
+7. open the new-business verifier journey and complete one successful proof
+8. capture any wallet or backend evidence needed for follow-up only after the happy path has been attempted once end to end
+
+Do not mix old installed APKs with a newly deployed backend stack during this final pass. The point of the sequence is to prove that the latest automatically published Android artifact works against the latest automatically deployed cloud services.
 
 ## Idempotence Rule
 
