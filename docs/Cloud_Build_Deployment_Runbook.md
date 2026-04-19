@@ -460,6 +460,34 @@ Once the automated pushes and publications are green, run the final stack valida
 
 Do not mix old installed APKs with a newly deployed backend stack during this final pass. The point of the sequence is to prove that the latest automatically published Android artifact works against the latest automatically deployed cloud services.
 
+## Rollout Timeout Triage
+
+Do not wait indefinitely for `aws ecs wait services-stable` when a cloud rollout is still marked `IN_PROGRESS`.
+
+Use this operator rule:
+
+1. if the stack has not reached steady state within 15 minutes, treat the rollout as needing investigation rather than passively waiting longer
+2. first inspect ECS service events for repeated task replacement or repeated target registration and deregistration loops
+3. then inspect recent stopped tasks for container exit codes and stopped reasons
+4. then inspect ALB target health to distinguish `healthy`, `draining`, and `unhealthy` targets
+5. only after that pull the relevant CloudWatch logs for the failing service
+
+Current cloud-build evidence shows two distinct patterns that can both stretch deployment time:
+
+1. normal-but-slow convergence: verifier backend warm-up and ALB deregistration delay can keep a service `IN_PROGRESS` even after a new target is already healthy
+2. actual stuck rollout: repeated replacement of auth-server tasks with container exit code `1` means the service is not just waiting on health-check timing and should be treated as failed until the container startup error is fixed
+
+For this environment, remember these specific timing contributors:
+
+1. verifier backend trust-list warm-up has previously taken about 123 seconds before the service was ready
+2. the ALB target groups currently use `deregistration_delay.timeout_seconds = 300`, which means old tasks can remain in `draining` state for up to 5 minutes even when the new target is already healthy
+
+Recommended operator practice:
+
+1. use one bounded `services-stable` wait with a 15-minute expectation, not an open-ended loop
+2. if it overruns, switch immediately to ECS events, stopped-task reasons, target health, and logs
+3. consider enabling ECS deployment circuit breaker rollback for services where repeated failed replacements are possible, so broken revisions fail fast instead of stalling the environment for an hour
+
 ## Idempotence Rule
 
 All build and deployment steps should be written so repeated execution converges on the same result.
