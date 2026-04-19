@@ -537,6 +537,8 @@ Phase 1 design choices should therefore prefer:
 
 The current runtime scaffold follows that rule by creating ECS task definitions and ECS services from immutable image references, but keeping every service at `desired_count = 0` until the runtime configuration and secret contract is explicitly wired for cloud execution.
 
+That zero-desired-count baseline is now guarded in the deploy workflows. A runtime apply that would leave every component at `desired_count = 0` fails by default, because that path is too easy to trigger accidentally from the checked-in base runtime manifest. Use a generated runtime profile such as `full-public-demo`, `verifier-first`, or `issuer-first` for normal public-slice deploys. Only set the explicit `allow-zero-desired-counts` workflow input when the intent really is to scale the runtime slice down to zero.
+
 For the issuer authorization server specifically, the container runtime contract should stay as plain HTTP on internal port `5001`, with cloud TLS terminated at ingress. Local self-signed HTTPS remains a separate helper path and should not drive the ECS task definition.
 
 That means the cloud-rendered auth runtime config must not carry the template `webserver.server_cert` or `webserver.server_key` values from the repository's local config unless `AUTH_TLS_CERT_FILE` and `AUTH_TLS_KEY_FILE` are explicitly provided. If those local cert paths survive into the ECS runtime config, the container can repeatedly exit at startup while looking for `certs/client.crt` and `certs/client.key` that do not exist in the cloud task filesystem.
