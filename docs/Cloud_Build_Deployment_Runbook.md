@@ -159,9 +159,18 @@ The workflow is also self-contained for release-sidecar generation. Instead of c
 - source repository and commit metadata
 - a generated proof-of-concept release record markdown file
 
+The Android wallet fork now also publishes a GitHub prerelease automatically on every push to `main` in `InstechSandbox/eudi-app-android-wallet-ui`. Those automatic drops use a generated `demo-main-r<run-number>-<short-sha>` tag and stay marked as prereleases so the Releases page can act as a rolling tester-download surface without implying that every merge is a stable milestone release.
+
+Manual dispatch is still available for deliberate named releases. Use `workflow_dispatch` when you want to control the tag, title, or prerelease flag explicitly rather than accepting the generated rolling prerelease metadata.
+
 ### Android Test APK Publication Steps
 
-The minimum publication sequence is:
+The minimum publication sequence is now one of:
+
+1. push to `main` and let the repository publish the next rolling prerelease automatically
+2. dispatch the workflow manually when you want a deliberate named release
+
+For a manual named release, the sequence is:
 
 1. ensure the Android repo changes that add or update `.github/workflows/publish-test-apk.yml` are committed and pushed
 2. populate the required repository secrets in `InstechSandbox/eudi-app-android-wallet-ui`
@@ -206,6 +215,13 @@ Expected workflow-dispatch inputs:
 - `release_tag`: immutable release identifier and Git tag, for example `cloud-build-20260412-demo-apk-v1`
 - `release_name`: human-readable title shown on the GitHub release page
 - `prerelease`: default `false` so the latest APK release is visible on the repository homepage; set it to `true` only when you intentionally want a prerelease drop
+
+Expected automatic push-to-main metadata:
+
+- `release_tag`: generated as `demo-main-r<run-number>-<short-sha>`
+- `release_name`: generated as `Demo main prerelease r<run-number> (<short-sha>, vc<versionCode>)`
+- `prerelease`: always `true` for the automatic rolling mainline publication path
+
 The resulting GitHub release should contain at least:
 
 - one signed `demoRelease` APK from `app/build/outputs/apk/demo/release/`
