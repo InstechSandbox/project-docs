@@ -59,8 +59,8 @@ Keep one completed record per distributed tester build.
 
 ## Device Compatibility Statement
 
-- Evidence-backed minimum OS statement: `<for Android: Android 10 / API 29 or later; otherwise platform-specific statement>`
-- Evidence-backed required hardware statement: `<for Android: camera, Bluetooth, Bluetooth LE; NFC optional; otherwise platform-specific statement>`
+- Evidence-backed minimum OS statement: `<for Android: Android 10 / API 29 or later; for iOS: iOS 17.0 or later; otherwise platform-specific statement>`
+- Evidence-backed required hardware statement: `<for Android: camera, Bluetooth, Bluetooth LE; NFC optional; for iOS: no narrower hardware floor proven beyond devices that support the minimum iOS version; otherwise platform-specific statement>`
 - Hardware not proven as minimum: `<RAM|storage|CPU class|specific device family|none>`
 
 ## Tested On Declaration

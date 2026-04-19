@@ -62,7 +62,7 @@ A reusable blank release note is maintained in [Mobile App Release Record Templa
 
 ## Evidence-Based Device Statements
 
-For Android APK distribution in this workspace, keep device-compatibility language evidence-based.
+For Android APK distribution and iOS TestFlight or device distribution in this workspace, keep device-compatibility language evidence-based.
 
 The current repository evidence supports only these hard statements for the Android wallet APK:
 
@@ -80,6 +80,21 @@ The current repository does not establish a defensible minimum for:
 
 That means release notes and tester communications should not claim a broader Android hardware minimum unless that statement is backed by recorded test evidence.
 
+The current repository evidence supports only these hard statements for the iOS wallet app:
+
+- software floor: iOS 17.0 or later, because the iOS app target deployment settings are set to `IPHONEOS_DEPLOYMENT_TARGET = 17.0`
+- there is no separate evidence-backed minimum handset-family statement beyond whatever Apple devices support that iOS floor
+
+The current repository does not establish a defensible minimum for the iOS wallet for:
+
+- RAM
+- free storage
+- CPU class or chip generation
+- biometric sensor presence as an install-time requirement
+- a narrower handset-family floor than Apple's own iOS support matrix
+
+That means release notes and tester communications should not claim a broader iPhone hardware minimum unless that statement is backed by recorded test evidence.
+
 When the exact minimum hardware profile is not proven, the Android release record should include a `Tested on` declaration instead of an invented minimum-device claim. That declaration should list:
 
 1. device make and model
@@ -88,6 +103,17 @@ When the exact minimum hardware profile is not proven, the Android release recor
 4. whether the run was on physical hardware or emulator
 5. flows exercised, for example launch, PIN setup, issuance, same-device presentation, or proximity
 6. outcome, including any known limitations
+
+Apply the same rule to iOS release records when a narrower hardware minimum than the iOS software floor is not proven.
+
+### Current Recorded Tested-On Devices
+
+The current recorded mobile proof-of-concept test evidence in this workspace is:
+
+- Android wallet: Samsung Galaxy S21+ 5G on physical hardware running Android 15 with One UI 7.0, with device software reported as updated on 2026-03-31
+- iOS wallet: iPhone 11 on physical hardware running iOS 26.3
+
+This is useful runtime evidence, but it is not yet a complete minimum-device statement.
 
 ## Third-Party Notices
 
@@ -119,6 +145,7 @@ The shared generator script now automates the creation of this sidecar bundle, i
 - TestFlight distribution to external or internal testers should be treated as redistribution for notice and source-availability purposes.
 - Because TestFlight is weak as a document-delivery channel, keep the notice bundle in a stable source-controlled or release-attached location and reference it in tester communications.
 - If branding or naming diverges from upstream, make the forked proof-of-concept status explicit.
+- The iOS release record should include either an evidence-backed minimum-device statement or, when that is not proven, a `Tested on` declaration with the exact devices and iOS versions exercised.
 
 ## Release Checklist
 
