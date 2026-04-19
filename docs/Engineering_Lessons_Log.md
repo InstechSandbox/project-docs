@@ -4,6 +4,13 @@
 
 Record recurring lessons that are worth turning into shared engineering guidance.
 
+### 2026-04-19 - Verifier backend needs a longer ALB grace period than the rest of the runtime slice
+
+- Context: The public `test` verifier-backend rollout stayed `IN_PROGRESS` for over an hour even though new tasks were starting and the container process itself was not crash-looping.
+- What happened: ECS was configured with a uniform `120` second `health_check_grace_period_seconds` for all public-ingress services. The verifier backend spends longer than that bootstrapping trust-list validation before `/actuator/health` can pass, so each replacement task was terminated by the service scheduler with `Task failed ELB health checks` before it could ever take over.
+- Reusable lesson: A shared runtime module can still need per-service readiness budgets. When a service has a known cold-start phase longer than the generic ALB grace period, encode that exception in infrastructure rather than relying on retries to eventually line up.
+- Follow-up doc or rule update: Keep `verifier-backend` on a `240` second ECS health-check grace period in the test runtime module until startup work is reduced or health checks are redesigned.
+
 ### 2026-04-19 - Cloud ECS images must not depend on ignored local proof assets
 
 - Context: The public `test` issuer-backend ECS rollout remained stuck in `IN_PROGRESS` with repeated `EssentialContainerExited` task failures even after image publish and deploy automation were working.

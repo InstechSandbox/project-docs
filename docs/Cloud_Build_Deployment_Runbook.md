@@ -561,6 +561,7 @@ That runtime configuration contract should stay explicit and reviewable:
 - allow the reviewed runtime-config manifest to carry intentional `desired_count` values so the deployment system can activate one public slice at a time instead of turning on every service together
 - where the hostname pattern is already agreed, prefer generating the first runtime-config slice from the base domain and profile rather than hand-editing repeated public URLs across five services
 - for the `verifier-first` public slice, explicitly disable Spring mail health checks in the generated verifier-backend environment until real SMTP credentials exist, because placeholder mail settings must not make the shared `/actuator/health` endpoint fail the ALB target check
+- keep the verifier-backend ECS service on a longer ALB grace period than the other services. The current trust-list bootstrap can take longer than two minutes, so the runtime module should use `240` seconds for `verifier-backend` rather than the generic `120` second public-ingress default
 
 Do not distort the architecture solely for short-term savings, but prefer the smallest viable infrastructure footprint that keeps the design maintainable.
 
