@@ -9,7 +9,6 @@ source "$SCRIPT_DIR/common.sh"
 require_command openssl
 require_dir "$ISSUER_REPO"
 require_dir "$WALLET_REPO"
-require_dir "$IOS_WALLET_REPO"
 
 PYTHON_BIN="${PYTHON_BIN:-$ISSUER_REPO/.venv/bin/python}"
 if [[ ! -x "$PYTHON_BIN" ]]; then
@@ -20,6 +19,11 @@ ISSUER_CERT_DIR="$ISSUER_REPO/local/cert"
 ISSUER_KEY_DIR="$ISSUER_REPO/local/privKey"
 ANDROID_LOCAL_ROOT="$WALLET_REPO/resources-logic/src/main/res/raw/pidissuerca_local_ut.pem"
 IOS_LOCAL_ROOT="$IOS_WALLET_REPO/Wallet/Certificate/pidissuerca_local_ut.der"
+SYNC_IOS_LOCAL_ROOT=true
+
+if [[ ! -d "$IOS_WALLET_REPO" ]]; then
+  SYNC_IOS_LOCAL_ROOT=false
+fi
 
 IACA_KEY="$ISSUER_KEY_DIR/PID-IACA-LOCAL-UT.pem"
 IACA_CERT_PEM="$ISSUER_CERT_DIR/PIDIssuerCALocalUT.pem"
@@ -27,7 +31,11 @@ DS_KEY="$ISSUER_KEY_DIR/PID-DS-LOCAL-UT.pem"
 DS_CERT_PEM="$ISSUER_CERT_DIR/PID-DS-LOCAL-UT_cert.pem"
 DS_CERT_DER="$ISSUER_CERT_DIR/PID-DS-LOCAL-UT_cert.der"
 
-mkdir -p "$ISSUER_CERT_DIR" "$ISSUER_KEY_DIR" "$(dirname "$ANDROID_LOCAL_ROOT")" "$(dirname "$IOS_LOCAL_ROOT")"
+mkdir -p "$ISSUER_CERT_DIR" "$ISSUER_KEY_DIR" "$(dirname "$ANDROID_LOCAL_ROOT")"
+
+if [[ "$SYNC_IOS_LOCAL_ROOT" == true ]]; then
+  mkdir -p "$(dirname "$IOS_LOCAL_ROOT")"
+fi
 
 IACA_KEY="$IACA_KEY" \
 IACA_CERT_PEM="$IACA_CERT_PEM" \
@@ -170,7 +178,10 @@ PY
 
 openssl x509 -in "$DS_CERT_PEM" -outform der -out "$DS_CERT_DER"
 cp "$IACA_CERT_PEM" "$ANDROID_LOCAL_ROOT"
-openssl x509 -in "$IACA_CERT_PEM" -outform der -out "$IOS_LOCAL_ROOT"
+
+if [[ "$SYNC_IOS_LOCAL_ROOT" == true ]]; then
+  openssl x509 -in "$IACA_CERT_PEM" -outform der -out "$IOS_LOCAL_ROOT"
+fi
 
 section "Local Mdoc Signer Chain"
 openssl x509 -in "$IACA_CERT_PEM" -noout -subject -issuer -dates
@@ -180,7 +191,12 @@ openssl verify -CAfile "$IACA_CERT_PEM" "$DS_CERT_PEM"
 
 section "Wallet Trust Roots"
 printf 'Android local root: %s\n' "$ANDROID_LOCAL_ROOT"
-printf 'iOS local root: %s\n' "$IOS_LOCAL_ROOT"
+
+if [[ "$SYNC_IOS_LOCAL_ROOT" == true ]]; then
+  printf 'iOS local root: %s\n' "$IOS_LOCAL_ROOT"
+else
+  printf 'iOS local root: skipped (repo not present at %s)\n' "$IOS_WALLET_REPO"
+fi
 
 section "Issuer Signer Material"
 printf 'IACA key: %s\n' "$IACA_KEY"

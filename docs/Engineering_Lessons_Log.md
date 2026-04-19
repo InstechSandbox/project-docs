@@ -39,6 +39,13 @@ Record recurring lessons that are worth turning into shared engineering guidance
 - Reusable lesson: If a cloud task depends on protocol-facing signer files, treat them as explicit runtime contract, not accidental workspace baggage. Put fixed trust material behind reviewed ECS secret references, bootstrap it into writable runtime paths before app startup, and generate only the ephemeral keys that do not need cross-service trust continuity.
 - Follow-up doc or rule update: Keep issuer cloud runtime config using secret-backed bootstrap for the Utopia signer assets and writable temp paths for generated request-encryption and nonce keys. Do not point ECS at ignored repository directories like `/app/local/*` again.
 
+### 2026-04-18 - Local cert refresh must treat a missing IACA as stale signer state
+
+- Context: The rebuilt local Irish Life proof flow regressed back to `IssuerCertificateIsNotTrusted` after wallet consent, even though this trust-shape issue had already been fixed before.
+- What happened: The local runtime only had `PID-DS-0001_UT_cert.pem`, a self-signed DS leaf with the correct issuer SAN, but no `PIDIssuerCALocalUT.pem`. `scripts/refresh-local-certs.sh` validated SANs and key matching, then skipped CA verification when the IACA file was absent, so the stale DS cert was accepted. `scripts/start-local-verifier.sh` then mounted that DS leaf as `VERIFIER_IRISHLIFE_PIDISSUERCHAIN_PATH`, but the verifier expects PKIX trust anchors for SD-JWT issuer validation, not a directly trusted self-signed DS leaf.
+- Reusable lesson: In the local stack, absence of the IACA is itself a certificate-staleness signal. Treat missing CA material as a hard failure that forces signer-chain regeneration before starting verifier flows.
+- Follow-up doc or rule update: Keep `refresh-local-certs.sh` requiring a present IACA and keep verifier startup refusing DS-leaf fallback for `issuer_chain` so the regression cannot hide behind a green local build.
+
 ### 2026-04-15 - Cloud SD-JWT issuer demo certs must bind to the public issuer URL, not the packaged local IP
 
 - Context: The Irish Life proof flow progressed past wallet consent in the public `test` environment and then failed at verifier response processing with `IssuerCertificateIsNotTrusted`.

@@ -127,6 +127,8 @@ utopia_signer_cert_matches_issuer_identity() {
   [[ -f "$key_file" ]] || return 1
   [[ -f "$cert_pem" ]] || return 1
   [[ -f "$cert_der" ]] || return 1
+  [[ -n "$iaca_cert_pem" ]] || return 1
+  [[ -f "$iaca_cert_pem" ]] || return 1
 
   cert_has_san_entry "$cert_pem" "URI:$ISSUER_URL" || return 1
 
@@ -149,9 +151,7 @@ utopia_signer_cert_matches_issuer_identity() {
   [[ "$key_fp" == "$pem_fp" ]] || return 1
   [[ "$key_fp" == "$der_fp" ]] || return 1
 
-  if [[ -n "$iaca_cert_pem" ]] && [[ -f "$iaca_cert_pem" ]]; then
-    openssl verify -CAfile "$iaca_cert_pem" "$cert_pem" >/dev/null 2>&1 || return 1
-  fi
+  openssl verify -CAfile "$iaca_cert_pem" "$cert_pem" >/dev/null 2>&1 || return 1
 }
 
 generate_shared_cert() {
