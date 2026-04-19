@@ -537,6 +537,8 @@ The current runtime scaffold follows that rule by creating ECS task definitions 
 
 For the issuer authorization server specifically, the container runtime contract should stay as plain HTTP on internal port `5001`, with cloud TLS terminated at ingress. Local self-signed HTTPS remains a separate helper path and should not drive the ECS task definition.
 
+That means the cloud-rendered auth runtime config must not carry the template `webserver.server_cert` or `webserver.server_key` values from the repository's local config unless `AUTH_TLS_CERT_FILE` and `AUTH_TLS_KEY_FILE` are explicitly provided. If those local cert paths survive into the ECS runtime config, the container can repeatedly exit at startup while looking for `certs/client.crt` and `certs/client.key` that do not exist in the cloud task filesystem.
+
 The first public-internet ingress step should also stay minimal and explicit:
 
 - use one shared public ALB for the `test` runtime instead of separate public entry points per service
