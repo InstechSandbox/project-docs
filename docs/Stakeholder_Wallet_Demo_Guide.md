@@ -185,5 +185,5 @@ For Existing Business, use policy number 12345678.
 If you use New Business, make sure the values entered into the Irish Life form match the wallet PID values exactly.
 
 The fuller tester note is available here:
-Stakeholder_Wallet_Demo_Guide.md
+https://github.com/InstechSandbox/project-docs/blob/main/docs/Stakeholder_Wallet_Demo_Guide.md
 ```
