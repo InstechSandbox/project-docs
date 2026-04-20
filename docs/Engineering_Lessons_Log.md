@@ -4,6 +4,13 @@
 
 Record recurring lessons that are worth turning into shared engineering guidance.
 
+### 2026-04-20 - De-scope inherited non-blocking Sonar noise before disabling broader security signal
+
+- Context: The cloud-build proof-of-concept slice reached a healthy push-to-main deploy path, but the InstechSandbox verifier forks were still generating repeated SonarCloud failure emails from inherited upstream workflows.
+- What happened: The deploy-critical gates were already the repo-native validation and publish flows, while the inherited Sonar workflows were failing outside the accepted proof-of-concept acceptance path. At the same time, SCA and secret-scanning were still succeeding and provided useful signal.
+- Reusable lesson: When inherited governance workflows create noise during a narrowly scoped proof-of-concept, disable the smallest non-blocking source of noise first rather than turning off all security checks. Preserve manual re-run capability and keep higher-signal checks enabled where they are not impeding delivery.
+- Follow-up doc or rule update: Keep the InstechSandbox verifier forks on manual-only SonarCloud during the current proof-of-concept phase, while retaining automatic SCA and secret-scanning until there is evidence they are also materially obstructing the agreed platform goal.
+
 ### 2026-04-19 - ECS secret refs require explicit Parameter Store access on the task execution role
 
 - Context: After the issuer-backend moved its signer material into ECS secret references, the public `test` runtime still failed to start the service even though the container image and runtime config were correct.
