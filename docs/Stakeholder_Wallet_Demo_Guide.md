@@ -160,13 +160,21 @@ After installing the APK, use the public demo environment:
 - Issuer: https://issuer.test.instech-eudi-poc.com/
 - Irish Life verifier: https://verifier.test.instech-eudi-poc.com/irish-life
 
-When issuing a credential in the wallet, choose PID in SD-JWT VC format.
+When issuing a credential in the wallet, choose:
+
+- PID
+- Format: SD-JWT VC
+- Country of origin: FormEU
 
 For the happy-path demo, issue a PID with these values:
 
 - Given name: Patrick
 - Family name: Murphy
 - Birthdate: 1980-04-12
+- Country: IE
+
+After entering those identity fields, click Add Optional Attributes, choose Address, and click Add Attributes.
+
 - Street address: 1 Main Street
 - Locality: Dublin
 - Region: Leinster
