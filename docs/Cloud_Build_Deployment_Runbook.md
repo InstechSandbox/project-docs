@@ -229,6 +229,8 @@ The resulting GitHub release should contain at least:
 - one signed `demoRelease` APK from `app/build/outputs/apk/demo/release/`
 - one compliance sidecar zip generated under `.local/mobile-compliance/<release-tag>-android-compliance.zip`
 
+For a stakeholder-facing, low-maintenance operator sheet that reuses these release assumptions and the current Irish Life verifier journey rules, see [Stakeholder Wallet Demo Guide](Stakeholder_Wallet_Demo_Guide.md).
+
 ## Recommended Workflow Shape
 
 ### Repository-Level Workflows
