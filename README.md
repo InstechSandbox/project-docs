@@ -6,6 +6,7 @@ This repository holds documentation that applies across the current implementati
 
 - [Local Build Runbook](docs/Local_Build_Runbook.md) - step-by-step local build, startup, smoke, wallet install, issuance, and verification flow across the six repositories
 - [Cloud Build And Deployment Runbook](docs/Cloud_Build_Deployment_Runbook.md) - agreed first-phase GitHub Actions, AWS `test` environment, artifact publication, and `cloud-build` workstream design
+- [Stakeholder Wallet Demo Guide](docs/Stakeholder_Wallet_Demo_Guide.md) - short stakeholder-facing instructions for downloading the Android demo APK, issuing a happy-path PID, and completing the Irish Life public demo journeys
 - [EIDAS ARF Implementation Brief](docs/EIDAS_ARF_Implementation_Brief.md) - local implementation guardrails for ARF alignment, protocol assumptions, trust boundaries, and verifier-first delivery
 - [AI Working Agreement](docs/AI_Working_Agreement.md) - canonical AI-assisted engineering rules, repo map, testing expectations, and docs-update policy
 - [Irish Life New Business Verifier Design](docs/Irish_Life_New_Business_Verifier_Design.md) - business analysis, credential strategy, support-agent UX design, and pre-implementation architecture for the first Irish Life verifier journey
