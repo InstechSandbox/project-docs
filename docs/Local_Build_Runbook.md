@@ -313,6 +313,7 @@ For a second full stack, override values such as:
 AUTH_PORT=15001
 ISSUER_PORT=15002
 FRONTEND_PORT=15003
+VERIFIER_STACK_SUFFIX=-ios
 COMPOSE_PROJECT_NAME=ioswalletlocal
 VERIFIER_TLS_HOST_PORT=4443
 VERIFIER_BACKEND_HOST_PORT=18080
@@ -324,6 +325,8 @@ VERIFIER_PUBLIC_URL=https://<host-ip>:4443
 ```
 
 This keeps the primary local stack on its default ports while allowing a second full stack to run without colliding on Python service ports, Docker port bindings, fixed container names, or Compose project scoping.
+
+The verifier wrappers now auto-derive an isolated Docker Compose project name when you use non-default verifier ports, container names, or `VERIFIER_STACK_SUFFIX` and do not set `COMPOSE_PROJECT_NAME` explicitly. Keeping `COMPOSE_PROJECT_NAME` in `local-demo.env` is still the preferred explicit setup for long-lived parallel worktrees because it makes the intended stack boundary obvious in logs and `docker ps`.
 
 ## Irish Life Email And Customer Surface Settings
 

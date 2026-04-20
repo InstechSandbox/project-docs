@@ -121,6 +121,53 @@ AUTH_PORT="${AUTH_PORT:-5001}"
 ISSUER_PORT="${ISSUER_PORT:-5002}"
 FRONTEND_PORT="${FRONTEND_PORT:-5003}"
 VERIFIER_TLS_HOST_PORT="${VERIFIER_TLS_HOST_PORT:-443}"
+VERIFIER_BACKEND_HOST_PORT="${VERIFIER_BACKEND_HOST_PORT:-8080}"
+VERIFIER_UI_HOST_PORT="${VERIFIER_UI_HOST_PORT:-4300}"
+VERIFIER_STACK_SUFFIX="${VERIFIER_STACK_SUFFIX:-}"
+VERIFIER_BACKEND_CONTAINER_NAME="${VERIFIER_BACKEND_CONTAINER_NAME:-verifier-backend${VERIFIER_STACK_SUFFIX}}"
+VERIFIER_UI_CONTAINER_NAME="${VERIFIER_UI_CONTAINER_NAME:-verifier-ui${VERIFIER_STACK_SUFFIX}}"
+VERIFIER_HAPROXY_CONTAINER_NAME="${VERIFIER_HAPROXY_CONTAINER_NAME:-verifier-haproxy${VERIFIER_STACK_SUFFIX}}"
+
+derive_default_verifier_compose_project_name() {
+  local default_stack=true
+  local suffix="${VERIFIER_STACK_SUFFIX:-}"
+  local discriminator=""
+  local sanitized=""
+
+  if [[ "$VERIFIER_TLS_HOST_PORT" != "443" || "$VERIFIER_BACKEND_HOST_PORT" != "8080" || "$VERIFIER_UI_HOST_PORT" != "4300" ]]; then
+    default_stack=false
+  fi
+
+  if [[ "$VERIFIER_BACKEND_CONTAINER_NAME" != "verifier-backend" || "$VERIFIER_UI_CONTAINER_NAME" != "verifier-ui" || "$VERIFIER_HAPROXY_CONTAINER_NAME" != "verifier-haproxy" ]]; then
+    default_stack=false
+  fi
+
+  if [[ -n "$suffix" ]]; then
+    default_stack=false
+    discriminator="$suffix"
+  elif [[ "$default_stack" != true ]]; then
+    discriminator="${VERIFIER_TLS_HOST_PORT}-${VERIFIER_BACKEND_HOST_PORT}-${VERIFIER_UI_HOST_PORT}"
+  fi
+
+  if [[ -z "$discriminator" ]]; then
+    return 0
+  fi
+
+  sanitized=$(printf '%s' "$discriminator" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//')
+  if [[ -n "$sanitized" ]]; then
+    printf 'verifier-%s\n' "$sanitized"
+  fi
+}
+
+if [[ -z "${COMPOSE_PROJECT_NAME:-}" ]]; then
+  COMPOSE_PROJECT_NAME="$(derive_default_verifier_compose_project_name)"
+fi
+
+export VERIFIER_TLS_HOST_PORT VERIFIER_BACKEND_HOST_PORT VERIFIER_UI_HOST_PORT
+export VERIFIER_STACK_SUFFIX VERIFIER_BACKEND_CONTAINER_NAME VERIFIER_UI_CONTAINER_NAME VERIFIER_HAPROXY_CONTAINER_NAME
+if [[ -n "${COMPOSE_PROJECT_NAME:-}" ]]; then
+  export COMPOSE_PROJECT_NAME
+fi
 
 if [[ "$VERIFIER_TLS_HOST_PORT" == "443" ]]; then
   VERIFIER_PUBLIC_PORT_SUFFIX=""
@@ -412,12 +459,15 @@ sync_wallet_local_demo_host() {
 print_runtime_summary() {
   section "Runtime Summary"
   printf 'Wallet repo:        %s\n' "$WALLET_REPO"
+  printf 'Compose project:    %s\n' "${COMPOSE_PROJECT_NAME:-default}"
   printf 'LAN IP source:      %s\n' "$HOST_IP_SOURCE"
   printf 'Detected LAN IP:    %s\n' "${DETECTED_LAN_IP:-unavailable}"
   printf 'Auth URL:           %s\n' "$AUTH_URL"
   printf 'Issuer URL:         %s\n' "$ISSUER_URL"
   printf 'Frontend URL:       %s\n' "$FRONTEND_URL"
   printf 'Verifier URL:       %s\n' "$VERIFIER_PUBLIC_URL"
+  printf 'Verifier ports:     tls=%s backend=%s ui=%s\n' "$VERIFIER_TLS_HOST_PORT" "$VERIFIER_BACKEND_HOST_PORT" "$VERIFIER_UI_HOST_PORT"
+  printf 'Verifier containers:%s %s %s\n' " $VERIFIER_BACKEND_CONTAINER_NAME" "$VERIFIER_UI_CONTAINER_NAME" "$VERIFIER_HAPROXY_CONTAINER_NAME"
   printf 'Shared cert:        %s\n' "$SHARED_CERT_FILE"
   printf 'APK path:           %s\n' "$APK_PATH"
   printf 'ADB bin:            %s\n' "$ADB_BIN"
