@@ -67,6 +67,7 @@ When the issuer asks you to choose a credential type or format, select:
 
 - `PID`
 - format: `SD-JWT VC`
+- country of origin: `FormEU`
 
 For the Irish Life happy path, the wallet credential needs these structured address claims populated:
 
