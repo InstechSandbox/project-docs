@@ -83,13 +83,14 @@ For the simplest happy-path test data, issue a PID with:
 1. `given_name = Patrick`
 2. `family_name = Murphy`
 3. `birthdate = 1980-04-12`
-4. after entering those identity fields, click `Add Optional Attributes`
-5. choose `Address`
-6. click `Add Attributes`
-7. enter `street_address = 1 Main Street`
-8. enter `locality = Dublin`
-9. enter `region = Leinster`
-10. enter `postal_code = D02 XY56`
+4. enter `country = IE`
+5. after entering those identity fields, click `Add Optional Attributes`
+6. choose `Address`
+7. click `Add Attributes`
+8. enter `street_address = 1 Main Street`
+9. enter `locality = Dublin`
+10. enter `region = Leinster`
+11. enter `postal_code = D02 XY56`
 
 This produces the expected joined address:
 
