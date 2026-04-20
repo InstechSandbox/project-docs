@@ -174,7 +174,7 @@ The iOS wrappers deliberately stop at simulator build and launch. They are not a
 The Android wallet flavors now have explicit environment meaning in this workspace:
 
 - `Dev` is the local wallet build and is the one that the local runbook uses
-- `Demo` is the shared cloud or tester wallet build and is reserved for public `test.instech-eudi-poc.com` flows
+- `Demo` is the shared cloud or tester wallet build and is reserved for the public `issuer.test.instech-eudi-poc.com` and `verifier.test.instech-eudi-poc.com` flows
 
 This split matters for document readers and verifier requests because the wallet bakes environment-specific issuer and verifier hosts into `BuildConfig`.
 

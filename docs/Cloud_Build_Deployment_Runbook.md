@@ -120,8 +120,8 @@ For the current proof-of-concept phase, the InstechSandbox verifier forks also d
 For the wallet apps, environment targeting and distribution channel are related but distinct:
 
 - Android `Dev` is the local engineering flavor and should stay bound to local issuer and local verifier readers
-- Android `Demo` is the shared cloud tester flavor and should stay bound to the public `test.instech-eudi-poc.com` issuer and verifier readers
-- iOS `Dev` is the local Xcode path and now defaults to local issuer hosts through the tracked xcconfig and `Wallet.plist` path, while iOS `Demo` is the shared cloud or TestFlight path and now defaults to the public `test.instech-eudi-poc.com` issuer hosts
+- Android `Demo` is the shared cloud tester flavor and should stay bound to the public `issuer.test.instech-eudi-poc.com` and `verifier.test.instech-eudi-poc.com` readers
+- iOS `Dev` is the local Xcode path and now defaults to local issuer hosts through the tracked xcconfig and `Wallet.plist` path, while iOS `Demo` is the shared cloud or TestFlight path and now defaults to the public `issuer.test.instech-eudi-poc.com` and `issuer-api.test.instech-eudi-poc.com` issuer hosts
 - launcher or display names should make the distinction visible to operators so both installs can coexist without ambiguity
 
 The reader or verifier environment matters as much as the app binary origin. A local-reader wallet build should not be reused against the public verifier slice, and a cloud-reader wallet build should not be reused against the local verifier slice, because preregistered verifier assumptions and redirect handling are environment-specific.
@@ -146,7 +146,7 @@ Recommended local sequence:
 cd "$CODE_ROOT/eudi-app-android-wallet-ui"
 cp local.signing.properties.example local.signing.properties
 ./preflight-demo-release-signing.sh
-LOCAL_DEMO_HOST=test.instech-eudi-poc.com ./gradlew :app:assembleDemoRelease --console=plain
+LOCAL_DEMO_HOST=issuer.test.instech-eudi-poc.com ./gradlew :app:assembleDemoRelease --console=plain
 ```
 
 If the preflight fails with an alias or password mismatch, do not continue into Gradle packaging. Update `local.signing.properties` to match the local keystore or replace the ignored `sign` file with the intended local release keystore first.

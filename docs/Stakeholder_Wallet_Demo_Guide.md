@@ -19,7 +19,7 @@ The detailed engineering source of truth remains:
 Use this guide only for the public cloud proof-of-concept environment.
 
 - Wallet build: Android `Demo` APK from GitHub Releases
-- Environment: `test.instech-eudi-poc.com`
+- Environment: public `test` subdomains under `*.test.instech-eudi-poc.com`
 - Journeys covered:
   - Irish Life New Business
   - Irish Life Existing Business
@@ -53,15 +53,20 @@ If an older demo wallet is already installed, remove it first to avoid confusion
 
 These are the public cloud endpoints relevant to the demo:
 
-- Irish Life verifier journey selector: `https://test.instech-eudi-poc.com/verifier/irish-life`
-- Irish Life New Business customer entry: `https://test.instech-eudi-poc.com/verifier/irish-life/new-business/customer`
-- Irish Life Existing Business customer entry: `https://test.instech-eudi-poc.com/verifier/irish-life/existing-business/customer`
-- Irish Life Existing Business monitor: `https://test.instech-eudi-poc.com/verifier/irish-life/existing-business/agent`
-- Issuer frontend: `https://test.instech-eudi-poc.com`
+- Irish Life verifier journey selector: `https://verifier.test.instech-eudi-poc.com/irish-life`
+- Irish Life New Business customer entry: `https://verifier.test.instech-eudi-poc.com/irish-life/new-business/customer`
+- Irish Life Existing Business customer entry: `https://verifier.test.instech-eudi-poc.com/irish-life/existing-business/customer`
+- Irish Life Existing Business monitor: `https://verifier.test.instech-eudi-poc.com/irish-life/existing-business/agent`
+- Issuer frontend: `https://issuer.test.instech-eudi-poc.com/`
 
 ## 4. Issue A PID Credential
 
-Use the public issuer frontend and issue a PID credential in the wallet.
+Use the public issuer frontend and issue a `PID (SD-JWT VC)` credential in the wallet.
+
+When the issuer asks you to choose a credential type or format, select:
+
+- `PID`
+- format: `SD-JWT VC`
 
 For the Irish Life happy path, the wallet credential needs these structured address claims populated:
 
@@ -90,7 +95,7 @@ This produces the expected joined address:
 
 This is the most fixed and prescriptive happy path.
 
-1. Open `https://test.instech-eudi-poc.com/verifier/irish-life/existing-business/customer`
+1. Open `https://verifier.test.instech-eudi-poc.com/irish-life/existing-business/customer`
 2. Enter policy number `12345678`
 3. Start the withdrawal request
 4. Complete wallet sharing when prompted
@@ -106,7 +111,7 @@ For a successful match, the issued PID must match this internal policy record:
 
 If you want a monitoring view during the demo, open:
 
-- `https://test.instech-eudi-poc.com/verifier/irish-life/existing-business/agent`
+- `https://verifier.test.instech-eudi-poc.com/irish-life/existing-business/agent`
 
 That page is read-only for the current demo.
 
@@ -114,7 +119,7 @@ That page is read-only for the current demo.
 
 Open:
 
-- `https://test.instech-eudi-poc.com/verifier/irish-life/new-business/customer`
+- `https://verifier.test.instech-eudi-poc.com/irish-life/new-business/customer`
 
 For New Business, the easiest rule is simple:
 
@@ -147,8 +152,10 @@ https://github.com/InstechSandbox/eudi-app-android-wallet-ui/releases
 
 After installing the APK, use the public demo environment:
 
-- Issuer: https://test.instech-eudi-poc.com
-- Irish Life verifier: https://test.instech-eudi-poc.com/verifier/irish-life
+- Issuer: https://issuer.test.instech-eudi-poc.com/
+- Irish Life verifier: https://verifier.test.instech-eudi-poc.com/irish-life
+
+When issuing a credential in the wallet, choose PID in SD-JWT VC format.
 
 For the happy-path demo, issue a PID with these values:
 
