@@ -123,6 +123,7 @@ For the wallet apps, environment targeting and distribution channel are related 
 - Android `Demo` is the shared cloud tester flavor and should stay bound to the public `issuer.test.instech-eudi-poc.com` and `verifier.test.instech-eudi-poc.com` readers
 - iOS `Dev` is the local Xcode path and now defaults to local issuer hosts through the tracked xcconfig and `Wallet.plist` path, while iOS `Demo` is the shared cloud or TestFlight path and now defaults to the public `issuer.test.instech-eudi-poc.com` and `issuer-api.test.instech-eudi-poc.com` issuer hosts
 - launcher or display names should make the distinction visible to operators so both installs can coexist without ambiguity
+- Android callback registration must stay flavor-specific as well: keep `Demo` on `eu.europa.ec.euidi://authorization` and keep `Dev` on `eu.europa.ec.euidi.dev://authorization` so both APKs can coexist on one device without browser-return collisions
 
 The reader or verifier environment matters as much as the app binary origin. A local-reader wallet build should not be reused against the public verifier slice, and a cloud-reader wallet build should not be reused against the local verifier slice, because preregistered verifier assumptions and redirect handling are environment-specific.
 

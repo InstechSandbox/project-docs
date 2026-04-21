@@ -10,6 +10,7 @@ Record recurring lessons that are worth turning into shared engineering guidance
 - What happened: The `demo` flavor is the intended cloud app and the `dev` flavor is the local app, but both exported the same OpenID4VCI authorization callback scheme and host. On a test device with both apps installed, Android resolved that callback to `eu.europa.ec.euidi.dev`, so the OS could deliver the cloud authorization return to the wrong wallet flavor before issuance resumed.
 - Reusable lesson: Flavor-specific package ids are not enough when the authorization callback URI is shared. If demo and dev need to coexist on one device, each flavor must advertise a distinct OpenID4VCI authorization callback scheme so Android intent resolution cannot silently steal the browser return.
 - Follow-up doc or rule update: Keep the Android demo flavor on `eu.europa.ec.euidi://authorization` for cloud testing, and keep the dev flavor on its own callback scheme so both APKs can stay installed without cross-flavor redirect collisions.
+- Implementation note: The shared Android flavor wiring and merged manifests now enforce that split, so future callback debugging should treat any cross-flavor browser return as a regression.
 
 ### 2026-04-21 - Issuer request-encryption metadata and decrypt key must stay pinned to the same runtime key
 
