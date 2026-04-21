@@ -4,6 +4,13 @@
 
 Record recurring lessons that are worth turning into shared engineering guidance.
 
+### 2026-04-21 - Issuer request-encryption metadata and decrypt key must stay pinned to the same runtime key
+
+- Context: Android wallet issuance started failing after browser authorization with issuer backend logs showing `POST /credential 400` and `Failed to decrypt JWE ... InvalidTag()` even though the wallet JWE header matched the live `credential_request_encryption` metadata `kid` and algorithm.
+- What happened: The issuer bootstrap path generated and published the credential-request public JWK once at startup, but the `/credential` handler still reopened `CREDENTIAL_KEY` from the writable runtime directory on each request. That made the advertised key and the decrypt key separable if the runtime file drifted, which is exactly the failure shape for an `ECDH-ES` decrypt mismatch.
+- Reusable lesson: For protocol-facing request encryption, treat the published JWK and the server private key as one startup-time contract. Load the private key once, validate it against the published metadata before serving traffic, and do not rely on rereading a writable runtime key file per request.
+- Follow-up doc or rule update: Keep issuer startup validating `credential_request_encryption` against `CREDENTIAL_KEY`, and keep the request decrypt path using the startup-loaded key rather than rereading `/tmp` runtime files on every credential request.
+
 ### 2026-04-21 - Private ECS DNS needs both the correct Terraform state key and runtime security-group self-ingress
 
 - Context: The public `test` verifier UI was changed to proxy Irish Life case traffic to the verifier backend over private ECS DNS instead of hairpinning through the public verifier API host.
