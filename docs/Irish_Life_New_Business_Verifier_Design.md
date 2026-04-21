@@ -79,7 +79,7 @@ This separation should be treated as a deliberate architectural requirement so t
 
 - Journey name: New Business
 - Primary user: prospective customer, initiated from a support-agent workflow
-- Product surface: Irish Life branded dual-surface verifier product
+- Product surface: Emerald Insurance branded verifier product with aligned agent and customer views
 - Entry structure: new Irish Life journey selector with this journey as the first implemented route
 - Future placeholder: Existing Business Claims journey
 - Result handling: hard fail with visible reason on-screen

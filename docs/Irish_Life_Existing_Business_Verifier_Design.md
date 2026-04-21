@@ -24,18 +24,17 @@ The wallet does not replace policy administration, AML systems, or payment syste
 
 ### Implemented Demo Flow
 
-1. Customer opens the Existing Business customer journey.
-2. Customer enters a policy number and clicks `Request withdrawal`.
-3. The verifier accepts only demo policy number `12345678`.
-4. The verifier resolves that policy number to a hard-coded internal Irish Life policy record.
-5. The verifier creates the withdrawal case and immediately starts the wallet proof request with no agent intervention.
-6. The agent workspace is notified and acts only as a read-only monitor for case progress.
-7. The customer provides PID proof using the wallet.
-8. The verifier validates PID and compares it with the internal policy record.
-9. The verifier records a dummy AML lookup miss.
-10. The verifier records a policy-application match after proof verification succeeds.
-11. The verifier records an automated approval decision.
-12. The agent workspace is notified as the case progresses through those stages.
+1. Customer opens the Existing Business customer journey from an already-authenticated policy context.
+2. The verifier immediately resolves the demo policy to a hard-coded internal record and shows the prepopulated policy details on screen.
+3. The verifier creates the withdrawal case and immediately starts the wallet proof request with no agent intervention.
+4. The local demo continues to use supported policy number `12345678` behind that prepopulated view.
+5. The agent workspace is notified and acts only as a read-only monitor for case progress.
+6. The customer provides PID proof using the wallet.
+7. The verifier validates PID and compares it with the internal policy record.
+8. The verifier records a dummy AML lookup miss.
+9. The verifier records a policy-application match after proof verification succeeds.
+10. The verifier records an automated approval decision.
+11. The agent workspace is notified as the case progresses through those stages.
 
 ### Journey Ownership Decision
 
@@ -60,7 +59,7 @@ Any other policy number is rejected immediately and no case is created.
 
 ## Product Surface
 
-The verifier remains a dual-surface Irish Life product.
+The verifier remains a branded product with aligned customer and agent views.
 
 It includes:
 
@@ -83,13 +82,13 @@ The verifier UI includes:
 - an Existing Business agent route at `/irish-life/existing-business/agent`
 - an Existing Business customer start route at `/irish-life/existing-business/customer`
 - an Existing Business customer case route at `/irish-life/existing-business/customer/{caseId}`
-- shared Irish Life theme styling used by both journeys
+- current Emerald Insurance branding on the customer-facing and agent-facing UI
 - shared PID validation helpers reused from the Irish Life proof comparison path
 
 Frontend behaviour now follows these rules:
 
-- the customer start page asks only for policy number
-- successful create immediately routes the customer into the case page
+- the customer start route creates the demo case automatically and routes immediately into the case page
+- the case page shows the prepopulated policy details instead of a search form
 - the case page auto-starts the proof handoff when an active wallet request exists
 - the agent page lists all in-memory Existing Business cases and automatically expands the active one where possible
 
