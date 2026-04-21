@@ -109,6 +109,13 @@ Record recurring lessons that are worth turning into shared engineering guidance
 - What happened: The Angular UI issued same-origin requests such as `POST /ui/irish-life/new-business/cases`, but the cloud Nginx container only served static assets and had no `/ui` reverse proxy. Those requests therefore died in the UI container with `405 Method Not Allowed` before the Kotlin backend saw them.
 - Reusable lesson: When a frontend is built around relative API paths, the cloud UI container must preserve the same reverse-proxy contract as local development. Rewriting a few absolute URLs is not enough if the browser can still call `/ui`, `/wallet`, or `/utilities` on the SPA origin.
 
+### 2026-04-21 - Private ECS DNS in Nginx must be re-resolved after backend task rotation
+
+- Context: All four live Irish Life verifier journeys began timing out again even though `test-verifier-backend` was healthy and the direct backend host `verifier-api.test.instech-eudi-poc.com` still answered quickly.
+- What happened: The verifier UI task was configured with `HOST_API=http://test-verifier-backend.test.runtime.internal:8080`, but Nginx had resolved that hostname only when the UI container started. After the backend redeployed, Cloud Map pointed at the new backend IP while the UI task kept proxying to the stale old IP, producing `504 Gateway Time-out` and log lines such as `upstream timed out ... upstream: "http://10.42.1.123:8080/..."`.
+- Reusable lesson: For ECS-to-ECS proxying through private DNS, Nginx must use a resolver-backed variable target so it can refresh backend IPs after task rotation. Otherwise a healthy backend redeploy can silently break a long-lived UI task until the UI service is restarted.
+- Follow-up doc or rule update: Keep the runtime runbook explicit that `test-verifier-ui` can be recovered immediately with `aws ecs update-service --force-new-deployment`, but treat that only as the operational workaround. The durable fix is dynamic DNS resolution in the UI proxy config.
+
 ### 2026-04-10 - Scripted same-device verifier deep links are better triage than repeated Safari retries on iOS simulator
 
 - Context: A local same-device verifier deeplink on iOS could switch from Safari into the wallet app, yet still fail to start the actual proof request.
