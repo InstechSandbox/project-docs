@@ -4,12 +4,26 @@
 
 Record recurring lessons that are worth turning into shared engineering guidance.
 
+### 2026-04-21 - Demo and Dev Android wallets must not share the same OpenID4VCI authorization callback URI
+
+- Context: Cloud PID issuance retries remained ambiguous even after backend fixes because both installed Android wallet flavors could claim the same browser-return URI `eu.europa.ec.euidi://authorization`.
+- What happened: The `demo` flavor is the intended cloud app and the `dev` flavor is the local app, but both exported the same OpenID4VCI authorization callback scheme and host. On a test device with both apps installed, Android resolved that callback to `eu.europa.ec.euidi.dev`, so the OS could deliver the cloud authorization return to the wrong wallet flavor before issuance resumed.
+- Reusable lesson: Flavor-specific package ids are not enough when the authorization callback URI is shared. If demo and dev need to coexist on one device, each flavor must advertise a distinct OpenID4VCI authorization callback scheme so Android intent resolution cannot silently steal the browser return.
+- Follow-up doc or rule update: Keep the Android demo flavor on `eu.europa.ec.euidi://authorization` for cloud testing, and keep the dev flavor on its own callback scheme so both APKs can stay installed without cross-flavor redirect collisions.
+
 ### 2026-04-21 - Issuer request-encryption metadata and decrypt key must stay pinned to the same runtime key
 
 - Context: Android wallet issuance started failing after browser authorization with issuer backend logs showing `POST /credential 400` and `Failed to decrypt JWE ... InvalidTag()` even though the wallet JWE header matched the live `credential_request_encryption` metadata `kid` and algorithm.
 - What happened: The issuer bootstrap path generated and published the credential-request public JWK once at startup, but the `/credential` handler still reopened `CREDENTIAL_KEY` from the writable runtime directory on each request. That made the advertised key and the decrypt key separable if the runtime file drifted, which is exactly the failure shape for an `ECDH-ES` decrypt mismatch.
 - Reusable lesson: For protocol-facing request encryption, treat the published JWK and the server private key as one startup-time contract. Load the private key once, validate it against the published metadata before serving traffic, and do not rely on rereading a writable runtime key file per request.
 - Follow-up doc or rule update: Keep issuer startup validating `credential_request_encryption` against `CREDENTIAL_KEY`, and keep the request decrypt path using the startup-loaded key rather than rereading `/tmp` runtime files on every credential request.
+
+### 2026-04-21 - Frontend-hosted issuer metadata must refresh backend request-encryption keys after backend redeploys
+
+- Context: Public test Android issuance still failed with `Failed to decrypt JWE ... InvalidTag()` after the issuer backend was fixed to pin its decrypt key at startup.
+- What happened: The demo wallet defaulted to `https://issuer.test.instech-eudi-poc.com` for issuer metadata, and that frontend-hosted metadata pointed `credential_endpoint` at `https://issuer-api.test.instech-eudi-poc.com/credential`. Live checks showed the frontend was serving `credential_request_encryption` key `kid=QgVaK7trQ1MbRnhZd8PoMK5mauGGWvWD8xxrB9pM7uI` while the backend host published and used `kid=AEB34ZPueLA0a-r3FbTpjMoN9JedBEnTzT0rANZ_UGQ`. The wallet therefore encrypted the JWE to the frontend key and posted it to a backend task holding a different private key, which deterministically produced the `InvalidTag` decrypt failure.
+- Reusable lesson: In a split frontend or backend issuer topology, `issuer.<base-domain>` metadata is protocol-critical state, not a cosmetic mirror. If the frontend caches backend request-encryption metadata only at startup, any backend task rotation that changes the request-encryption key can break issuance until the frontend is also restarted or refreshed.
+- Follow-up doc or rule update: Keep the issuer frontend refreshing upstream `credential_request_encryption` before serving `/.well-known/openid-credential-issuer`, and include a post-deploy check that `issuer.<base-domain>` and `issuer-api.<base-domain>` publish the same request-encryption JWK before retesting wallets.
 
 ### 2026-04-21 - Private ECS DNS needs both the correct Terraform state key and runtime security-group self-ingress
 
