@@ -4,6 +4,13 @@
 
 Record recurring lessons that are worth turning into shared engineering guidance.
 
+### 2026-04-21 - Private ECS DNS needs both the correct Terraform state key and runtime security-group self-ingress
+
+- Context: The public `test` verifier UI was changed to proxy Irish Life case traffic to the verifier backend over private ECS DNS instead of hairpinning through the public verifier API host.
+- What happened: Two manual redeploy attempts failed before rollout because they were pointed at `iac/environments/test/runtime.tfstate`, which contained only a partial duplicate scaffold, while the live runtime was actually tracked in `iac/environments/test-runtime/terraform.tfstate`. After the deploy was rerun against the correct state key, the verifier UI resolved `test-verifier-backend.test.runtime.internal` correctly but still timed out because the shared runtime security group only allowed ingress from the public ALB and not from peer tasks in the same security group.
+- Reusable lesson: When adding private service-to-service traffic inside this ECS runtime, verify two contracts together: the deploy workflow must target the actual runtime state key for the `test-runtime` root, and the shared runtime security group must explicitly allow same-group ingress on the container ports. Fixing only DNS target selection is not enough.
+- Follow-up doc or rule update: Keep manual runtime deploys using `runtime-backend-key=iac/environments/test-runtime/terraform.tfstate`, and keep the runtime module allowing service-to-service ingress from the shared runtime security group on each exposed application port.
+
 ### 2026-04-20 - De-scope inherited non-blocking Sonar noise before disabling broader security signal
 
 - Context: The cloud-build proof-of-concept slice reached a healthy push-to-main deploy path, but the InstechSandbox verifier forks were still generating repeated SonarCloud failure emails from inherited upstream workflows.
