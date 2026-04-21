@@ -389,7 +389,9 @@ For the current public verifier slice, keep the UI-to-backend routing contract e
 
 - the Angular verifier UI currently issues relative API calls under `/ui`, `/wallet`, and `/utilities`
 - the cloud `eudi-web-verifier` Nginx container must proxy those paths to `HOST_API` instead of serving them as static routes
+- in ECS, `HOST_API` should point at the verifier backend over private runtime DNS such as `http://test-verifier-backend.test.runtime.internal:8080`, not back out through the public `https://verifier-api.<base-domain>` host
 - without that proxy, browser POSTs such as `/ui/irish-life/new-business/cases` terminate at the UI container and return `405`, even when the verifier backend itself is healthy
+- if `HOST_API` is set to the public verifier-api hostname, the UI task can hairpin through the public ALB and intermittently fail with Nginx `upstream timed out (110: Connection timed out) while connecting to upstream`, which surfaces in the browser as Irish Life case create or invite timeouts
 - the verifier backend task must also carry explicit Irish Life PID trust material. The current emergency cloud contract is `VERIFIER_IRISHLIFE_PIDISSUERCHAIN_PATH=classpath:irishlife/LocalUtopiaDsSelfSigned.pem`, because the live issuer task is emitting a self-signed SD-JWT leaf for the public issuer URL rather than a CA-signed leaf chained to `PIDIssuerCAUT01.pem`
 - keep that PEM packaged with the verifier image and reviewed in `instechsandbox-eudi-deploy` runtime config; if the env var is missing or points at a non-existent resource, both Irish Life flows still render but proof submission fails with `IssuerCertificateIsNotTrusted`
 - this is a compatibility bridge, not the target architecture. The durable fix is to provision cloud signer assets that let the issuer emit a CA-signed public-SAN leaf, then move verifier trust back to the reviewed issuer CA chain instead of pinning a self-signed DS certificate
