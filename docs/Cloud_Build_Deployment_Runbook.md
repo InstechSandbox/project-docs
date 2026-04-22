@@ -230,7 +230,7 @@ The resulting GitHub release should contain at least:
 - one signed `demoRelease` APK from `app/build/outputs/apk/demo/release/`
 - one compliance sidecar zip generated under `.local/mobile-compliance/<release-tag>-android-compliance.zip`
 
-For a stakeholder-facing, low-maintenance operator sheet that reuses these release assumptions and the current Irish Life verifier journey rules, see [Stakeholder Wallet Demo Guide](Stakeholder_Wallet_Demo_Guide.md).
+For a stakeholder-facing, low-maintenance operator sheet that reuses these release assumptions and the current Emerald Insurance verifier journey rules, see [Stakeholder Wallet Demo Guide](Stakeholder_Wallet_Demo_Guide.md).
 
 ## Recommended Workflow Shape
 
@@ -398,11 +398,11 @@ For the current public verifier slice, keep the UI-to-backend routing contract e
 - once `HOST_API` uses private runtime DNS, the shared runtime ECS security group must also allow service-to-service ingress on the container ports from that same security group. ALB-only ingress is not sufficient, because the verifier UI task then reaches the verifier backend directly on the backend task IP and port
 - when `HOST_API` uses private runtime DNS, the Nginx proxy must resolve that hostname dynamically, not only once at container startup. A backend redeploy changes the backend task IP, and a long-lived UI task can otherwise keep proxying to a stale `10.42.x.x:8080` address until the UI task is restarted
 - without that proxy, browser POSTs such as `/ui/irish-life/new-business/cases` terminate at the UI container and return `405`, even when the verifier backend itself is healthy
-- if `HOST_API` is set to the public verifier-api hostname, the UI task can hairpin through the public ALB and intermittently fail with Nginx `upstream timed out (110: Connection timed out) while connecting to upstream`, which surfaces in the browser as Irish Life case create or invite timeouts
+- if `HOST_API` is set to the public verifier-api hostname, the UI task can hairpin through the public ALB and intermittently fail with Nginx `upstream timed out (110: Connection timed out) while connecting to upstream`, which surfaces in the browser as Emerald Insurance case create or invite timeouts
 - if `HOST_API` resolves to the private verifier backend but the runtime security group does not allow same-group ingress on the backend port, the browser still sees the same timeout symptom, but the Nginx upstream target shifts to an internal task IP such as `http://10.42.x.x:8080/...`
 - if the verifier backend has redeployed and the UI now times out while trying a stale internal target such as `http://10.42.1.123:8080/...` even though Cloud Map points at a different healthy backend IP, the immediate operational recovery is `aws ecs update-service --force-new-deployment` on `test-verifier-ui`
-- the verifier backend task must also carry explicit Irish Life PID trust material. The current emergency cloud contract is `VERIFIER_IRISHLIFE_PIDISSUERCHAIN_PATH=classpath:irishlife/LocalUtopiaDsSelfSigned.pem`, because the live issuer task is emitting a self-signed SD-JWT leaf for the public issuer URL rather than a CA-signed leaf chained to `PIDIssuerCAUT01.pem`
-- keep that PEM packaged with the verifier image and reviewed in `instechsandbox-eudi-deploy` runtime config; if the env var is missing or points at a non-existent resource, both Irish Life flows still render but proof submission fails with `IssuerCertificateIsNotTrusted`
+- the verifier backend task must also carry explicit Emerald Insurance PID trust material. The current emergency cloud contract is `VERIFIER_IRISHLIFE_PIDISSUERCHAIN_PATH=classpath:irishlife/LocalUtopiaDsSelfSigned.pem`, because the live issuer task is emitting a self-signed SD-JWT leaf for the public issuer URL rather than a CA-signed leaf chained to `PIDIssuerCAUT01.pem`
+- keep that PEM packaged with the verifier image and reviewed in `instechsandbox-eudi-deploy` runtime config; if the env var is missing or points at a non-existent resource, both Emerald Insurance flows still render but proof submission fails with `IssuerCertificateIsNotTrusted`
 - this is a compatibility bridge, not the target architecture. The durable fix is to provision cloud signer assets that let the issuer emit a CA-signed public-SAN leaf, then move verifier trust back to the reviewed issuer CA chain instead of pinning a self-signed DS certificate
 
 For a blank AWS account, the correct point to start cloud testing is now the durable account bootstrap layer:

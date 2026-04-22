@@ -2,7 +2,7 @@
 
 This FAQ is a short, business-facing guide for insurers and product teams that are evaluating verifier capabilities in the EU Digital Identity Wallet ecosystem.
 
-It reflects the current working interpretation used in this project. It is aligned with the local [EIDAS ARF Implementation Brief](EIDAS_ARF_Implementation_Brief.md), the [AI Working Agreement](AI_Working_Agreement.md), and the current Irish Life verifier design notes for [New Business](Irish_Life_New_Business_Verifier_Design.md) and [Existing Business](Irish_Life_Existing_Business_Verifier_Design.md).
+It reflects the current working interpretation used in this project. It is aligned with the local [EIDAS ARF Implementation Brief](EIDAS_ARF_Implementation_Brief.md), the [AI Working Agreement](AI_Working_Agreement.md), and the current Emerald Insurance verifier design notes for [New Business](Emerald_Insurance_New_Business_Verifier_Design.md) and [Existing Business](Emerald_Insurance_Existing_Business_Verifier_Design.md).
 
 It is not legal advice, certification guidance, or a substitute for the final ecosystem rulebooks that will apply in production.
 
@@ -18,7 +18,7 @@ It does not replace underwriting, AML policy, sanctions screening, or policy-adm
 
 A verifier is the relying-party system that asks the wallet for evidence, receives the presentation, validates it, and decides what to do next. In insurance terms, it is the component that sits between the customer journey and the insurer's internal business decisioning.
 
-In this project, the verifier is the primary delivery surface. It is the part that generates the presentation request, handles wallet responses, and passes verified results into the Irish Life journey logic.
+In this project, the verifier is the primary delivery surface. It is the part that generates the presentation request, handles wallet responses, and passes verified results into the Emerald Insurance journey logic.
 
 ### Is this only for government identity?
 
@@ -134,6 +134,6 @@ Many insurers will end up with a hybrid approach: buy core verifier capability, 
 
 - [EIDAS ARF Implementation Brief](EIDAS_ARF_Implementation_Brief.md)
 - [AI Working Agreement](AI_Working_Agreement.md)
-- [Irish Life New Business Verifier Design](Irish_Life_New_Business_Verifier_Design.md)
-- [Irish Life Existing Business Verifier Design](Irish_Life_Existing_Business_Verifier_Design.md)
+- [Emerald Insurance New Business Verifier Design](Emerald_Insurance_New_Business_Verifier_Design.md)
+- [Emerald Insurance Existing Business Verifier Design](Emerald_Insurance_Existing_Business_Verifier_Design.md)
 - [Local Build Runbook](Local_Build_Runbook.md)

@@ -10,7 +10,7 @@ If you want to:
 
 - build and run the reference implementation locally, start with [Local Build Runbook](docs/Local_Build_Runbook.md)
 - understand what wallets mean for insurers operationally, start with [Insurer Readiness Pack](docs/Insurer_Readiness_Pack.md)
-- understand the public cloud deployment shape, start with [Irish Life Public Cloud Architecture](docs/Irish_Life_Public_Cloud_Architecture.md)
+- understand the public cloud deployment shape, start with [Emerald Insurance Public Cloud Architecture](docs/Emerald_Insurance_Public_Cloud_Architecture.md)
 - follow the cloud build and deployment model, use [Cloud Build And Deployment Runbook](docs/Cloud_Build_Deployment_Runbook.md)
 - install the wallet and run the public demo journeys, use [Stakeholder Wallet Demo Guide](docs/Stakeholder_Wallet_Demo_Guide.md)
 - understand the standards and protocol profile choices behind the PoC, read [Reference Implementation Standards Summary](docs/Reference_Implementation_Standards_Summary.md)
@@ -18,17 +18,17 @@ If you want to:
 ## Core Documents
 
 - [Insurer Readiness Pack](docs/Insurer_Readiness_Pack.md) - concise insurer-facing summary of what wallets enable, onboarding and AML implications, immediate actions, and Government-led environment considerations
-- [Irish Life Public Cloud Architecture](docs/Irish_Life_Public_Cloud_Architecture.md) - public `test` environment architecture, AWS runtime boundaries, Mermaid diagrams, and verifier-first system context for the Irish Life proof of concept
+- [Emerald Insurance Public Cloud Architecture](docs/Emerald_Insurance_Public_Cloud_Architecture.md) - public `test` environment architecture, AWS runtime boundaries, Mermaid diagrams, and verifier-first system context for the Emerald Insurance proof of concept
 - [Local Build Runbook](docs/Local_Build_Runbook.md) - step-by-step local build, startup, smoke, wallet install, issuance, and verification flow across the six repositories
 - [Cloud Build And Deployment Runbook](docs/Cloud_Build_Deployment_Runbook.md) - agreed first-phase GitHub Actions, AWS `test` environment, artifact publication, and `cloud-build` workstream design
 - [EIDAS ARF Implementation Brief](docs/EIDAS_ARF_Implementation_Brief.md) - local implementation guardrails for ARF alignment, protocol assumptions, trust boundaries, and verifier-first delivery
 - [Reference Implementation Standards Summary](docs/Reference_Implementation_Standards_Summary.md) - concise map of the standards and profiles used in this PoC, where they are implemented across the repo set, and which delivery concessions remain explicit
 - [AI Working Agreement](docs/AI_Working_Agreement.md) - canonical AI-assisted engineering rules, repo map, testing expectations, and docs-update policy
-- [Irish Life New Business Verifier Design](docs/Irish_Life_New_Business_Verifier_Design.md) - business analysis, credential strategy, support-agent UX design, and pre-implementation architecture for the first Irish Life verifier journey
+- [Emerald Insurance New Business Verifier Design](docs/Emerald_Insurance_New_Business_Verifier_Design.md) - business analysis, credential strategy, support-agent UX design, and pre-implementation architecture for the first Emerald Insurance verifier journey
 - [Engineering Lessons Log](docs/Engineering_Lessons_Log.md) - reusable lessons captured as the project evolves
 - [Repo Gate Debt Backlog](docs/Repo_Gate_Debt_Backlog.md) - tracked follow-up items for repo-native gates surfaced by the shared hooks
 - [Local Deployment Notes](docs/Local_Deployment_Notes.md) - explains the fork-to-baseline commit set, the rationale behind the local deployment changes, and the coordinated baseline tags
-- [Irish Life Demo OBS Overlay](docs/Irish_Life_Demo_OBS_Overlay.md) - simple browser-source overlay for end-to-end demo recordings with customer and agent screen labels
+- [Emerald Insurance Demo OBS Overlay](docs/Emerald_Insurance_Demo_OBS_Overlay.md) - simple browser-source overlay for end-to-end demo recordings with customer and agent screen labels
 - [iOS Wallet Enablement Plan](docs/IOS_Wallet_Enablement_Plan.md) - initial repo scope, build path, smoke targets, and distribution preparation for the iOS workstream
 - [Licensing Notes](docs/Licensing_Notes.md) - practical engineering guidance on the mixed-license repo set, notice preservation, and distribution cautions
 - [Mobile App Distribution Compliance](docs/Mobile_App_Distribution_Compliance.md) - PoC tester-distribution rules for the Android and iOS wallet forks, including notice retention, source availability, and third-party notice handling

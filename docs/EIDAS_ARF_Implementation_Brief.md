@@ -8,7 +8,7 @@ This document does not replace the EIDAS Architecture and Reference Framework. I
 
 ## Current Delivery Posture
 
-- The current delivery focus is a verifier-first proof of concept, beginning with the Irish Life branded verifier journeys.
+- The current delivery focus is a verifier-first proof of concept, beginning with the Emerald Insurance branded verifier journeys.
 - The wallet and issuer components are currently treated as reference-backed enabling components rather than production target products.
 - The six forked EUDI repositories are being used as working reference implementations and integration anchors.
 - Any change that departs from ARF-aligned behaviour must be called out explicitly in `project-docs` as a design choice, limitation, or temporary implementation concession.
@@ -87,7 +87,7 @@ The following distinction must be applied whenever a change is proposed.
 
 ### Project Design Choices
 
-- Visual branding for Irish Life verifier journeys
+- Visual branding for Emerald Insurance verifier journeys
 - Which verifier journeys are prioritized first
 - How local orchestration, smoke testing, and demo environments are structured
 - Which reference implementation components are treated as dummy enablers rather than product endpoints

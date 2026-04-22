@@ -1,16 +1,16 @@
-# Irish Life Public Cloud Architecture
+# Emerald Insurance Public Cloud Architecture
 
 ## Purpose
 
-This note describes the public cloud proof-of-concept architecture that is currently built for the Irish Life verifier demonstration.
+This note describes the public cloud proof-of-concept architecture that is currently built for the Emerald Insurance verifier demonstration.
 
 It is intentionally architecture-focused. It does not repeat the operator steps from the wallet demo guide or the full deployment mechanics from the cloud runbook.
 
 For authoritative operational detail, cross-reference:
 
 - [Cloud Build And Deployment Runbook](Cloud_Build_Deployment_Runbook.md)
-- [Irish Life New Business Verifier Design](Irish_Life_New_Business_Verifier_Design.md)
-- [Irish Life Existing Business Verifier Design](Irish_Life_Existing_Business_Verifier_Design.md)
+- [Emerald Insurance New Business Verifier Design](Emerald_Insurance_New_Business_Verifier_Design.md)
+- [Emerald Insurance Existing Business Verifier Design](Emerald_Insurance_Existing_Business_Verifier_Design.md)
 - [Stakeholder Wallet Demo Guide](Stakeholder_Wallet_Demo_Guide.md)
 
 ## Scope
@@ -34,12 +34,12 @@ The wallet and issuer stack are current enabling components only. They are expec
 
 ## Architecture Summary
 
-The public proof of concept exposes an Irish Life branded verifier experience over a shared AWS `test` environment.
+The public proof of concept exposes an Emerald Insurance branded verifier experience over a shared AWS `test` environment.
 
 The verifier is split into two deployable runtime components:
 
 - Angular verifier UI for journey selection, customer pages, and agent pages
-- Kotlin verifier backend for OpenID4VP request generation, `request_uri` handling, wallet response processing, and Irish Life case APIs
+- Kotlin verifier backend for OpenID4VP request generation, `request_uri` handling, wallet response processing, and Emerald Insurance case APIs
 
 The issuance side remains available only to support end-to-end demonstration:
 
@@ -71,7 +71,7 @@ flowchart LR
         end
     end
 
-    browser -->|Open Irish Life journeys| edge
+    browser -->|Open Emerald Insurance journeys| edge
     edge --> vui
     vui -->|Same-origin UI and case APIs| vbe
 
@@ -146,7 +146,7 @@ sequenceDiagram
     participant VBE as Verifier Backend
     participant W as Android Wallet
 
-    U->>VUI: Open Irish Life customer journey
+    U->>VUI: Open Emerald Insurance customer journey
     VUI->>VBE: Create or load case
     VBE->>VBE: Build OpenID4VP request and request_uri
     VBE-->>VUI: Return case state and wallet handoff details
@@ -183,7 +183,7 @@ sequenceDiagram
 
 ## Key Delivery Boundaries
 
-- The verifier UI and verifier backend are the primary delivery surfaces for the current Irish Life proof of concept.
+- The verifier UI and verifier backend are the primary delivery surfaces for the current Emerald Insurance proof of concept.
 - The wallet and issuer stack are present only to enable end-to-end issuance and verification in the current sandbox.
 - The wallet and issuer stack should therefore be described as dummy or reference-backed components in stakeholder material.
 - The 2026 target direction is to replace those supporting components with the Government sandbox rather than evolve them as product endpoints inside this program.

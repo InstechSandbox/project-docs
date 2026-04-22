@@ -10,7 +10,7 @@ For normative and architecture detail, cross-reference:
 
 - [EIDAS ARF Implementation Brief](EIDAS_ARF_Implementation_Brief.md)
 - [Reference Implementation Standards Summary](Reference_Implementation_Standards_Summary.md)
-- [Irish Life Public Cloud Architecture](Irish_Life_Public_Cloud_Architecture.md)
+- [Emerald Insurance Public Cloud Architecture](Emerald_Insurance_Public_Cloud_Architecture.md)
 - [Irish Insurance Verifier FAQ](Irish_Insurance_Verifier_FAQ.md)
 
 ## 1. What Digital Identity Wallets Enable
@@ -50,7 +50,7 @@ In practice, insurers should expect four implications:
 - exception handling becomes more explicit because mismatches can be surfaced as structured verifier outcomes
 - trust policy becomes a first-class operating concern because the insurer must decide which issuers, credential types, and assurance levels are acceptable
 
-For the current Irish Life proof of concept, the business-ready interpretation is narrower and deliberately practical:
+For the current Emerald Insurance proof of concept, the business-ready interpretation is narrower and deliberately practical:
 
 - PID is currently the main identity evidence source
 - address evidence is currently derived from PID address claims for the demo journeys
@@ -109,7 +109,7 @@ The most grounded near-term interpretation is:
 
 - [EIDAS ARF Implementation Brief](EIDAS_ARF_Implementation_Brief.md)
 - [Reference Implementation Standards Summary](Reference_Implementation_Standards_Summary.md)
-- [Irish Life Public Cloud Architecture](Irish_Life_Public_Cloud_Architecture.md)
+- [Emerald Insurance Public Cloud Architecture](Emerald_Insurance_Public_Cloud_Architecture.md)
 - [Irish Insurance Verifier FAQ](Irish_Insurance_Verifier_FAQ.md)
-- [Irish Life New Business Verifier Design](Irish_Life_New_Business_Verifier_Design.md)
-- [Irish Life Existing Business Verifier Design](Irish_Life_Existing_Business_Verifier_Design.md)
+- [Emerald Insurance New Business Verifier Design](Emerald_Insurance_New_Business_Verifier_Design.md)
+- [Emerald Insurance Existing Business Verifier Design](Emerald_Insurance_Existing_Business_Verifier_Design.md)

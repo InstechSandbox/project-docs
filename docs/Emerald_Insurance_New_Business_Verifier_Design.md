@@ -1,8 +1,8 @@
-# Irish Life New Business Verifier Design
+# Emerald Insurance New Business Verifier Design
 
 ## Purpose
 
-This document records the business analysis, credential analysis, implementation brief, and proposed technical design for the first Irish Life verifier journey before product code changes begin.
+This document records the business analysis, credential analysis, implementation brief, and proposed technical design for the first Emerald Insurance verifier journey before product code changes begin.
 
 It is intentionally design-first. It should be reviewed before verifier UI, verifier backend, or issuer metadata changes are implemented.
 
@@ -18,7 +18,7 @@ It is intentionally design-first. It should be reviewed before verifier UI, veri
 
 ### Business Context
 
-Irish Life New Business currently relies on AML checks that require:
+Emerald Insurance New Business currently relies on AML checks that require:
 
 - proof of identity
 - proof of address
@@ -80,7 +80,7 @@ This separation should be treated as a deliberate architectural requirement so t
 - Journey name: New Business
 - Primary user: prospective customer, initiated from a support-agent workflow
 - Product surface: Emerald Insurance branded verifier product with aligned agent and customer views
-- Entry structure: new Irish Life journey selector with this journey as the first implemented route
+- Entry structure: new Emerald Insurance journey selector with this journey as the first implemented route
 - Future placeholder: Existing Business Claims journey
 - Result handling: hard fail with visible reason on-screen
 - Matching policy: exact-after-normalization
@@ -89,8 +89,8 @@ This separation should be treated as a deliberate architectural requirement so t
 
 The verifier should provide clear journey starting points for both roles.
 
-- Agent starting point: Irish Life New Business case orchestration page
-- Customer starting point: Irish Life proof-sharing page, reachable by emailed deep link or by scanning a QR code from a browser page
+- Agent starting point: Emerald Insurance New Business case orchestration page
+- Customer starting point: Emerald Insurance proof-sharing page, reachable by emailed deep link or by scanning a QR code from a browser page
 
 These starting points should be explicit in the verifier UI rather than hidden inside the generic developer-oriented request builder flow.
 
@@ -127,7 +127,7 @@ Verified available credentials include:
 
 In the issuer repository, `por` means Power Of Representation, not Proof Of Residence.
 
-Therefore it must not be used as the Irish Life proof-of-address credential.
+Therefore it must not be used as the Emerald Insurance proof-of-address credential.
 
 ### Verified PID Capability
 
@@ -154,7 +154,7 @@ The current issuer metadata includes address-related claims in several credentia
 - Tax
 - HIID matching fields
 
-However, none of the existing non-PID credentials is a clean semantic fit for Irish Life proof of address.
+However, none of the existing non-PID credentials is a clean semantic fit for Emerald Insurance proof of address.
 
 Using Tax, MDL, Photo ID, or HIID as proof of address would blur business meaning and would be harder to justify in a standards-sensitive demo.
 
@@ -183,7 +183,7 @@ The original risk was treating PID as both:
 
 while also applying a separate 90-day freshness rule to the address evidence.
 
-PID issuance or expiry does not necessarily prove that the address evidence itself is recent enough for Irish Life AML purposes.
+PID issuance or expiry does not necessarily prove that the address evidence itself is recent enough for Emerald Insurance AML purposes.
 
 ### Current Design Direction
 
@@ -262,7 +262,7 @@ MSO mdoc remains the fallback option because it is already proven in the current
 
 ### Recommendation
 
-For the first Irish Life New Business demo:
+For the first Emerald Insurance New Business demo:
 
 - target SD-JWT VC first
 - keep the journey, UI routing, and backend orchestration format-agnostic
@@ -337,19 +337,19 @@ But the preferred path remains real email.
 
 The current implementation now includes:
 
-- an Irish Life journey selector at `/irish-life`
+- an Emerald Insurance journey selector at `/irish-life`
 - an agent route at `/irish-life/new-business/agent`
 - a customer entry route at `/irish-life/new-business/customer`
 - a case-specific customer route at `/irish-life/new-business/customer/:caseId`
 - backend case endpoints under `/ui/irish-life/new-business/cases`
 
-The generic verifier routes remain available, but the default application entry point now redirects to the Irish Life journey selector.
+The generic verifier routes remain available, but the default application entry point now redirects to the Emerald Insurance journey selector.
 
 ### Frontend
 
 In `eudi-web-verifier`:
 
-- add an Irish Life journey selector landing page
+- add an Emerald Insurance journey selector landing page
 - add a New Business support-agent route
 - add a New Business customer-facing route
 - add a visible placeholder tile for Existing Business Claims
@@ -450,7 +450,7 @@ This should be applied before exact comparison against the new business applicat
 
 ### In Scope For First Increment
 
-- branded Irish Life dual-surface verifier UI
+- branded Emerald Insurance dual-surface verifier UI
 - journey selector and New Business route
 - customer-facing proof-sharing route
 - dummy new-business case state

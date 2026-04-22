@@ -4,17 +4,17 @@ This note is the shortest practical guide for external testers and business stak
 
 - install the correct Android wallet APK
 - issue a credential against the public cloud issuer
-- use that credential in the public Irish Life verifier journeys
+- use that credential in the public Emerald Insurance verifier journeys
 
 It is intentionally a one-page operator guide, not a second technical runbook.
 
 The detailed engineering source of truth remains:
 
 - [Reference Implementation Standards Summary](Reference_Implementation_Standards_Summary.md)
-- [Irish Life Public Cloud Architecture](Irish_Life_Public_Cloud_Architecture.md)
+- [Emerald Insurance Public Cloud Architecture](Emerald_Insurance_Public_Cloud_Architecture.md)
 - [Cloud Build And Deployment Runbook](Cloud_Build_Deployment_Runbook.md)
-- [Irish Life New Business Verifier Design](Irish_Life_New_Business_Verifier_Design.md)
-- [Irish Life Existing Business Verifier Design](Irish_Life_Existing_Business_Verifier_Design.md)
+- [Emerald Insurance New Business Verifier Design](Emerald_Insurance_New_Business_Verifier_Design.md)
+- [Emerald Insurance Existing Business Verifier Design](Emerald_Insurance_Existing_Business_Verifier_Design.md)
 
 ## Scope
 
@@ -23,14 +23,14 @@ Use this guide only for the public cloud proof-of-concept environment.
 - Wallet build: Android `Demo` APK from GitHub Releases
 - Environment: public `test` subdomains under `*.test.instech-eudi-poc.com`
 - Journeys covered:
-  - Irish Life New Business
-  - Irish Life Existing Business
+  - Emerald Insurance New Business
+  - Emerald Insurance Existing Business
 Do not use a local `Dev` APK for this flow.
 - Public demo URLs:
-  - Irish Life verifier journey selector: `https://verifier.test.instech-eudi-poc.com/irish-life`
-  - Irish Life New Business customer entry: `https://verifier.test.instech-eudi-poc.com/irish-life/new-business/customer`
-  - Irish Life Existing Business customer entry: `https://verifier.test.instech-eudi-poc.com/irish-life/existing-business/customer`
-  - Irish Life Existing Business monitor: `https://verifier.test.instech-eudi-poc.com/irish-life/existing-business/agent`
+  - Emerald Insurance verifier journey selector: `https://verifier.test.instech-eudi-poc.com/irish-life`
+  - Emerald Insurance New Business customer entry: `https://verifier.test.instech-eudi-poc.com/irish-life/new-business/customer`
+  - Emerald Insurance Existing Business customer entry: `https://verifier.test.instech-eudi-poc.com/irish-life/existing-business/customer`
+  - Emerald Insurance Existing Business monitor: `https://verifier.test.instech-eudi-poc.com/irish-life/existing-business/agent`
   - Issuer frontend: `https://issuer.test.instech-eudi-poc.com/`
 
 ## 1. Get The APK
@@ -69,7 +69,7 @@ Follow this exact order:
    - format: `SD-JWT VC`
    - country of origin: `FormEU`
 
-For the Irish Life happy path, the wallet credential needs these structured address claims populated:
+For the Emerald Insurance happy path, the wallet credential needs these structured address claims populated:
 
 1. `street_address`
 2. `locality`
@@ -94,7 +94,7 @@ This produces the expected joined address:
 
 `1 Main Street, Dublin, Leinster, D02 XY56`
 
-## 4. Run The Irish Life Existing Business Journey
+## 4. Run The Emerald Insurance Existing Business Journey
 
 This is the most fixed and prescriptive happy path.
 
@@ -118,7 +118,7 @@ If you want a monitoring view during the demo, open:
 
 That page is read-only for the current demo.
 
-## 5. Run The Irish Life New Business Journey
+## 5. Run The Emerald Insurance New Business Journey
 
 1. Open `https://verifier.test.instech-eudi-poc.com/irish-life/new-business/customer`
 2. Open the customer journey and continue to wallet sharing when prompted.
@@ -126,7 +126,7 @@ That page is read-only for the current demo.
 
 For New Business, the easiest rule is simple:
 
-- whatever personal details and address are entered into the Irish Life New Business case must match the PID disclosed from the wallet
+- whatever personal details and address are entered into the Emerald Insurance New Business case must match the PID disclosed from the wallet
 
 To avoid avoidable mismatch during stakeholder demos, reuse the same values as the issued happy-path PID:
 
@@ -140,5 +140,5 @@ To avoid avoidable mismatch during stakeholder demos, reuse the same values as t
 - Use the newest `Latest` APK release, not an older install already on the phone.
 - Use the cloud `Demo` APK, not a local `Dev` build.
 - For Existing Business, only policy number `12345678` is expected to succeed.
-- For both Irish Life journeys, matching is driven by the disclosed PID values.
+- For both Emerald Insurance journeys, matching is driven by the disclosed PID values.
 - Address matching uses the structured PID address fields and reconstructs the value in this order: street, locality, region, postal code.

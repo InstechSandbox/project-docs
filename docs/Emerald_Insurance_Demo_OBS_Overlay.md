@@ -1,12 +1,12 @@
-# Irish Life Demo OBS Overlay
+# Emerald Insurance Demo OBS Overlay
 
-This page documents a simple OBS browser-source overlay for Irish Life end-to-end demo recordings on macOS.
+This page documents a simple OBS browser-source overlay for Emerald Insurance end-to-end demo recordings on macOS.
 
 The overlay is intended for a full-screen recording where the left 25% of the capture is the customer journey and the right 75% is the agent journey.
 
 ## Files
 
-- Browser overlay HTML: [docs/assets/obs/irish-life-dual-screen-overlay.html](docs/assets/obs/irish-life-dual-screen-overlay.html)
+- Browser overlay HTML: [docs/assets/obs/emerald-insurance-dual-screen-overlay.html](docs/assets/obs/emerald-insurance-dual-screen-overlay.html)
 
 ## What It Shows
 
@@ -33,12 +33,10 @@ Follow these steps:
 7. You should now see your desktop in the OBS preview.
 8. In the `Sources` panel, click the `+` button again.
 9. Choose `Browser`.
-10. Give it a name such as `Irish Life Overlay`, then click `OK`.
+10. Give it a name such as `Emerald Insurance Overlay`, then click `OK`.
 11. In the browser source settings window, enable `Local file`.
-12. Click `Browse` and select `project-docs/docs/assets/obs/irish-life-dual-screen-overlay.html`.
-13. Set `Width` and `Height` to match the resolution you plan to record at:
-	- use `1920` x `1080` for a standard full HD recording
-	- use `3840` x `2160` only if your OBS canvas and final recording are set to 4K
+12. Click `Browse` and select `project-docs/docs/assets/obs/emerald-insurance-dual-screen-overlay.html`.
+13. Set `Width` and `Height` to match the resolution you plan to record at. Use `1920` x `1080` for a standard full HD recording. Use `3840` x `2160` only if your OBS canvas and final recording are set to 4K.
 14. Leave the page background transparent so only the labels, divider, and frame appear on top of your screen capture.
 15. Click `OK` to create the browser source.
 16. In the `Sources` list, make sure the browser source is above the screen capture source so the overlay stays visible.
@@ -91,17 +89,17 @@ Use this quick test before the real demo:
 2. In the `Audio Mixer`, confirm the meters move for any microphone or system audio you want to keep.
 3. Click `Start Recording`.
 4. Record 10 to 15 seconds while doing a few real actions:
-	- move the mouse
-	- open the app or browser you will demo
-	- speak a sentence if you want microphone audio
-	- play a short sound if you want system audio
+   - move the mouse
+   - open the app or browser you will demo
+   - speak a sentence if you want microphone audio
+   - play a short sound if you want system audio
 5. Click `Stop Recording`.
 6. In OBS, open `File` then `Show Recordings`.
 7. Open the newest video file and check four things:
-	- the full screen is visible
-	- the overlay labels and divider are aligned correctly
-	- the text is readable
-	- the audio is present and clear
+   - the full screen is visible
+   - the overlay labels and divider are aligned correctly
+   - the text is readable
+   - the audio is present and clear
 
 If the video looks soft or blurry, first check whether OBS is set to `1920 x 1080` or `3840 x 2160`, then make sure the browser overlay source uses the same size.
 

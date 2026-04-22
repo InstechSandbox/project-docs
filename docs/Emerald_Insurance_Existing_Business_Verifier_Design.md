@@ -1,8 +1,8 @@
-# Irish Life Existing Business Verifier Design
+# Emerald Insurance Existing Business Verifier Design
 
 ## Purpose
 
-This document records the implemented business interpretation, journey decisions, and technical design for the Irish Life Existing Business withdrawal verifier journey.
+This document records the implemented business interpretation, journey decisions, and technical design for the Emerald Insurance Existing Business withdrawal verifier journey.
 
 It sits alongside the New Business design and reuses the same local verifier stack, wallet proof pattern, and protocol constraints.
 
@@ -12,15 +12,15 @@ It sits alongside the New Business design and reuses the same local verifier sta
 - The delivery and documentation rules in [AI_Working_Agreement.md](AI_Working_Agreement.md) apply.
 - Protocol-facing behaviour remains aligned with OpenID4VP and DCQL.
 - The Existing Business journey reuses the same PID proof set as the New Business journey.
-- Irish Life branding and shared verifier behaviour should stay centralized rather than duplicated where practical.
+- Emerald Insurance branding and shared verifier behaviour should stay centralized rather than duplicated where practical.
 
 ## Business Interpretation
 
 ### Business Context
 
-Irish Life Existing Business withdrawals, such as a Savings & Investments release, are used here as a simplified step-up verification journey.
+Emerald Insurance Existing Business withdrawals, such as a Savings & Investments release, are used here as a simplified step-up verification journey.
 
-The wallet does not replace policy administration, AML systems, or payment systems. Instead, it proves customer-held identity attributes that can be checked against an internal Irish Life policy record before an automated demo decision is recorded.
+The wallet does not replace policy administration, AML systems, or payment systems. Instead, it proves customer-held identity attributes that can be checked against an internal Emerald Insurance policy record before an automated demo decision is recorded.
 
 ### Implemented Demo Flow
 
@@ -83,7 +83,7 @@ The verifier UI includes:
 - an Existing Business customer start route at `/irish-life/existing-business/customer`
 - an Existing Business customer case route at `/irish-life/existing-business/customer/{caseId}`
 - current Emerald Insurance branding on the customer-facing and agent-facing UI
-- shared PID validation helpers reused from the Irish Life proof comparison path
+- shared PID validation helpers reused from the Emerald Insurance proof comparison path
 
 Frontend behaviour now follows these rules:
 
@@ -142,7 +142,7 @@ The monitoring workspace shows explicit notifications for milestones such as:
 
 This journey intentionally reuses the New Business building blocks that are genuinely common:
 
-- Irish Life visual branding
+- Emerald Insurance visual branding
 - PID proof request profile
 - customer PID validation logic
 - same-device and QR entry behaviour
@@ -159,7 +159,7 @@ This journey keeps its own business-specific artifacts separate:
 
 Local validation for this journey should cover:
 
-- route accessibility from the Irish Life journey selector
+- route accessibility from the Emerald Insurance journey selector
 - customer start page rendering and policy-number submission
 - rejection of unsupported policy numbers
 - automatic wallet proof initialization after supported policy submission
@@ -179,7 +179,7 @@ The current workstream implementation includes:
 - a dedicated verifier backend case API under `/ui/irish-life/existing-business/cases/**`
 - a dedicated Existing Business in-memory case store and lifecycle model
 - a read-only Existing Business monitoring workspace that lists all cases
-- shared Irish Life frontend types, PID validation helpers, and theme styling used across both Irish Life journeys
+- shared Emerald Insurance frontend types, PID validation helpers, and theme styling used across both Emerald Insurance journeys
 
 ## Runtime Notes
 

@@ -7,14 +7,14 @@ This document defines the shared working agreement for AI-assisted development a
 ## Project Brief
 
 - The project currently maintains a working local baseline across six forked EUDI reference repositories plus two new repositories.
-- The next major delivery objective is an Irish Life branded verifier proof of concept that mimics selected real member journeys.
+- The next major delivery objective is an Emerald Insurance branded verifier proof of concept that mimics selected real member journeys.
 - Subsequent streams include AWS deployment automation, stronger smoke and acceptance testing, iPhone enablement, and continuous `project-docs` updates.
 - The active cloud deployment workstream is `cloud-build`, which targets one shared AWS environment named `test` while preserving the local build as the effective development baseline.
 - The immediate `cloud-build` target is the smallest viable public-internet deployment that lets a mobile wallet request a credential and complete a proof or verification flow against the cloud-hosted services.
 
 ## Deliverables
 
-1. Build a branded Irish Life verifier proof of concept for two target journeys.
+1. Build a branded Emerald Insurance verifier proof of concept for two target journeys.
 2. Build GitHub Actions driven deployment into AWS `test` for issuer, verifier, Android distribution, and iOS distribution preparation.
 3. Improve smoke coverage and add acceptance test coverage.
 4. Enable the iPhone reference implementation.
@@ -70,7 +70,7 @@ This document defines the shared working agreement for AI-assisted development a
 - For the local issuer Python services, prefer Python 3.11 for `.venv` bootstrap so local runtime stays close to the current Docker packaging baseline; use 3.10 or 3.9 only as explicit fallback choices.
 - If local Python runtime drift is detected, rebuild the affected `.venv` with `project-docs/scripts/bootstrap-local-python-venvs.sh` rather than patching around the drift inside repo code or cloud deployment scripts.
 - While pull requests are not yet the primary delivery mechanism, `push` to `main` must still be treated as a controlled integration event with deterministic remote validation.
-- Strengthen verifier-focused smoke and acceptance coverage as the Irish Life workstream evolves.
+- Strengthen verifier-focused smoke and acceptance coverage as the Emerald Insurance workstream evolves.
 
 ## AWS Deployment Principles
 

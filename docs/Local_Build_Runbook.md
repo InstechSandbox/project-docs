@@ -62,7 +62,7 @@ cd "$CODE_ROOT/project-docs/scripts"
 ./run-ios-verification-deeplink.sh
 ```
 
-`./run-issuance-demo.sh` now defaults to `eu.europa.ec.eudi.pid_vc_sd_jwt` so the automated local issuance path matches the Irish Life verifier request. Override `CREDENTIAL_CONFIGURATION_ID` only when you intentionally want to test a different credential format.
+`./run-issuance-demo.sh` now defaults to `eu.europa.ec.eudi.pid_vc_sd_jwt` so the automated local issuance path matches the Emerald Insurance verifier request. Override `CREDENTIAL_CONFIGURATION_ID` only when you intentionally want to test a different credential format.
 
 `./run-ios-verification-deeplink.sh` now asks the local verifier for JWT PID `dc+sd-jwt` by default because that is the most reliable current iOS simulator proof path. Set `PID_PRESENTATION_FORMAT=mdoc` to probe the mdoc path, or `PID_PRESENTATION_FORMAT=dual` to ask for either representation when you explicitly want to test mixed local wallet state.
 
@@ -299,7 +299,7 @@ Use that explicit stop when you want to tear the local stack down at the end, or
 
 ## Multiple Local Stacks
 
-The local wrapper model can support more than one local backend stack on the same machine when you need separate worktrees for different testing goals, for example one Irish Life verifier stack and one wallet-focused stack.
+The local wrapper model can support more than one local backend stack on the same machine when you need separate worktrees for different testing goals, for example one Emerald Insurance verifier stack and one wallet-focused stack.
 
 The safe rule is:
 
@@ -328,9 +328,9 @@ This keeps the primary local stack on its default ports while allowing a second 
 
 The verifier wrappers now auto-derive an isolated Docker Compose project name when you use non-default verifier ports, container names, or `VERIFIER_STACK_SUFFIX` and do not set `COMPOSE_PROJECT_NAME` explicitly. Keeping `COMPOSE_PROJECT_NAME` in `local-demo.env` is still the preferred explicit setup for long-lived parallel worktrees because it makes the intended stack boundary obvious in logs and `docker ps`.
 
-## Irish Life Email And Customer Surface Settings
+## Emerald Insurance Email And Customer Surface Settings
 
-The Irish Life New Business verifier flow now depends on two verifier-backend settings when you want the full agent-plus-customer demo to work end to end.
+The Emerald Insurance New Business verifier flow now depends on two verifier-backend settings when you want the full agent-plus-customer demo to work end to end.
 
 Required verifier settings for the customer surface and email flow:
 
@@ -360,7 +360,7 @@ spring.mail.properties.mail.smtp.starttls.enable=true
 
 The verifier UI now uses same-origin API calls for `/ui`, `/wallet`, and `/utilities` instead of a hardcoded `http://localhost:8080` base URL. That means the Docker-served HTTPS UI can talk to the verifier backend without mixed-content problems, and `npm start` continues to work through the Angular dev-server proxy.
 
-For the local Docker verifier path started by `scripts/start-local-all.sh` or `av-srv-web-verifier-endpoint-23220-4-kt/scripts/start-local-verifier.sh`, the customer surface URL is now derived automatically from the active verifier public host. On a LAN or hotspot IP change, restarting the verifier stack is enough to refresh Irish Life customer links and same-device return URLs.
+For the local Docker verifier path started by `scripts/start-local-all.sh` or `av-srv-web-verifier-endpoint-23220-4-kt/scripts/start-local-verifier.sh`, the customer surface URL is now derived automatically from the active verifier public host. On a LAN or hotspot IP change, restarting the verifier stack is enough to refresh Emerald Insurance customer links and same-device return URLs.
 
 That local Docker verifier path also disables Spring Boot's mail health contributor by default. The invite-email integration still uses the configured mail settings when you intentionally wire a real SMTP service, but the shared local `/actuator/health` endpoint stays green instead of failing on the placeholder `smtp.example.com` values used by the demo runtime.
 
@@ -372,15 +372,15 @@ For local same-device troubleshooting, keep `response_type=vp_token` present on 
 
 For iOS simulator troubleshooting, prefer `project-docs/scripts/run-ios-verification-deeplink.sh` before repeated Safari retries. If Safari already switches into the wallet, the custom-scheme registration is usually fine; the scripted path is more useful because it removes verifier-UI and browser handoff noise and proves whether the generated OpenID4VP deep link itself can start the proof flow.
 
-Current iOS wallet builds also need single-credential PID issuance for local same-device verifier testing. The upstream wallet-kit batch issuance path currently saves every credential in a one-time-use PID batch under the same document id, and OpenID4VP presentation then crashes when it constructs a dictionary keyed by document id. Until that upstream path is fixed, keep iOS PID issuance at `numberOfCredentials = 1` for both mdoc and SD-JWT VC variants before using the simulator or a real iPhone for local verifier proof runs. For reusable Irish Life SD-JWT PID proof journeys, keep `SdJwtPid` on `rotateUse` with that single credential so repeat proofs do not exhaust the only usable credential.
+Current iOS wallet builds also need single-credential PID issuance for local same-device verifier testing. The upstream wallet-kit batch issuance path currently saves every credential in a one-time-use PID batch under the same document id, and OpenID4VP presentation then crashes when it constructs a dictionary keyed by document id. Until that upstream path is fixed, keep iOS PID issuance at `numberOfCredentials = 1` for both mdoc and SD-JWT VC variants before using the simulator or a real iPhone for local verifier proof runs. For reusable Emerald Insurance SD-JWT PID proof journeys, keep `SdJwtPid` on `rotateUse` with that single credential so repeat proofs do not exhaust the only usable credential.
 
 If SMTP is not configured, the verifier backend will still expose the case flow and wallet journey, but invite and completion emails will be reported as not sent.
 
-For local runs, the default placeholder host `smtp.example.com` is now treated as email-disabled on purpose. That prevents the Irish Life `Create case and send invite` action from blocking on a fake SMTP connection while still letting the case move to `INVITE_SENT` and expose the customer portal URL.
+For local runs, the default placeholder host `smtp.example.com` is now treated as email-disabled on purpose. That prevents the Emerald Insurance `Create case and send invite` action from blocking on a fake SMTP connection while still letting the case move to `INVITE_SENT` and expose the customer portal URL.
 
-The Irish Life agent surface now shows which step is active during case creation versus invite sending, and it clears the spinner locally if the browser waits too long for either step. If the page reports that it stopped waiting, use `Refresh case` before retrying so you can tell whether the backend already created the case or issued the invite.
+The Emerald Insurance agent surface now shows which step is active during case creation versus invite sending, and it clears the spinner locally if the browser waits too long for either step. If the page reports that it stopped waiting, use `Refresh case` before retrying so you can tell whether the backend already created the case or issued the invite.
 
-For the Irish Life SD-JWT PID flow, the local issuer frontend must advertise `eu.europa.ec.eudi.pid_vc_sd_jwt` in `CREDENTIALS_SUPPORTED`. The current local wrapper does this automatically so wallet discovery stays consistent with the verifier request.
+For the Emerald Insurance SD-JWT PID flow, the local issuer frontend must advertise `eu.europa.ec.eudi.pid_vc_sd_jwt` in `CREDENTIALS_SUPPORTED`. The current local wrapper does this automatically so wallet discovery stays consistent with the verifier request.
 
 ## Existing Business Local Demo Flow
 
@@ -398,7 +398,7 @@ The local verifier accepts only policy number `12345678` for this demo. Any othe
 
 The customer entry page also short-circuits unsupported policy numbers locally so the demo fails immediately in the browser instead of waiting for a verifier round trip.
 
-The verifier resolves policy `12345678` to a hard-coded internal Irish Life policy record. For the Existing Business happy path, issue a PID that matches:
+The verifier resolves policy `12345678` to a hard-coded internal Emerald Insurance policy record. For the Existing Business happy path, issue a PID that matches:
 
 1. `given_name = Patrick`
 2. `family_name = Murphy`
@@ -414,7 +414,7 @@ The verifier reconstructs the expected address as:
 
 The Existing Business agent surface no longer creates cases or sends invites. It monitors all in-memory Existing Business cases and should auto-expand the active withdrawal while the customer journey is in progress.
 
-For the Irish Life proof-of-address happy path, use the local `FC` dynamic PID form rather than the reduced one-step Utopia form description. The current local issuer backend sends optional PID address claims to the frontend, and the dynamic form exposes them behind `Add Optional Attributes`.
+For the Emerald Insurance proof-of-address happy path, use the local `FC` dynamic PID form rather than the reduced one-step Utopia form description. The current local issuer backend sends optional PID address claims to the frontend, and the dynamic form exposes them behind `Add Optional Attributes`.
 
 For the simplest end-to-end address proof, add the optional `Address` fields during PID issuance and populate at least:
 
@@ -430,7 +430,7 @@ Example values:
 3. `region = Leinster`
 4. `postal_code = D02 XY56`
 
-Then enter the Irish Life New Business `Current address` exactly as:
+Then enter the Emerald Insurance New Business `Current address` exactly as:
 
 `1 Main Street, Dublin, Leinster, D02 XY56`
 
@@ -446,15 +446,15 @@ In the current dynamic issuer UI, the optional address block is rendered from cl
 6. `Formatted`
 7. `House Number`
 
-For the local verifier path, only the first four are needed. `Country` can still be entered in the issuer form, but the Irish Life verifier no longer depends on it being disclosed for the address comparison. The verifier comparison now tolerates punctuation-only differences and whitespace-only differences inside the final address string, including cases like `D02 XY56` versus `D02XY56`, but it still expects the same underlying address values.
+For the local verifier path, only the first four are needed. `Country` can still be entered in the issuer form, but the Emerald Insurance verifier no longer depends on it being disclosed for the address comparison. The verifier comparison now tolerates punctuation-only differences and whitespace-only differences inside the final address string, including cases like `D02 XY56` versus `D02XY56`, but it still expects the same underlying address values.
 
-Once you have completed one successful issuance and Irish Life proof with this address shape, you do not need to rerun the happy path unless you change the verifier request, the issuer address fields, the local host/cert material, or the wallet APK again. Re-running is only useful as a regression check after further changes.
+Once you have completed one successful issuance and Emerald Insurance proof with this address shape, you do not need to rerun the happy path unless you change the verifier request, the issuer address fields, the local host/cert material, or the wallet APK again. Re-running is only useful as a regression check after further changes.
 
 The shared local runtime certificate must advertise SAN URI entries for the local HTTPS service identities, especially `ISSUER_URL`. The verifier's SD-JWT issuer-certificate check does not treat a bare IP SAN as equivalent to the issuer identifier `https://host:5002`, so a cert that only contains `IP:...` and `DNS:localhost` can still let issuance succeed but fail post-share verification with `IssuerCertificateIsNotTrusted`.
 
 The issuer signer certificate under `eudi-srv-web-issuing-eudiw-py/local/cert/PID-DS-LOCAL-UT_cert.{pem,der}` is separate from the shared runtime TLS cert. `scripts/refresh-local-certs.sh` now validates that signer certificate against the active local signer private key and requires the local IACA PEM to exist so the DS certificate can be verified against `PIDIssuerCALocalUT.pem`. The same DS leaf must also carry `URI:$ISSUER_URL` in `subjectAltName`, because the verifier uses that SAN entry to trust SD-JWT issuer certificates during proof. If the signer material is stale or the local IACA is missing, the script regenerates the full local IACA plus DS chain via `scripts/generate-local-mdoc-signer-chain.sh` instead of leaving a self-signed DS leaf in place. The generated local CA and DS certificates are intentionally backdated by a few minutes so a freshly issued MSO cannot fail strict iOS validation because the cert `notBefore` second is later than the MSO `signed` timestamp. Legacy `PID-DS-0001_UT` paths still work only as input material for regeneration, not as a verifier trust anchor. After that signer cert changes, restart the issuer backend and reissue the credential before retrying proof.
 
-The Irish Life verifier case flow does not rely on the manual trusted-issuer UI control. For local PID verification, `av-srv-web-verifier-endpoint-23220-4-kt/scripts/start-local-verifier.sh` mounts the active local issuer CA PEM as the Irish Life `issuer_chain`, preferring `eudi-srv-web-issuing-eudiw-py/local/cert/PIDIssuerCALocalUT.pem` and falling back to `PIDIssuerCAUT01.pem`. The verifier parses that `issuer_chain` as PKIX trust anchors, not as directly trusted DS leaves, so startup now refuses to continue if only a DS leaf certificate is available. The default SD-JWT PID validator now also uses that same configured local issuer CA as a fallback trust source for generic `urn:eudi:pid:1` transactions when no explicit `issuer_chain` was posted, so local generic `/ui/presentations` proof requests no longer depend on the manual trusted-issuer UI control either. If the local IACA or signer certificate changes, restart the verifier stack as well so new transactions carry the updated trust anchor.
+The Emerald Insurance verifier case flow does not rely on the manual trusted-issuer UI control. For local PID verification, `av-srv-web-verifier-endpoint-23220-4-kt/scripts/start-local-verifier.sh` mounts the active local issuer CA PEM as the Emerald Insurance `issuer_chain`, preferring `eudi-srv-web-issuing-eudiw-py/local/cert/PIDIssuerCALocalUT.pem` and falling back to `PIDIssuerCAUT01.pem`. The verifier parses that `issuer_chain` as PKIX trust anchors, not as directly trusted DS leaves, so startup now refuses to continue if only a DS leaf certificate is available. The default SD-JWT PID validator now also uses that same configured local issuer CA as a fallback trust source for generic `urn:eudi:pid:1` transactions when no explicit `issuer_chain` was posted, so local generic `/ui/presentations` proof requests no longer depend on the manual trusted-issuer UI control either. If the local IACA or signer certificate changes, restart the verifier stack as well so new transactions carry the updated trust anchor.
 
 The generic local proof helper `av-srv-web-verifier-endpoint-23220-4-kt/scripts/generate-verifier-deeplink.sh` must also include that same `issuer_chain` when it posts to `/ui/presentations`. Without it, the resulting transaction validates SD-JWT PID proofs with no local trust anchors and the verifier logs show `issuerChainCertificates='none'` during `PostWalletResponse`, even when the wallet presents the correct local DS certificate.
 
