@@ -4,18 +4,20 @@ This repository holds documentation that applies across the current implementati
 
 This repository is a proof-of-concept reference implementation document set. It is intentionally shared so customers can build the repos, run them locally, deploy them to cloud test environments, and compare implementation experience. It is not production-hardening or production-operations guidance.
 
-
 ## Start Here
 
 If you want to:
 
 - build and run the reference implementation locally, start with [Local Build Runbook](docs/Local_Build_Runbook.md)
+- understand what wallets mean for insurers operationally, start with [Insurer Readiness Pack](docs/Insurer_Readiness_Pack.md)
 - understand the public cloud deployment shape, start with [Irish Life Public Cloud Architecture](docs/Irish_Life_Public_Cloud_Architecture.md)
 - follow the cloud build and deployment model, use [Cloud Build And Deployment Runbook](docs/Cloud_Build_Deployment_Runbook.md)
 - install the wallet and run the public demo journeys, use [Stakeholder Wallet Demo Guide](docs/Stakeholder_Wallet_Demo_Guide.md)
 - understand the standards and protocol profile choices behind the PoC, read [Reference Implementation Standards Summary](docs/Reference_Implementation_Standards_Summary.md)
+
 ## Core Documents
 
+- [Insurer Readiness Pack](docs/Insurer_Readiness_Pack.md) - concise insurer-facing summary of what wallets enable, onboarding and AML implications, immediate actions, and Government-led environment considerations
 - [Irish Life Public Cloud Architecture](docs/Irish_Life_Public_Cloud_Architecture.md) - public `test` environment architecture, AWS runtime boundaries, Mermaid diagrams, and verifier-first system context for the Irish Life proof of concept
 - [Local Build Runbook](docs/Local_Build_Runbook.md) - step-by-step local build, startup, smoke, wallet install, issuance, and verification flow across the six repositories
 - [Cloud Build And Deployment Runbook](docs/Cloud_Build_Deployment_Runbook.md) - agreed first-phase GitHub Actions, AWS `test` environment, artifact publication, and `cloud-build` workstream design
