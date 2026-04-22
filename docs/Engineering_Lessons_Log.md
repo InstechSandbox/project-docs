@@ -4,6 +4,13 @@
 
 Record recurring lessons that are worth turning into shared engineering guidance.
 
+### 2026-04-22 - Fork-owned CI noise should fail closed only for real findings, not missing optional service tokens or deprecated artifact helpers
+
+- Context: The `InstechSandbox` fork repos were producing failure emails after routine workflow-pin pushes even though the runtime deploy path, JWK alignment check, and end-to-end issuance and proof flow were all working.
+- What happened: The fork-owned SonarCloud workflows treated a missing `SONAR_TOKEN` as a hard failure in an initial secret-check job, and the fork-owned issuer-frontend Gitleaks workflow still depended on deprecated `actions/upload-artifact@v3`, which GitHub now auto-fails during job setup. Those failures created misleading incident noise without proving a runtime regression or a real secret-scanning finding.
+- Reusable lesson: In fork-owned delivery repos, optional third-party analysis should skip cleanly when the required service credential is intentionally absent, and inherited artifact actions must be kept on supported major versions. Otherwise workflow noise can look like product instability even when the deployed system is healthy.
+- Follow-up doc or rule update: Keep SonarCloud workflows emitting a skip signal instead of failing when `SONAR_TOKEN` is absent, and keep Gitleaks artifact upload steps on `actions/upload-artifact@v4` with `if-no-files-found: warn` so only actual scan findings or runner failures page the team.
+
 ### 2026-04-21 - Demo and Dev Android wallets must not share the same OpenID4VCI authorization callback URI
 
 - Context: Cloud PID issuance retries remained ambiguous even after backend fixes because both installed Android wallet flavors could claim the same browser-return URI `eu.europa.ec.euidi://authorization`.
