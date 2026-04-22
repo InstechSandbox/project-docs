@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Irish Life Dual Screen Overlay</title>
+  <style>
+    :root {
+      --split-position: 25%;
+      --guide-gap: 22px;
+      --left-accent: rgba(14, 96, 89, 0.9);
+      --right-accent: rgba(0, 71, 171, 0.9);
+      --label-text: #ffffff;
+      --divider-core: rgba(255, 255, 255, 0.95);
+      --divider-glow: rgba(255, 255, 255, 0.25);
+      --frame-stroke: rgba(255, 255, 255, 0.18);
+      --shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: transparent;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+    }
+
+    body {
+      position: relative;
+      color: var(--label-text);
+    }
+
+    .overlay {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border: 1px solid var(--frame-stroke);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+      pointer-events: none;
+    }
+
+    .label-row {
+      position: absolute;
+      top: 28px;
+      left: 28px;
+      right: 28px;
+      display: grid;
+      grid-template-columns: 1fr 3fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    .label {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      min-width: 240px;
+      padding: 14px 22px;
+      border-radius: 16px;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      line-height: 1;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      text-transform: none;
+    }
+
+    .label.left {
+      justify-self: start;
+      background: linear-gradient(135deg, rgba(18, 125, 116, 0.96), var(--left-accent));
+    }
+
+    .label.right {
+      justify-self: center;
+      background: linear-gradient(135deg, rgba(33, 113, 228, 0.96), var(--right-accent));
+    }
+
+    .label::before {
+      content: "";
+      width: 12px;
+      height: 12px;
+      margin-right: 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.16);
+      flex: 0 0 auto;
+    }
+
+    .divider {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: var(--split-position);
+      width: 2px;
+      transform: translateX(-50%);
+      background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0),
+        var(--divider-core) 12%,
+        var(--divider-core) 88%,
+        rgba(255, 255, 255, 0)
+      );
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.15),
+        0 0 24px 6px var(--divider-glow);
+    }
+
+    .divider::before,
+    .divider::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      border: 2px solid rgba(255, 255, 255, 0.92);
+      background: rgba(12, 19, 26, 0.28);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+    }
+
+    .divider::before {
+      top: 28px;
+    }
+
+    .divider::after {
+      bottom: 28px;
+    }
+
+    .half-guide {
+      position: absolute;
+      top: 18px;
+      bottom: 18px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0));
+    }
+
+    .half-guide.left {
+      left: 18px;
+      width: calc(var(--split-position) - 18px - var(--guide-gap));
+    }
+
+    .half-guide.right {
+      right: 18px;
+      left: calc(var(--split-position) + var(--guide-gap));
+    }
+
+    @media (max-width: 1200px) {
+      .label-row {
+        top: 20px;
+        left: 20px;
+        right: 20px;
+        gap: 20px;
+      }
+
+      .label {
+        min-width: 0;
+        padding: 12px 18px;
+        font-size: 22px;
+      }
+
+      .divider::before {
+        top: 20px;
+      }
+
+      .divider::after {
+        bottom: 20px;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .label-row {
+        grid-template-columns: 1fr;
+      }
+
+      .label.left,
+      .label.right {
+        justify-self: start;
+      }
+
+      .label.right {
+        margin-top: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="overlay" aria-label="Irish Life dual screen demo overlay">
+    <div class="half-guide left"></div>
+    <div class="half-guide right"></div>
+
+    <div class="label-row">
+      <section class="label left">Customer experience</section>
+      <section class="label right">Agent experience</section>
+    </div>
+
+    <div class="divider" aria-hidden="true"></div>
+  </main>
+</body>
+</html>

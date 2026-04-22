@@ -6,14 +6,13 @@ This repository holds documentation that applies across the current implementati
 
 - [Local Build Runbook](docs/Local_Build_Runbook.md) - step-by-step local build, startup, smoke, wallet install, issuance, and verification flow across the six repositories
 - [Cloud Build And Deployment Runbook](docs/Cloud_Build_Deployment_Runbook.md) - agreed first-phase GitHub Actions, AWS `test` environment, artifact publication, and `cloud-build` workstream design
-- [Stakeholder Wallet Demo Guide](docs/Stakeholder_Wallet_Demo_Guide.md) - short stakeholder-facing instructions for downloading the Android demo APK, issuing a happy-path PID, and completing the Irish Life public demo journeys
 - [EIDAS ARF Implementation Brief](docs/EIDAS_ARF_Implementation_Brief.md) - local implementation guardrails for ARF alignment, protocol assumptions, trust boundaries, and verifier-first delivery
 - [AI Working Agreement](docs/AI_Working_Agreement.md) - canonical AI-assisted engineering rules, repo map, testing expectations, and docs-update policy
 - [Irish Life New Business Verifier Design](docs/Irish_Life_New_Business_Verifier_Design.md) - business analysis, credential strategy, support-agent UX design, and pre-implementation architecture for the first Irish Life verifier journey
-- [Irish Insurance Verifier FAQ](docs/Irish_Insurance_Verifier_FAQ.md) - concise insurer-facing FAQ covering verifier concepts, trust, formats, privacy, and adoption questions
 - [Engineering Lessons Log](docs/Engineering_Lessons_Log.md) - reusable lessons captured as the project evolves
 - [Repo Gate Debt Backlog](docs/Repo_Gate_Debt_Backlog.md) - tracked follow-up items for repo-native gates surfaced by the shared hooks
 - [Local Deployment Notes](docs/Local_Deployment_Notes.md) - explains the fork-to-baseline commit set, the rationale behind the local deployment changes, and the coordinated baseline tags
+- [Irish Life Demo OBS Overlay](docs/Irish_Life_Demo_OBS_Overlay.md) - simple browser-source overlay for end-to-end demo recordings with customer and agent screen labels
 - [iOS Wallet Enablement Plan](docs/IOS_Wallet_Enablement_Plan.md) - initial repo scope, build path, smoke targets, and distribution preparation for the iOS workstream
 - [Licensing Notes](docs/Licensing_Notes.md) - practical engineering guidance on the mixed-license repo set, notice preservation, and distribution cautions
 - [Mobile App Distribution Compliance](docs/Mobile_App_Distribution_Compliance.md) - PoC tester-distribution rules for the Android and iOS wallet forks, including notice retention, source availability, and third-party notice handling
