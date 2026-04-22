@@ -2,6 +2,8 @@
 
 This repository holds documentation that applies across the current implementation repositories in the `InstechSandbox` EUDI insurance readiness proof of concept.
 
+This repository is a proof-of-concept reference implementation document set. It is intentionally shared so customers can build the repos, run them locally, deploy them to cloud test environments, and compare implementation experience. It is not production-hardening or production-operations guidance.
+
 ## Core Documents
 
 - [Local Build Runbook](docs/Local_Build_Runbook.md) - step-by-step local build, startup, smoke, wallet install, issuance, and verification flow across the six repositories
