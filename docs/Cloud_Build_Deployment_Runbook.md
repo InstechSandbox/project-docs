@@ -462,6 +462,17 @@ For operator-driven verification after the automation is in place, use the same 
 
 That order is not a build-system requirement because the repositories publish independently and the runtime consumes immutable image digests. It is a verification convenience that reduces transient issuer-verifier mismatch while ECS rollouts are still converging.
 
+For the issuer specifically, treat a failed `Verify issuer request-encryption key alignment` step as an environment health signal, not as harmless pipeline noise. It means `issuer.<base-domain>` and `issuer-api.<base-domain>` were publishing different `credential_request_encryption` JWKs at that moment, so wallet issuance may fail until they align again.
+
+If that guardrail fails, use this bounded recovery sequence before retesting wallets:
+
+1. fetch `https://issuer.<base-domain>/.well-known/openid-credential-issuer` and `https://issuer-api.<base-domain>/.well-known/openid-credential-issuer`
+2. compare `credential_request_encryption.jwks.keys[0]` on both responses
+3. if they differ, rerun or force the issuer frontend rollout first, because the backend may already have rotated to a new startup-generated key
+4. recheck both live metadata documents before declaring the environment issuance-safe again
+
+Do not assume this condition will self-heal within a few minutes. In the current POC design, the backend request-encryption key can be generated ephemerally at task startup, so alignment usually returns only after a frontend refresh or redeploy starts serving the same backend key.
+
 ## Final Acceptance Sequence
 
 Once the automated pushes and publications are green, run the final stack validation in this exact order:
