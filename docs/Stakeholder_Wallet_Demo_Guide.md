@@ -10,6 +10,8 @@ It is intentionally a one-page operator guide, not a second technical runbook.
 
 The detailed engineering source of truth remains:
 
+- [Reference Implementation Standards Summary](Reference_Implementation_Standards_Summary.md)
+- [Irish Life Public Cloud Architecture](Irish_Life_Public_Cloud_Architecture.md)
 - [Cloud Build And Deployment Runbook](Cloud_Build_Deployment_Runbook.md)
 - [Irish Life New Business Verifier Design](Irish_Life_New_Business_Verifier_Design.md)
 - [Irish Life Existing Business Verifier Design](Irish_Life_Existing_Business_Verifier_Design.md)

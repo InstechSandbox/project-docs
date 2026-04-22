@@ -6,9 +6,11 @@ This repository is a proof-of-concept reference implementation document set. It 
 
 ## Core Documents
 
+- [Irish Life Public Cloud Architecture](docs/Irish_Life_Public_Cloud_Architecture.md) - public `test` environment architecture, AWS runtime boundaries, Mermaid diagrams, and verifier-first system context for the Irish Life proof of concept
 - [Local Build Runbook](docs/Local_Build_Runbook.md) - step-by-step local build, startup, smoke, wallet install, issuance, and verification flow across the six repositories
 - [Cloud Build And Deployment Runbook](docs/Cloud_Build_Deployment_Runbook.md) - agreed first-phase GitHub Actions, AWS `test` environment, artifact publication, and `cloud-build` workstream design
 - [EIDAS ARF Implementation Brief](docs/EIDAS_ARF_Implementation_Brief.md) - local implementation guardrails for ARF alignment, protocol assumptions, trust boundaries, and verifier-first delivery
+- [Reference Implementation Standards Summary](docs/Reference_Implementation_Standards_Summary.md) - concise map of the standards and profiles used in this PoC, where they are implemented across the repo set, and which delivery concessions remain explicit
 - [AI Working Agreement](docs/AI_Working_Agreement.md) - canonical AI-assisted engineering rules, repo map, testing expectations, and docs-update policy
 - [Irish Life New Business Verifier Design](docs/Irish_Life_New_Business_Verifier_Design.md) - business analysis, credential strategy, support-agent UX design, and pre-implementation architecture for the first Irish Life verifier journey
 - [Engineering Lessons Log](docs/Engineering_Lessons_Log.md) - reusable lessons captured as the project evolves
