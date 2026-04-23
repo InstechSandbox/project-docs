@@ -129,7 +129,7 @@ The verifier UI currently carries inherited lint debt that is broader than the c
 
 This is a temporary exception for inherited repo hygiene debt, not a change to the desired long-term quality bar. When the verifier UI repo is scheduled for dedicated cleanup, the validation workflow should be returned to lint-blocking mode.
 
-For the current proof-of-concept phase, the InstechSandbox verifier forks also disable automatic SonarCloud runs on `push` and PR events while keeping manual `workflow_dispatch` available. Those Sonar workflows are inherited from upstream, are currently non-deploy-blocking, and were generating repeated failure noise that did not affect the accepted public-demo runtime path. SCA and secret-scanning workflows remain enabled because they are currently succeeding and still provide useful signal without blocking the agreed proof-of-concept platform goal.
+For the current proof-of-concept phase, the InstechSandbox wallet and verifier forks disable automatic SonarCloud runs on `push` and PR events while keeping manual `workflow_dispatch` available. Those Sonar workflows are inherited from upstream, are currently non-deploy-blocking, and were generating repeated failure noise when `SONAR_TOKEN` was intentionally absent in the fork environment. SCA and secret-scanning workflows remain enabled because they are currently succeeding and still provide useful signal without blocking the agreed proof-of-concept platform goal.
 
 ### Mobile Distribution
 
