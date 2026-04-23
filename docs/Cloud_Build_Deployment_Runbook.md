@@ -20,6 +20,26 @@ The near-term delivery target inside that phase is narrower and should guide cos
 
 This phase does not replace the local build. The local build remains the effective development baseline and the fastest integration path.
 
+## Business View
+
+At a business level, the cloud build and release process exists to move the proof of concept from developer-local validation into a controlled public `test` environment that external testers and stakeholders can actually use.
+
+The release model is intentionally simple:
+
+- application repositories validate and package their own deliverables
+- successful service builds publish immutable deployable artifacts for the shared AWS `test` environment
+- the shared runtime is then updated using those published artifacts rather than ad hoc rebuilds
+- mobile distribution is handled as a parallel release track, with Android Demo APKs published through GitHub Releases and iOS distribution prepared toward TestFlight
+
+In business terms, this gives the program four practical outcomes:
+
+- a repeatable way to refresh the public demo environment after approved changes land on `main`
+- a clearer separation between building software, releasing artifacts, and deploying a live test environment
+- a controlled tester-distribution path for wallet builds that need to participate in end-to-end demos
+- a documented operating model that can later be tightened for stronger governance without redesigning the whole pipeline
+
+The current process is still proof-of-concept grade rather than production release management. It is designed to support a shared stakeholder demo environment, low-cost iteration, and evidence-based learning about what should become long-term release discipline.
+
 ## Agreed Operating Model
 
 ### Environment Model

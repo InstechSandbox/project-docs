@@ -11,7 +11,7 @@ If you want to:
 - build and run the reference implementation locally, start with [Local Build Runbook](docs/Local_Build_Runbook.md)
 - understand what wallets mean for insurers operationally, start with [Insurer Readiness Pack](docs/Insurer_Readiness_Pack.md)
 - understand the public cloud deployment shape, start with [Emerald Insurance Public Cloud Architecture](docs/Emerald_Insurance_Public_Cloud_Architecture.md)
-- follow the cloud build and deployment model, use [Cloud Build And Deployment Runbook](docs/Cloud_Build_Deployment_Runbook.md)
+- understand the cloud build, release, and deployment model, use [Cloud Build And Deployment Runbook](docs/Cloud_Build_Deployment_Runbook.md)
 - install the wallet and run the public demo journeys, use [Stakeholder Wallet Demo Guide](docs/Stakeholder_Wallet_Demo_Guide.md)
 - understand the standards and protocol profile choices behind the PoC, read [Reference Implementation Standards Summary](docs/Reference_Implementation_Standards_Summary.md)
 
@@ -20,7 +20,7 @@ If you want to:
 - [Insurer Readiness Pack](docs/Insurer_Readiness_Pack.md) - concise insurer-facing summary of what wallets enable, onboarding and AML implications, immediate actions, and Government-led environment considerations
 - [Emerald Insurance Public Cloud Architecture](docs/Emerald_Insurance_Public_Cloud_Architecture.md) - public `test` environment architecture, AWS runtime boundaries, Mermaid diagrams, and verifier-first system context for the Emerald Insurance proof of concept
 - [Local Build Runbook](docs/Local_Build_Runbook.md) - step-by-step local build, startup, smoke, wallet install, issuance, and verification flow across the six repositories
-- [Cloud Build And Deployment Runbook](docs/Cloud_Build_Deployment_Runbook.md) - agreed first-phase GitHub Actions, AWS `test` environment, artifact publication, and `cloud-build` workstream design
+- [Cloud Build And Deployment Runbook](docs/Cloud_Build_Deployment_Runbook.md) - agreed first-phase business and technical operating model for GitHub Actions, artifact publication, release flow, AWS `test` deployment, and the `cloud-build` workstream
 - [EIDAS ARF Implementation Brief](docs/EIDAS_ARF_Implementation_Brief.md) - local implementation guardrails for ARF alignment, protocol assumptions, trust boundaries, and verifier-first delivery
 - [Reference Implementation Standards Summary](docs/Reference_Implementation_Standards_Summary.md) - concise map of the standards and profiles used in this PoC, where they are implemented across the repo set, and which delivery concessions remain explicit
 - [AI Working Agreement](docs/AI_Working_Agreement.md) - canonical AI-assisted engineering rules, repo map, testing expectations, and docs-update policy
