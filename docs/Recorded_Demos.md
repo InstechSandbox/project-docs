@@ -29,7 +29,7 @@ For the current written source of truth, cross-reference:
 ### Demo 0.9.2
 
 - Video: [Demo 0.9.2](https://youtu.be/SuEZfaEa9XE)
-- Focus: Emerald Insurance Existing Business withdrawal journey
+- Focus: Emerald Insurance Existing Business withdrawal journey  (Claims)
 - Business flow shown:
   - customer workflow covering withdrawal request, POI and POA sharing, and acceptance of the withdrawal request
   - automated agent-monitor path covering customer invite generation, POI and POA receipt, automated policy-record match, and automatic withdrawal approval
