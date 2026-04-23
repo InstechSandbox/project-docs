@@ -1,6 +1,6 @@
 # Licensing Notes
 
-This note captures practical engineering guidance for working with the current implementation repositories in the `InstechSandbox` EUDI insurance readiness proof of concept.
+This note captures practical engineering guidance for working with the current public repository set behind the `InstechSandbox` EUDI insurance readiness proof of concept.
 
 It is intended to reduce avoidable operational risk when publishing changes, distributing builds, or presenting the fork set publicly.
 
@@ -12,13 +12,17 @@ It is not legal advice.
 | --- | --- | --- |
 | `eudi-app-android-wallet-ui` | `EUPL-1.2` | Usable for the current fork/reference implementation work, but modified tester builds must travel with source and retained notices |
 | `eudi-app-ios-wallet-ui` | `EUPL-1.2` | Same EUPL posture as the Android wallet; suitable for PoC tester builds if source, notices, and modification records remain available |
+| `eudi-lib-ios-wallet-kit` | `Apache-2.0` | Supporting iOS wallet library repo; natural fit for public reference implementation work if local source changes become necessary |
 | `eudi-srv-issuer-oidc-py` | `Apache-2.0` | Natural fit for public fork and reference implementation work |
 | `eudi-srv-web-issuing-eudiw-py` | `Apache-2.0` | Natural fit for public fork and reference implementation work |
 | `eudi-srv-web-issuing-frontend-eudiw-py` | `Apache-2.0` | Natural fit for public fork and reference implementation work |
 | `av-srv-web-verifier-endpoint-23220-4-kt` | `Apache-2.0` | Natural fit for public fork and reference implementation work |
 | `eudi-web-verifier` | `Apache-2.0` | Natural fit for public fork and reference implementation work |
+| `project-docs` | repository-local license | Documentation-only repo; its license applies only to the docs content in that repository |
+| `.github` | repository-local license | Org-profile and shared workflow repo; its license applies only to `.github` repository content |
+| `instechsandbox-eudi-deploy` | `Apache-2.0` | Public deployment repo for the shared AWS `test` environment; now carries an explicit repository license |
 
-The license file in each implementation repository is the authoritative license source for that repository.
+The license file in each repository is the authoritative license source for that repository when one exists.
 
 ## Practical Assessment
 
@@ -28,8 +32,10 @@ The main engineering risk is not the existence of public forks. The main risk is
 
 In practical terms:
 
-- The five `Apache-2.0` repositories are well suited to open reference implementation work
-- The two `EUPL-1.2` wallet repositories are workable, but deserve more care if modified application packages are distributed outside a private development flow
+- The six `Apache-2.0` implementation repositories are well suited to open reference implementation work
+- The two `EUPL-1.2` wallet application repositories are workable, but deserve more care if modified application packages are distributed outside a private development flow
+- The documentation repositories have their own separate license scope and should not be treated as changing the implementation-repo licenses
+- The public deployment repo is now explicitly licensed and can be treated consistently with the other Apache-licensed repositories for engineering reuse purposes
 - The fact that these repositories are forks with local modifications does not by itself break the upstream licensing model
 
 ## Current InstechSandbox Tester Distribution Posture

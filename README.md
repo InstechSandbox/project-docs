@@ -43,13 +43,25 @@ If you want to:
 
 ## Repositories In Scope
 
+Primary delivery surfaces in the current proof of concept:
+
 - [eudi-app-android-wallet-ui](https://github.com/InstechSandbox/eudi-app-android-wallet-ui)
+- [av-srv-web-verifier-endpoint-23220-4-kt](https://github.com/InstechSandbox/av-srv-web-verifier-endpoint-23220-4-kt)
+- [eudi-web-verifier](https://github.com/InstechSandbox/eudi-web-verifier)
+
+Supporting reference implementation components:
+
 - [eudi-app-ios-wallet-ui](https://github.com/InstechSandbox/eudi-app-ios-wallet-ui)
+- [eudi-lib-ios-wallet-kit](https://github.com/InstechSandbox/eudi-lib-ios-wallet-kit)
 - [eudi-srv-issuer-oidc-py](https://github.com/InstechSandbox/eudi-srv-issuer-oidc-py)
 - [eudi-srv-web-issuing-eudiw-py](https://github.com/InstechSandbox/eudi-srv-web-issuing-eudiw-py)
 - [eudi-srv-web-issuing-frontend-eudiw-py](https://github.com/InstechSandbox/eudi-srv-web-issuing-frontend-eudiw-py)
-- [av-srv-web-verifier-endpoint-23220-4-kt](https://github.com/InstechSandbox/av-srv-web-verifier-endpoint-23220-4-kt)
-- [eudi-web-verifier](https://github.com/InstechSandbox/eudi-web-verifier)
+
+Shared delivery and documentation repositories:
+
+- [instechsandbox-eudi-deploy](https://github.com/InstechSandbox/instechsandbox-eudi-deploy)
+- [project-docs](https://github.com/InstechSandbox/project-docs)
+- [.github](https://github.com/InstechSandbox/.github)
 
 ## Baseline Reference
 
@@ -63,15 +75,18 @@ The detailed tag-to-commit mapping is maintained in [Local Deployment Notes](doc
 
 ## License Summary
 
-The seven implementation repositories currently in scope do not use a single shared license.
+The public repository set does not use a single shared license posture.
 
 - `eudi-app-android-wallet-ui` uses `EUPL-1.2`
 - `eudi-app-ios-wallet-ui` uses `EUPL-1.2`
+- `eudi-lib-ios-wallet-kit` uses `Apache-2.0`
 - `eudi-srv-issuer-oidc-py` uses `Apache-2.0`
 - `eudi-srv-web-issuing-eudiw-py` uses `Apache-2.0`
 - `eudi-srv-web-issuing-frontend-eudiw-py` uses `Apache-2.0`
 - `av-srv-web-verifier-endpoint-23220-4-kt` uses `Apache-2.0`
 - `eudi-web-verifier` uses `Apache-2.0`
+- `project-docs` and `.github` are licensed separately for their own repository content
+- `instechsandbox-eudi-deploy` uses `Apache-2.0`
 
 The full context and repository-by-repository notes are maintained in [Local Deployment Notes](docs/Local_Deployment_Notes.md), [Licensing Notes](docs/Licensing_Notes.md), and [Mobile App Distribution Compliance](docs/Mobile_App_Distribution_Compliance.md).
 
