@@ -51,8 +51,8 @@ The current process is still proof-of-concept grade rather than production relea
 ### Trigger Model
 
 - local commit and push hooks remain the first-line quality gates before code is pushed
-- GitHub Actions should trigger on `push` to `main`
-- for phase 1, pull request workflows are not required because the build is still maturing
+- GitHub Actions should trigger on pull requests into `main` and on merges to `main`
+- for phase 1, pull request workflows should at least run the validation needed for protected default branches, even if deployment remains merge-driven
 - `workflow_dispatch` should be available for manual rebuild, redeploy, or smoke-only runs
 
 ### Build And Deploy Separation
@@ -80,7 +80,7 @@ The current process is still proof-of-concept grade rather than production relea
 
 ### Repo Boundary For Packaging vs Deployment
 
-- application repositories should build and publish immutable artifacts on `push` to `main`
+- application repositories should build and publish immutable artifacts on merge to `main`
 - the dedicated deployment repository should consume published artifact references or digests and deploy them into the `test` environment
 - deployment workflows must not rebuild application artifacts inside the deployment repository
 - reusable workflow primitives should stay in `.github`, but environment-specific AWS logic should not
