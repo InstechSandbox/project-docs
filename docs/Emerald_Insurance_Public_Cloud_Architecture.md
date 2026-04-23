@@ -24,7 +24,7 @@ The current delivery emphasis remains verifier-first:
 - primary delivery surfaces:
   - verifier web UI
   - verifier backend
-- dummy or reference-backed supporting components for the current phase:
+- supporting reference components for the current phase:
   - Android wallet
   - issuer frontend
   - issuer backend
@@ -54,7 +54,7 @@ The Android wallet currently acts as the mobile reference client for both issuan
 ```mermaid
 flowchart LR
     browser[Stakeholder Browser]
-    phone[Android Wallet<br/>Dummy reference wallet<br/>Replace with Government sandbox in 2026]
+    phone[Android Wallet<br/>Reference wallet component<br/>Replace with Government sandbox in 2026]
 
     subgraph aws[AWS test environment]
         edge[Public DNS + TLS<br/>Route 53 + ACM + shared ALB]
@@ -64,7 +64,7 @@ flowchart LR
             vbe[Verifier Backend<br/>Kotlin relying-party backend<br/>Primary delivery surface]
         end
 
-        subgraph issuer[Dummy reference issuer stack<br/>Replace with Government sandbox in 2026]
+        subgraph issuer[Reference issuer stack<br/>Replace with Government sandbox in 2026]
             ife[Issuer Frontend]
             ibe[Issuer Backend]
             auth[Authorization Server]
@@ -109,9 +109,9 @@ flowchart TB
         subgraph ecs[ECS Fargate services]
             vui[Verifier UI service]
             vbe[Verifier backend service]
-            ife[Issuer frontend service<br/>Dummy for 2026 replacement]
-            ibe[Issuer backend service<br/>Dummy for 2026 replacement]
-            auth[Authorization server service<br/>Dummy for 2026 replacement]
+            ife[Issuer frontend service<br/>Reference component for 2026 replacement]
+            ibe[Issuer backend service<br/>Reference component for 2026 replacement]
+            auth[Authorization server service<br/>Reference component for 2026 replacement]
         end
     end
 
@@ -178,14 +178,14 @@ sequenceDiagram
     IBE->>AUTH: Delegate authorization and token steps
     AUTH-->>W: Complete OIDC4VCI authorization
     IBE-->>W: Return issued PID credential
-    Note over IFE,AUTH: Dummy reference issuer path for current PoC only\nReplace with Government sandbox in 2026
+    Note over IFE,AUTH: Reference issuer path for current PoC only\nReplace with Government sandbox in 2026
 ```
 
 ## Key Delivery Boundaries
 
 - The verifier UI and verifier backend are the primary delivery surfaces for the current Emerald Insurance proof of concept.
 - The wallet and issuer stack are present only to enable end-to-end issuance and verification in the current sandbox.
-- The wallet and issuer stack should therefore be described as dummy or reference-backed components in stakeholder material.
+- The wallet and issuer stack should therefore be described as supporting reference components in stakeholder material.
 - The 2026 target direction is to replace those supporting components with the Government sandbox rather than evolve them as product endpoints inside this program.
 
 ## Reader Guidance

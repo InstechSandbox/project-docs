@@ -6,7 +6,7 @@ The overlay is intended for a full-screen recording where the left 25% of the ca
 
 ## Files
 
-- Browser overlay HTML: [docs/assets/obs/emerald-insurance-dual-screen-overlay.html](docs/assets/obs/emerald-insurance-dual-screen-overlay.html)
+- Browser overlay HTML: [assets/obs/emerald-insurance-dual-screen-overlay.html](assets/obs/emerald-insurance-dual-screen-overlay.html)
 
 ## What It Shows
 

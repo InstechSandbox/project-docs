@@ -9,14 +9,20 @@ This repository is a proof-of-concept reference implementation document set. It 
 If you want to:
 
 - build and run the reference implementation locally, start with [Local Build Runbook](docs/Local_Build_Runbook.md)
+- watch the published proof-of-concept walkthroughs, start with [Recorded Demos](docs/Recorded_Demos.md)
+- understand the current proof-of-concept scope, boundaries, and live surfaces, start with [Current PoC Scope](docs/Current_PoC_Scope.md)
 - understand what wallets mean for insurers operationally, start with [Insurer Readiness Pack](docs/Insurer_Readiness_Pack.md)
 - understand the public cloud deployment shape, start with [Emerald Insurance Public Cloud Architecture](docs/Emerald_Insurance_Public_Cloud_Architecture.md)
 - understand the cloud build, release, and deployment model, use [Cloud Build And Deployment Runbook](docs/Cloud_Build_Deployment_Runbook.md)
 - install the wallet and run the public demo journeys, use [Stakeholder Wallet Demo Guide](docs/Stakeholder_Wallet_Demo_Guide.md)
 - understand the standards and protocol profile choices behind the PoC, read [Reference Implementation Standards Summary](docs/Reference_Implementation_Standards_Summary.md)
+- understand the naming used across the public docs, read [Naming Glossary](docs/Naming_Glossary.md)
 
 ## Core Documents
 
+- [Recorded Demos](docs/Recorded_Demos.md) - published versioned walkthrough videos covering local iPhone interoperability, Emerald Insurance New Business and Existing Business journeys, and credential setup for PoC testing
+- [Current PoC Scope](docs/Current_PoC_Scope.md) - one-page summary of what is live now, what can be built locally, what runs in the public `test` environment, and which components are primary versus supporting
+- [Naming Glossary](docs/Naming_Glossary.md) - short explanation of Emerald Insurance, InsTech.ie, InstechSandbox, and legacy technical naming carried for compatibility
 - [Insurer Readiness Pack](docs/Insurer_Readiness_Pack.md) - concise insurer-facing summary of what wallets enable, onboarding and AML implications, immediate actions, and Government-led environment considerations
 - [Emerald Insurance Public Cloud Architecture](docs/Emerald_Insurance_Public_Cloud_Architecture.md) - public `test` environment architecture, AWS runtime boundaries, Mermaid diagrams, and verifier-first system context for the Emerald Insurance proof of concept
 - [Local Build Runbook](docs/Local_Build_Runbook.md) - step-by-step local build, startup, smoke, wallet install, issuance, and verification flow across the six repositories
@@ -24,7 +30,8 @@ If you want to:
 - [EIDAS ARF Implementation Brief](docs/EIDAS_ARF_Implementation_Brief.md) - local implementation guardrails for ARF alignment, protocol assumptions, trust boundaries, and verifier-first delivery
 - [Reference Implementation Standards Summary](docs/Reference_Implementation_Standards_Summary.md) - concise map of the standards and profiles used in this PoC, where they are implemented across the repo set, and which delivery concessions remain explicit
 - [AI Working Agreement](docs/AI_Working_Agreement.md) - canonical AI-assisted engineering rules, repo map, testing expectations, and docs-update policy
-- [Emerald Insurance New Business Verifier Design](docs/Emerald_Insurance_New_Business_Verifier_Design.md) - business analysis, credential strategy, support-agent UX design, and pre-implementation architecture for the first Emerald Insurance verifier journey
+- [Emerald Insurance New Business Verifier Design](docs/Emerald_Insurance_New_Business_Verifier_Design.md) - business analysis, credential strategy, support-agent UX design, and current implemented design state for the Emerald Insurance New Business verifier journey
+- [Emerald Insurance Existing Business Verifier Design](docs/Emerald_Insurance_Existing_Business_Verifier_Design.md) - implemented business interpretation, journey behaviour, and technical design for the Emerald Insurance Existing Business withdrawal journey
 - [Engineering Lessons Log](docs/Engineering_Lessons_Log.md) - reusable lessons captured as the project evolves
 - [Repo Gate Debt Backlog](docs/Repo_Gate_Debt_Backlog.md) - tracked follow-up items for repo-native gates surfaced by the shared hooks
 - [Local Deployment Notes](docs/Local_Deployment_Notes.md) - explains the fork-to-baseline commit set, the rationale behind the local deployment changes, and the coordinated baseline tags

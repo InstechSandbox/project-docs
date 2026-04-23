@@ -2,9 +2,9 @@
 
 ## Purpose
 
-This document records the business analysis, credential analysis, implementation brief, and proposed technical design for the first Emerald Insurance verifier journey before product code changes begin.
+This document records the business analysis, credential analysis, implementation brief, and current implemented technical design for the first Emerald Insurance verifier journey.
 
-It is intentionally design-first. It should be reviewed before verifier UI, verifier backend, or issuer metadata changes are implemented.
+It began as the design-first basis for the New Business journey and now also serves as the reference for the currently implemented route shape, comparison behaviour, and verifier-side integration assumptions.
 
 ## Applicable Constraints
 
@@ -71,7 +71,7 @@ The customer-facing surface is still required because the customer may:
 - open an emailed deep link on mobile
 - visit a web page and scan a QR code instead
 
-This separation should be treated as a deliberate architectural requirement so the same verifier product can later support both agent and customer journeys for Existing Business Claims.
+This separation should be treated as a deliberate architectural requirement so the same verifier product can support both agent and customer views across the Emerald Insurance journey set.
 
 ## Journey Decisions
 
@@ -81,7 +81,7 @@ This separation should be treated as a deliberate architectural requirement so t
 - Primary user: prospective customer, initiated from a support-agent workflow
 - Product surface: Emerald Insurance branded verifier product with aligned agent and customer views
 - Entry structure: new Emerald Insurance journey selector with this journey as the first implemented route
-- Future placeholder: Existing Business Claims journey
+- Companion journey: Emerald Insurance Existing Business withdrawal journey
 - Result handling: hard fail with visible reason on-screen
 - Matching policy: exact-after-normalization
 
@@ -94,9 +94,9 @@ The verifier should provide clear journey starting points for both roles.
 
 These starting points should be explicit in the verifier UI rather than hidden inside the generic developer-oriented request builder flow.
 
-### Current Placeholder For Future Journey
+### Current Journey Relationship
 
-The landing experience should visibly reserve a second journey slot for Existing Business Claims without implementing that flow yet.
+The landing experience should present New Business and Existing Business as the two visible Emerald Insurance journeys, while keeping their business rules and flow differences explicit.
 
 ## Credential Analysis
 
@@ -110,7 +110,7 @@ The current verifier stack already supports:
 
 ### Verified Current Issuer Metadata
 
-The local issuer metadata was checked in the cloned repositories.
+The local issuer metadata was checked in the reference implementation repositories used for this workspace.
 
 Verified available credentials include:
 
